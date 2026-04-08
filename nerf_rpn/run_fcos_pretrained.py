@@ -74,6 +74,11 @@ def parse_args():
         "--mae_checkpoint", default="", help="The path to the checkpoint to load."
     )
     parser.add_argument(
+        "--scratch_backbone",
+        action="store_true",
+        help="Use the pretrained FCOS codepath with a randomly initialized backbone.",
+    )
+    parser.add_argument(
         "--load_backbone_only",
         action="store_true",
         help="Only load the backbone weights.",
@@ -415,14 +420,13 @@ class Trainer:
                 "EF", self.args.input_dim, True, self.args.resolution
             )
         elif self.args.backbone_type.startswith("swin"):
-            if self.args.checkpoint is not None:
-                is_eval = True
-            else:
-                is_eval = False
+            load_mae_checkpoint = (
+                self.args.checkpoint is None and not self.args.scratch_backbone
+            )
             self.backbone = SwinTransformer_FPN_Pretrained(
                 resolution=self.args.resolution,
-                checkpoint_path=self.args.mae_checkpoint,
-                is_eval=is_eval,
+                checkpoint_path=self.args.mae_checkpoint if load_mae_checkpoint else None,
+                is_eval=not load_mae_checkpoint,
             )
 
     def init_datasets(self):

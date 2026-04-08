@@ -929,7 +929,7 @@ class Trainer:
 
         json_dict["ap_50"] = ap50
         json_dict["ap_25"] = ap25
-        json_dict["ap_75"] = ap25
+        json_dict["ap_75"] = ap75
 
         if self.args.mode == "eval":
             for metric in json_dict:

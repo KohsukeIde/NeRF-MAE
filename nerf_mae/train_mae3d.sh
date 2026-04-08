@@ -1,36 +1,67 @@
 #!/usr/bin/env bash
-
+set -euo pipefail
 set -x
-set -e
 
-DATA_ROOT="../dataset/pretrain"
-resolution=160
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/probe_scripts/_probe_common.sh"
 
-dataset_name="nerfmae"
+DATA_ROOT="${DATA_ROOT:-../dataset/pretrain}"
+dataset_name="${DATASET_NAME:-nerfmae}"
+resolution="${RESOLUTION:-}"
+GPU_IDS="${GPU_IDS:-0,1,2,3}"
+NUM_EPOCHS="${NUM_EPOCHS:-2000}"
+LR="${LR:-1e-4}"
+WEIGHT_DECAY="${WEIGHT_DECAY:-1e-3}"
+LOG_INTERVAL="${LOG_INTERVAL:-30}"
+EVAL_INTERVAL="${EVAL_INTERVAL:-10}"
+MASKING_PROB="${MASKING_PROB:-0.75}"
+PERCENT_TRAIN="${PERCENT_TRAIN:-1.0}"
+BATCH_SIZE_PER_GPU="${BATCH_SIZE_PER_GPU:-4}"
+USE_WANDB="${USE_WANDB:-1}"
+PROBE_MODE="${PROBE_MODE:-}"
 
-if [ "$dataset_name" == "hypersim" ]; then
+if [[ -z "${resolution}" ]]; then
+  resolution=160
+  if [[ "${dataset_name}" == "hypersim" ]]; then
     resolution=200
+  fi
 fi
 
+num_gpus="$(probe_count_gpus "${GPU_IDS}")"
+DEFAULT_BATCH_SIZE=$((num_gpus * BATCH_SIZE_PER_GPU))
+BATCH_SIZE="${BATCH_SIZE:-${DEFAULT_BATCH_SIZE}}"
+SAVE_NAME="${SAVE_NAME:-${dataset_name}_all}"
+RUN_TAG="${RUN_TAG:-${SAVE_NAME}}"
+SAVE_PATH="${SAVE_PATH:-../output/nerf_mae/results/${SAVE_NAME}}"
 
-python3 -u run_swin_mae3d.py \
---mode train \
---backbone_type swin_s \
---features_path ${DATA_ROOT}/features \
---num_epochs 2000 \
---wandb \
---lr 1e-4 \
---weight_decay 1e-3 \
---log_interval 30 \
---eval_interval 10 \
---normalize_density \
---log_to_file \
---batch_size 32 \
---resolution $resolution \
---masking_prob 0.75 \
---dataset "${dataset_name}" \
---dataset_split "${DATA_ROOT}/${dataset_name}_split.npz" \
---save_path "../output/nerf_mae/results/${dataset_name}_all" \
---gpus 0,1,2,3,4,5,6,7 \
---percent_train 1.0 \
---tags "${dataset_name}_all" \
+cmd=(
+  python3 -u run_swin_mae3d.py
+  --mode train
+  --backbone_type swin_s
+  --features_path "${DATA_ROOT}/features"
+  --num_epochs "${NUM_EPOCHS}"
+  --lr "${LR}"
+  --weight_decay "${WEIGHT_DECAY}"
+  --log_interval "${LOG_INTERVAL}"
+  --eval_interval "${EVAL_INTERVAL}"
+  --normalize_density
+  --log_to_file
+  --batch_size "${BATCH_SIZE}"
+  --resolution "${resolution}"
+  --masking_prob "${MASKING_PROB}"
+  --dataset "${dataset_name}"
+  --dataset_split "${DATA_ROOT}/${dataset_name}_split.npz"
+  --save_path "${SAVE_PATH}"
+  --gpus "${GPU_IDS}"
+  --percent_train "${PERCENT_TRAIN}"
+  --tags "${RUN_TAG}"
+)
+
+if [[ "${USE_WANDB}" == "1" ]]; then
+  cmd+=(--wandb)
+fi
+if [[ -n "${PROBE_MODE}" ]]; then
+  cmd+=(--probe_mode "${PROBE_MODE}")
+fi
+
+"${cmd[@]}"

@@ -19,7 +19,7 @@ from torch.utils.data.distributed import DistributedSampler
 # from model.fcos.fcos import FCOSOverNeRF
 # from model.mae.swin_mae3d import SwinTransformer_MAE3D
 
-from model.mae.swin_mae3d import SwinTransformer_MAE3D_New as SwinTransformer_MAE3D
+from model.mae.shortcut_probe import SwinTransformer_MAE3D_Probe as SwinTransformer_MAE3D
 
 import sys
 
@@ -143,6 +143,48 @@ def parse_args():
     )
     parser.add_argument(
         "--masking_strategy", default="random", type=str, help="The masking strategy."
+    )
+    parser.add_argument(
+        "--probe_mode",
+        default="baseline",
+        choices=["baseline", "masked_only_rgb_loss", "alpha_only", "radiance_only", "custom"],
+        help=(
+            "Shortcut-probe preset. baseline reproduces the current public behavior; "
+            "masked_only_rgb_loss restricts RGB loss to masked occupied voxels; "
+            "alpha_only zeros RGB input and optimizes alpha only; "
+            "radiance_only zeros alpha input and optimizes RGB only on masked occupied voxels; "
+            "custom uses the explicit probe_* flags below."
+        ),
+    )
+    parser.add_argument(
+        "--probe_rgb_input",
+        default="keep",
+        choices=["keep", "zero", "shuffle"],
+        help="How to corrupt RGB channels before encoding.",
+    )
+    parser.add_argument(
+        "--probe_alpha_input",
+        default="keep",
+        choices=["keep", "zero", "shuffle"],
+        help="How to corrupt alpha channel before encoding.",
+    )
+    parser.add_argument(
+        "--probe_rgb_loss",
+        default="occupied",
+        choices=["occupied", "removed_occupied", "removed_all", "none"],
+        help="Which voxels contribute to RGB reconstruction loss.",
+    )
+    parser.add_argument(
+        "--probe_alpha_loss",
+        default="removed",
+        choices=["removed", "all", "none"],
+        help="Which voxels contribute to alpha reconstruction loss.",
+    )
+    parser.add_argument(
+        "--probe_alpha_threshold",
+        default=0.01,
+        type=float,
+        help="Occupancy threshold used when building RGB supervision masks.",
     )
     parser.add_argument("--lr", default=5e-3, type=float, help="The learning rate.")
     parser.add_argument(
@@ -408,6 +450,12 @@ class Trainer:
             masking_prob=args.masking_prob,
             resolution=args.resolution,
             masking_strategy=args.masking_strategy,
+            probe_mode=args.probe_mode,
+            probe_rgb_input=args.probe_rgb_input,
+            probe_alpha_input=args.probe_alpha_input,
+            probe_rgb_loss=args.probe_rgb_loss,
+            probe_alpha_loss=args.probe_alpha_loss,
+            probe_alpha_threshold=args.probe_alpha_threshold,
         )
 
     def init_datasets(self):
