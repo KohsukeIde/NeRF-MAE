@@ -19,6 +19,13 @@ PERCENT_TRAIN="${PERCENT_TRAIN:-1.0}"
 BATCH_SIZE_PER_GPU="${BATCH_SIZE_PER_GPU:-4}"
 USE_WANDB="${USE_WANDB:-1}"
 PROBE_MODE="${PROBE_MODE:-}"
+PROBE_RGB_INPUT="${PROBE_RGB_INPUT:-}"
+PROBE_ALPHA_INPUT="${PROBE_ALPHA_INPUT:-}"
+PROBE_RGB_LOSS="${PROBE_RGB_LOSS:-}"
+PROBE_ALPHA_LOSS="${PROBE_ALPHA_LOSS:-}"
+PROBE_ALPHA_THRESHOLD="${PROBE_ALPHA_THRESHOLD:-}"
+SEED="${SEED:-}"
+DETERMINISTIC="${DETERMINISTIC:-0}"
 
 if [[ -z "${resolution}" ]]; then
   resolution=160
@@ -62,6 +69,27 @@ if [[ "${USE_WANDB}" == "1" ]]; then
 fi
 if [[ -n "${PROBE_MODE}" ]]; then
   cmd+=(--probe_mode "${PROBE_MODE}")
+fi
+if [[ -n "${PROBE_RGB_INPUT}" ]]; then
+  cmd+=(--probe_rgb_input "${PROBE_RGB_INPUT}")
+fi
+if [[ -n "${PROBE_ALPHA_INPUT}" ]]; then
+  cmd+=(--probe_alpha_input "${PROBE_ALPHA_INPUT}")
+fi
+if [[ -n "${PROBE_RGB_LOSS}" ]]; then
+  cmd+=(--probe_rgb_loss "${PROBE_RGB_LOSS}")
+fi
+if [[ -n "${PROBE_ALPHA_LOSS}" ]]; then
+  cmd+=(--probe_alpha_loss "${PROBE_ALPHA_LOSS}")
+fi
+if [[ -n "${PROBE_ALPHA_THRESHOLD}" ]]; then
+  cmd+=(--probe_alpha_threshold "${PROBE_ALPHA_THRESHOLD}")
+fi
+if [[ -n "${SEED}" ]]; then
+  cmd+=(--seed "${SEED}")
+fi
+if [[ "${DETERMINISTIC}" == "1" ]]; then
+  cmd+=(--deterministic)
 fi
 
 "${cmd[@]}"

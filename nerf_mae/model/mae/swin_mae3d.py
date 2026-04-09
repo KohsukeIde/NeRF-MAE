@@ -762,8 +762,9 @@ class SwinTransformer_MAE3D(nn.Module):  # TODO: change to 3D
         masked_x[mask.bool().expand(-1, -1, -1, -1, channels)] = 0
         if mask_token is not None:
             mask_token = mask_token.to(masked_x.device)
-            index_mask = (mask.bool()).squeeze(-1)
-            masked_x[index_mask, :] = mask_token
+            expanded_mask = mask.bool().expand(-1, -1, -1, -1, channels)
+            mask_token_view = mask_token.view(*([1] * (masked_x.ndim - 1)), channels)
+            masked_x = torch.where(expanded_mask, mask_token_view.expand_as(masked_x), masked_x)
 
         # percent_masked = 100 * num_masked_patches / num_patches
         # print(f"Total number of patches: {num_patches}")
@@ -1376,8 +1377,9 @@ class SwinTransformer_MAE3D_New(nn.Module):  # TODO: change to 3D
         masked_x[mask.bool().expand(-1, -1, -1, -1, channels)] = 0
         if mask_token is not None:
             mask_token = mask_token.to(masked_x.device)
-            index_mask = (mask.bool()).squeeze(-1)
-            masked_x[index_mask, :] = mask_token
+            expanded_mask = mask.bool().expand(-1, -1, -1, -1, channels)
+            mask_token_view = mask_token.view(*([1] * (masked_x.ndim - 1)), channels)
+            masked_x = torch.where(expanded_mask, mask_token_view.expand_as(masked_x), masked_x)
 
         return masked_x, mask
 

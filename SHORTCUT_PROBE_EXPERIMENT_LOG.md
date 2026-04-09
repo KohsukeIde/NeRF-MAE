@@ -158,35 +158,125 @@ Reading:
 - It is also below `alpha_only_e30_epoch30`.
 - This strengthens the claim that cutting the original RGB supervision path hurts transfer.
 
+## Experiment 6: 3-Seed Replication And `alpha_shuffle`
+
+Setup:
+- downstream only for seed replication:
+  - `fair scratch`
+  - `baseline_e30_epoch30`
+  - `alpha_only_e30_epoch30`
+  - `masked_only_e30_epoch30`
+- seeds: `1, 2, 3`
+- `alpha_shuffle`:
+  - pretrain: `p0.1`, `30 epochs`, `epoch_30.pt`
+  - probe config:
+    - `probe_mode=custom`
+    - `probe_rgb_input=zero`
+    - `probe_alpha_input=shuffle`
+    - `probe_rgb_loss=none`
+    - `probe_alpha_loss=removed`
+
+Result files:
+- `fair scratch`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/front3d_scratch_samepath_seed1_fcos100_eval/eval.json`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/front3d_scratch_samepath_seed2_fcos100_eval/eval.json`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/front3d_scratch_samepath_seed3_fcos100_eval/eval.json`
+- `baseline_e30_epoch30`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e30_epoch30_seed1_fcos100_eval/eval.json`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e30_epoch30_seed2_fcos100_eval/eval.json`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e30_epoch30_seed3_fcos100_eval/eval.json`
+- `alpha_only_e30_epoch30`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_only_p0.1_e30_epoch30_seed1_fcos100_eval/eval.json`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_only_p0.1_e30_epoch30_seed2_fcos100_eval/eval.json`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_only_p0.1_e30_epoch30_seed3_fcos100_eval/eval.json`
+- `masked_only_e30_epoch30`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_masked_only_rgb_loss_p0.1_e30_epoch30_seed1_fcos100_eval/eval.json`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_masked_only_rgb_loss_p0.1_e30_epoch30_seed2_fcos100_eval/eval.json`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_masked_only_rgb_loss_p0.1_e30_epoch30_seed3_fcos100_eval/eval.json`
+- `alpha_shuffle`
+  - pretrain ckpt: `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_mae/results/nerfmae_alpha_shuffle_p0.1_e30_seed1/epoch_30.pt`
+  - eval: `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_shuffle_p0.1_e30_seed1_epoch30_seed1_fcos100_eval/eval.json`
+
+3-seed downstream summary:
+
+| condition | seed1 AP@50 | seed2 AP@50 | seed3 AP@50 | mean AP@50 | mean AP@25 | mean Recall@50 top300 |
+|---|---:|---:|---:|---:|---:|---:|
+| fair scratch | 0.2013 | 0.1690 | 0.2530 | 0.2078 | 0.6117 | 0.4412 |
+| baseline_e30_epoch30 | 0.2276 | 0.1672 | 0.0391 | 0.1446 | 0.6340 | 0.3652 |
+| alpha_only_e30_epoch30 | 0.1695 | 0.2092 | 0.1938 | 0.1908 | 0.6103 | 0.3873 |
+| masked_only_e30_epoch30 | 0.2029 | 0.1797 | 0.2055 | 0.1960 | 0.6416 | 0.4559 |
+
+`alpha_shuffle` single-seed downstream result:
+
+| condition | AP@50 | AP@25 | Recall@50 top300 |
+|---|---:|---:|---:|
+| alpha_shuffle | 0.1970 | 0.6281 | 0.3529 |
+
+Reading:
+- The earlier single-seed impression that `alpha_only` clearly beats scratch is not robust after 3 seeds.
+- `fair scratch` has the highest mean `AP@50` among the four seeded conditions.
+- `baseline_e30_epoch30` is unstable. `seed3` collapses strongly.
+- `masked_only_e30_epoch30` no longer looks consistently worse than baseline; on the 3-seed mean it is actually above baseline.
+- `alpha_shuffle` lands close to `alpha_only`, so current evidence does not yet isolate "correct alpha spatial layout" as the decisive factor.
+
 ## Summary Table
 
-This is the table to cite first.
+This is the current table to cite first.
 
-| condition | AP@50 | AP@25 | note |
-|---|---:|---:|---|
-| fair scratch | 0.2059 | 0.6270 | same FCOS codepath as pretrained runs |
-| baseline_e30_epoch30 | 0.1929 | 0.6303 | `epoch_30.pt` fixed |
-| alpha_only_e30_epoch30 | 0.2271 | 0.6278 | strongest pretrained condition so far |
-| radiance_only_e30_epoch30 | 0.1932 | 0.6040 | weaker after confound removal |
-| masked_only_e30_epoch30 | 0.1812 | 0.6221 | supports RGB supervision path importance |
+| condition | mean AP@50 | mean AP@25 | mean Recall@50 top300 | note |
+|---|---:|---:|---:|---|
+| fair scratch | 0.2078 | 0.6117 | 0.4412 | same FCOS codepath as pretrained runs |
+| baseline_e30_epoch30 | 0.1446 | 0.6340 | 0.3652 | unstable across seeds |
+| alpha_only_e30_epoch30 | 0.1908 | 0.6103 | 0.3873 | near scratch, but not above it on mean |
+| masked_only_e30_epoch30 | 0.1960 | 0.6416 | 0.4559 | near scratch, above baseline on mean |
+| alpha_shuffle | 0.1970 | 0.6281 | 0.3529 | single seed only |
 
 ## What We Can Safely Say Now
 
-- The earlier ambiguity between `alpha_only` and `radiance_only` was partly caused by PSNR-based checkpoint selection.
-- Under `epoch_30.pt` fixed comparison, `alpha_only` is the strongest pretrained condition.
-- `masked_only_rgb_loss` underperforms at both e10 and e30.
-- The claim that "some occupancy/layout-heavy signal is enough to retain downstream utility" is supported.
-- The stronger claim that "pretraining in general is always better than scratch" is not supported.
-- The stronger claim that "alpha shell is the only cause" is also not yet supported.
+- The checkpoint-selection confound was real. Using `epoch_30.pt` changed the ordering relative to `model_best.pt`.
+- In the current quick setting, there is no robust pretraining advantage over fair scratch.
+- `baseline_e30_epoch30` is unstable enough that single-seed readings are not trustworthy.
+- `alpha_only` and `masked_only_rgb_loss` both retain substantial downstream utility, but neither has shown a robust advantage over fair scratch.
+- The earlier single-seed claim that `masked_only_rgb_loss` clearly hurts relative to baseline does not survive 3-seed replication.
+- `alpha_shuffle` is too close to `alpha_only` to support a strong "alpha spatial layout is the whole story" claim.
+- Reconstruction-side quality and downstream transfer quality are not moving together in a simple way.
 
 ## Next Recommended Experiments
 
-1. Add seeds for:
-   - `fair scratch`
-   - `alpha_only_e30_epoch30`
-   - `masked_only_e30_epoch30`
-2. If needed, add `baseline_e30_epoch30` seed replication for completeness.
-3. Keep using `epoch_k.pt` fixed checkpoints for probe variants when the pretrain objective is not aligned with RGB PSNR.
+1. Diagnose why `baseline_e30_epoch30` collapses on `seed3`.
+2. Add seeds for `alpha_shuffle`.
+3. Re-read the existing diagnostic dumps with the new 3-seed interpretation in mind.
+4. Keep using `epoch_k.pt` fixed checkpoints for probe variants when the pretrain objective is not aligned with RGB PSNR.
+
+## Utility Scripts
+
+- Seeded pretraining / transfer entrypoints:
+  - `/home/minesawa/ssl/NeRF-MAE/nerf_mae/train_mae3d.sh`
+  - `/home/minesawa/ssl/NeRF-MAE/nerf_rpn/train_fcos_pretrained.sh`
+  - `/home/minesawa/ssl/NeRF-MAE/nerf_rpn/test_fcos_pretrained.sh`
+- These now accept:
+  - `SEED`
+  - `DETERMINISTIC=1`
+- `train_mae3d.sh` also forwards custom probe controls:
+  - `PROBE_RGB_INPUT`
+  - `PROBE_ALPHA_INPUT`
+  - `PROBE_RGB_LOSS`
+  - `PROBE_ALPHA_LOSS`
+  - `PROBE_ALPHA_THRESHOLD`
+- Diagnostic dump scripts:
+  - `/home/minesawa/ssl/NeRF-MAE/nerf_rpn/run_fcos_diagnostic_variant.sh`
+  - `/home/minesawa/ssl/NeRF-MAE/nerf_mae/probe_scripts/run_shortcut_diagnostic_dump_chain.sh`
+
+The diagnostic dump chain writes raw analysis artifacts under:
+- `.../front3d_scratch_samepath_fcos100_diagnostics`
+- `.../nerfmae_all_p0.1_e30_epoch30_fcos100_diagnostics`
+- `.../nerfmae_alpha_only_p0.1_e30_epoch30_fcos100_diagnostics`
+- `.../nerfmae_masked_only_rgb_loss_p0.1_e30_epoch30_fcos100_diagnostics`
+
+Each diagnostic directory is expected to contain:
+- `proposals/*.npz`
+- `voxel_scores/*.npz`
+- `eval.json`
 
 ## Update Rules
 

@@ -23,6 +23,8 @@ IOU_LOSS_TYPE="${IOU_LOSS_TYPE:-iou}"
 USE_WANDB="${USE_WANDB:-1}"
 BATCH_SIZE_PER_GPU="${BATCH_SIZE_PER_GPU:-2}"
 SCRATCH_BACKBONE="${SCRATCH_BACKBONE:-0}"
+SEED="${SEED:-}"
+DETERMINISTIC="${DETERMINISTIC:-0}"
 
 if [[ -z "${resolution}" ]]; then
   resolution=160
@@ -75,6 +77,12 @@ if [[ "${USE_WANDB}" == "1" ]]; then
 fi
 if [[ "${SCRATCH_BACKBONE}" == "1" ]]; then
   cmd+=(--scratch_backbone)
+fi
+if [[ -n "${SEED}" ]]; then
+  cmd+=(--seed "${SEED}")
+fi
+if [[ "${DETERMINISTIC}" == "1" ]]; then
+  cmd+=(--deterministic)
 fi
 
 "${cmd[@]}"

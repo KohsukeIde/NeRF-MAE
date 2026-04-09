@@ -135,15 +135,17 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
 
     @staticmethod
     def _shuffle_spatial_(x: torch.Tensor, channel_slice: slice) -> None:
-        selected = x[:, channel_slice, ...]
+        selected = x[:, channel_slice, ...].clone().contiguous()
         batch_size = selected.shape[0]
         num_channels = selected.shape[1]
-        flat_size = selected[0, 0].numel()
+        flat = selected.reshape(batch_size, num_channels, -1)
+        flat_size = flat.shape[-1]
+
         for b in range(batch_size):
             perm = torch.randperm(flat_size, device=x.device)
-            flat = selected[b].reshape(num_channels, flat_size)
-            selected[b] = flat[:, perm].reshape_as(selected[b])
-        x[:, channel_slice, ...] = selected
+            flat[b] = flat[b, :, perm]
+
+        x[:, channel_slice, ...] = flat.reshape_as(selected)
 
     def _apply_probe_input_corruption(self, x: torch.Tensor) -> torch.Tensor:
         x = x.clone()
@@ -156,7 +158,7 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
             x[:, 3:4, ...] = 0
         elif self.probe_alpha_input == "shuffle":
             self._shuffle_spatial_(x, slice(3, 4))
-        return x
+        return x.contiguous()
 
     def _build_rgb_mask(
         self, target_alpha: torch.Tensor, removed_mask: torch.Tensor

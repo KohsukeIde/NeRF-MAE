@@ -6,7 +6,9 @@ import numpy as np
 import argparse
 import logging
 import importlib.util
+import socket
 from copy import deepcopy
+from functools import partial
 import random
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
@@ -67,6 +69,17 @@ def parse_args():
     )
     parser.add_argument(
         "--preload", action="store_true", help="Preload the features and boxes."
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="Random seed used for model init, dataloader workers, and shuffling.",
+    )
+    parser.add_argument(
+        "--deterministic",
+        action="store_true",
+        help="Enable more deterministic CUDA/cuDNN behavior.",
     )
 
     # General dataset csv files
@@ -355,6 +368,51 @@ def parse_args():
     return args
 
 
+def find_free_port():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(("127.0.0.1", 0))
+        return sock.getsockname()[1]
+
+
+def set_random_seed(seed, deterministic=False):
+    if deterministic and "CUBLAS_WORKSPACE_CONFIG" not in os.environ:
+        os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
+    torch.backends.cudnn.deterministic = deterministic
+    torch.backends.cudnn.benchmark = not deterministic
+
+    if deterministic and hasattr(torch, "use_deterministic_algorithms"):
+        try:
+            torch.use_deterministic_algorithms(True, warn_only=True)
+        except TypeError:
+            torch.use_deterministic_algorithms(True)
+
+    if seed is None:
+        return
+
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    random.seed(seed)
+    np.random.seed(seed % (2**32))
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+
+
+def seed_dataloader_worker(worker_id, base_seed):
+    worker_seed = (base_seed + worker_id) % (2**32)
+    random.seed(worker_seed)
+    np.random.seed(worker_seed)
+    torch.manual_seed(worker_seed)
+
+
+def build_generator(seed):
+    if seed is None:
+        return None
+    generator = torch.Generator()
+    generator.manual_seed(seed)
+    return generator
+
+
 class Trainer:
     def __init__(self, args, rank=0, world_size=1, device_id=None, logger=None):
         self.args = args
@@ -363,6 +421,19 @@ class Trainer:
         self.device_id = device_id
         self.logger = logger if logger is not None else logging.getLogger()
         torch.multiprocessing.set_sharing_strategy("file_system")
+        self.data_seed = None if args.seed is None else int(args.seed) + rank * 1000
+        self.worker_init_fn = None
+        self.eval_worker_init_fn = None
+        self.train_generator = None
+        self.eval_generator = None
+
+        if self.data_seed is not None:
+            self.worker_init_fn = partial(seed_dataloader_worker, base_seed=self.data_seed)
+            self.eval_worker_init_fn = partial(
+                seed_dataloader_worker, base_seed=self.data_seed + 100000
+            )
+            self.train_generator = build_generator(self.data_seed)
+            self.eval_generator = build_generator(self.data_seed + 100000)
 
         if args.wandb and rank == 0:
             wandb.login()
@@ -621,9 +692,12 @@ class Trainer:
                 shuffle=True,
                 num_workers=4,
                 pin_memory=True,
+                worker_init_fn=self.worker_init_fn,
+                generator=self.train_generator,
             )
         else:
-            self.train_sampler = DistributedSampler(self.train_set)
+            sampler_seed = 0 if self.args.seed is None else int(self.args.seed)
+            self.train_sampler = DistributedSampler(self.train_set, seed=sampler_seed)
             self.train_loader = DataLoader(
                 self.train_set,
                 batch_size=self.args.batch_size // self.world_size,
@@ -631,6 +705,8 @@ class Trainer:
                 sampler=self.train_sampler,
                 num_workers=2,
                 pin_memory=True,
+                worker_init_fn=self.worker_init_fn,
+                generator=self.train_generator,
             )
 
         self.optimizer = AdamW(
@@ -766,6 +842,8 @@ class Trainer:
             shuffle=False,
             num_workers=4,
             collate_fn=collate_fn,
+            worker_init_fn=self.eval_worker_init_fn,
+            generator=self.eval_generator,
         )
 
         self.logger.info(f"Evaluating...")
@@ -869,6 +947,7 @@ def main_worker(proc, nprocs, args, gpu_ids, init_method):
         rank=proc,
     )
     torch.cuda.set_device(gpu_ids[proc])
+    set_random_seed(args.seed, deterministic=args.deterministic)
 
     logger = logging.getLogger(f"worker_{proc}")
     logger.setLevel(logging.DEBUG)
@@ -901,6 +980,9 @@ def main():
     logging.basicConfig(
         level=logging.INFO, format="[%(asctime)s %(levelname)s] %(message)s"
     )
+    set_random_seed(args.seed, deterministic=args.deterministic)
+    if args.seed is not None:
+        logging.info(f"Using seed={args.seed} deterministic={args.deterministic}")
 
     gpu_ids = []
     if args.gpus:
@@ -935,9 +1017,7 @@ def main():
         elif args.mode == "eval":
             trainer.eval(trainer.test_set)
     else:
-        port = random.randint(
-            1024, 65535
-        )  # Generate a random port number within the range of unassigned ports
+        port = find_free_port()
         init_method = f"tcp://127.0.0.1:{port}"
         print("init_method", init_method)
         nprocs = len(gpu_ids)
