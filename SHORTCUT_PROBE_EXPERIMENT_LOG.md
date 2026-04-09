@@ -251,7 +251,7 @@ This is the current table to cite first.
 ## Experiment 7: Downstream Protocol Diagnosis Chain
 
 Status:
-- launched on 2026-04-09
+- completed on 2026-04-09
 - tmux session: `nerfmae_downstream_protocol_diagnosis_chain`
 - chain script:
   - `/home/minesawa/ssl/NeRF-MAE/nerf_mae/probe_scripts/run_downstream_protocol_diagnosis_chain.sh`
@@ -285,6 +285,52 @@ Implementation notes:
   - `FLIP_PROB`
   - `ROT_SCALE_PROB`
 - `DETERMINISTIC=1` now exports `CUBLAS_WORKSPACE_CONFIG=:4096:8` before Python launch in both pretrain and FCOS scripts.
+
+Results:
+
+`scheduler-fixed` (`lr_scheduler=onecycle_epoch`) 3-seed mean:
+
+| condition | AP@50 | AP@25 | AP@75 | Recall@50 top300 | AR top300 |
+|---|---:|---:|---:|---:|---:|
+| fair scratch | 0.3567 | 0.7520 | 0.0381 | 0.5784 | 0.4113 |
+| baseline | 0.3416 | 0.7599 | 0.0123 | 0.5613 | 0.3993 |
+| alpha_only | 0.3710 | 0.7537 | 0.0485 | 0.5931 | 0.4273 |
+| masked_only | 0.3506 | 0.7523 | 0.0369 | 0.5760 | 0.4181 |
+| alpha_shuffle | 0.3883 | 0.7580 | 0.0305 | 0.5931 | 0.4190 |
+
+Reading:
+- The scheduler change materially improves every condition relative to the previous quick transfer setup.
+- The earlier story that `fair scratch` clearly dominates no longer holds under the scheduler-fixed protocol.
+- `alpha_only` is now slightly above fair scratch on mean `AP@50`, but the margin is small.
+- `alpha_shuffle` is also in the same band, so this still does not isolate preserved alpha layout as the decisive factor.
+- `baseline` remains weaker on `AP@75`, and still has a relatively weak `seed3`, but it is no longer collapsing to the earlier degree.
+
+Seed-3 diagnostics against the scheduler-fixed baseline:
+
+| condition | AP@50 | AP@25 | AP@75 | Recall@50 top300 | AR top300 |
+|---|---:|---:|---:|---:|---:|
+| fair scratch sched-seed3 | 0.3918 | 0.7616 | 0.0408 | 0.6103 | 0.4167 |
+| baseline sched-seed3 | 0.2380 | 0.7387 | 0.0004 | 0.4706 | 0.3475 |
+| alpha_only sched-seed3 | 0.3901 | 0.7696 | 0.0530 | 0.6029 | 0.4309 |
+| masked_only sched-seed3 | 0.3379 | 0.7389 | 0.0322 | 0.5588 | 0.4196 |
+| fair scratch no-aug seed3 | 0.0573 | 0.3567 | 0.0000 | 0.1691 | 0.2059 |
+| baseline no-aug seed3 | 0.1181 | 0.5538 | 0.0000 | 0.2574 | 0.2637 |
+| alpha_only no-aug seed3 | 0.2270 | 0.6083 | 0.0036 | 0.4338 | 0.3348 |
+| masked_only no-aug seed3 | 0.1219 | 0.5376 | 0.0000 | 0.2426 | 0.2475 |
+| fair scratch freeze10 seed3 | 0.3605 | 0.7665 | 0.0433 | 0.5662 | 0.4260 |
+| baseline freeze10 seed3 | 0.1559 | 0.6947 | 0.0000 | 0.3529 | 0.3250 |
+| alpha_only freeze10 seed3 | 0.3638 | 0.7493 | 0.0292 | 0.5956 | 0.4167 |
+| masked_only freeze10 seed3 | 0.3253 | 0.7701 | 0.0292 | 0.5515 | 0.4108 |
+
+Reading:
+- `no-aug` hurts every condition badly, so the seed-3 behavior is not explained by stochastic augmentation noise alone.
+- `freeze_backbone_epochs=10` does not rescue baseline. It slightly lowers most conditions and leaves baseline clearly behind.
+- The strongest current protocol-level effect is the scheduler fix, not the freeze/no-aug diagnostics.
+
+Direct takeaway:
+- The old quick-transfer instability story was substantially driven by the downstream optimization recipe.
+- After fixing the scheduler, the five conditions cluster much more tightly.
+- The current evidence supports a modest "reduced objectives remain competitive" story more than a strong "vanilla baseline is broken" story.
 
 ## Utility Scripts
 
