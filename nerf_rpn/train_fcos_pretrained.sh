@@ -25,6 +25,14 @@ BATCH_SIZE_PER_GPU="${BATCH_SIZE_PER_GPU:-2}"
 SCRATCH_BACKBONE="${SCRATCH_BACKBONE:-0}"
 SEED="${SEED:-}"
 DETERMINISTIC="${DETERMINISTIC:-0}"
+ROTATE_PROB="${ROTATE_PROB:-0.5}"
+FLIP_PROB="${FLIP_PROB:-0.5}"
+ROT_SCALE_PROB="${ROT_SCALE_PROB:-0.5}"
+LR_SCHEDULER="${LR_SCHEDULER:-}"
+SCHEDULER_TOTAL_STEPS="${SCHEDULER_TOTAL_STEPS:-}"
+SCHEDULER_MIN_LR="${SCHEDULER_MIN_LR:-}"
+FREEZE_BACKBONE_EPOCHS="${FREEZE_BACKBONE_EPOCHS:-}"
+BACKBONE_LR_SCALE="${BACKBONE_LR_SCALE:-}"
 
 if [[ -z "${resolution}" ]]; then
   resolution=160
@@ -70,6 +78,9 @@ cmd=(
   --dataset_split "${DATA_ROOT}/${split_name}_split.npz"
   --save_path "${SAVE_PATH}"
   --mae_checkpoint "${MAE_CHECKPOINT}"
+  --rotate_prob "${ROTATE_PROB}"
+  --flip_prob "${FLIP_PROB}"
+  --rot_scale_prob "${ROT_SCALE_PROB}"
 )
 
 if [[ "${USE_WANDB}" == "1" ]]; then
@@ -82,7 +93,23 @@ if [[ -n "${SEED}" ]]; then
   cmd+=(--seed "${SEED}")
 fi
 if [[ "${DETERMINISTIC}" == "1" ]]; then
+  export CUBLAS_WORKSPACE_CONFIG="${CUBLAS_WORKSPACE_CONFIG:-:4096:8}"
   cmd+=(--deterministic)
+fi
+if [[ -n "${LR_SCHEDULER}" ]]; then
+  cmd+=(--lr_scheduler "${LR_SCHEDULER}")
+fi
+if [[ -n "${SCHEDULER_TOTAL_STEPS}" ]]; then
+  cmd+=(--scheduler_total_steps "${SCHEDULER_TOTAL_STEPS}")
+fi
+if [[ -n "${SCHEDULER_MIN_LR}" ]]; then
+  cmd+=(--scheduler_min_lr "${SCHEDULER_MIN_LR}")
+fi
+if [[ -n "${FREEZE_BACKBONE_EPOCHS}" ]]; then
+  cmd+=(--freeze_backbone_epochs "${FREEZE_BACKBONE_EPOCHS}")
+fi
+if [[ -n "${BACKBONE_LR_SCALE}" ]]; then
+  cmd+=(--backbone_lr_scale "${BACKBONE_LR_SCALE}")
 fi
 
 "${cmd[@]}"

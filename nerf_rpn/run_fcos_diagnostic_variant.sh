@@ -72,6 +72,7 @@ if [[ -n "${SEED}" ]]; then
   cmd+=(--seed "${SEED}")
 fi
 if [[ "${DETERMINISTIC}" == "1" ]]; then
+  export CUBLAS_WORKSPACE_CONFIG="${CUBLAS_WORKSPACE_CONFIG:-:4096:8}"
   cmd+=(--deterministic)
 fi
 

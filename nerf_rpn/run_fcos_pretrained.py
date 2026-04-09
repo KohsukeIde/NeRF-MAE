@@ -97,6 +97,41 @@ def parse_args():
         help="Enable more deterministic CUDA/cuDNN behavior.",
     )
     parser.add_argument(
+        "--lr_scheduler",
+        default="onecycle_legacy",
+        choices=[
+            "onecycle_legacy",
+            "onecycle_epoch",
+            "constant",
+            "exponential",
+        ],
+        help="Learning-rate scheduler. The legacy mode preserves the public repo behavior.",
+    )
+    parser.add_argument(
+        "--scheduler_total_steps",
+        type=int,
+        default=0,
+        help="Optional explicit scheduler total_steps. If 0, infer from the chosen scheduler mode.",
+    )
+    parser.add_argument(
+        "--scheduler_min_lr",
+        type=float,
+        default=5e-7,
+        help="Minimum LR target used by the exponential scheduler.",
+    )
+    parser.add_argument(
+        "--freeze_backbone_epochs",
+        type=int,
+        default=0,
+        help="Freeze the backbone for the first N training epochs.",
+    )
+    parser.add_argument(
+        "--backbone_lr_scale",
+        type=float,
+        default=1.0,
+        help="Multiplier applied to the backbone LR relative to the FCOS head LR.",
+    )
+    parser.add_argument(
         "--preload", action="store_true", help="Preload the features and boxes."
     )
     parser.add_argument(
@@ -609,6 +644,106 @@ class Trainer:
             if checkpoint_file not in checkpoints_to_keep:
                 os.remove(checkpoint_file)
 
+    def unwrap_model(self):
+        return self.model.module if self.world_size > 1 else self.model
+
+    def build_optimizer(self):
+        model_ref = self.unwrap_model()
+        backbone_params = list(model_ref.backbone.parameters())
+        head_params = list(model_ref.fcos_module.parameters())
+        tracked_ids = {id(param) for param in backbone_params + head_params}
+        extra_params = [
+            param for param in model_ref.parameters() if id(param) not in tracked_ids
+        ]
+        if extra_params:
+            head_params.extend(extra_params)
+
+        param_groups = []
+        max_lrs = []
+        if head_params:
+            param_groups.append({"params": head_params, "lr": self.args.lr})
+            max_lrs.append(self.args.lr)
+        if backbone_params:
+            backbone_lr = self.args.lr * self.args.backbone_lr_scale
+            param_groups.append({"params": backbone_params, "lr": backbone_lr})
+            max_lrs.append(backbone_lr)
+
+        self.max_lrs = max_lrs
+        return AdamW(
+            param_groups,
+            lr=self.args.lr,
+            weight_decay=self.args.weight_decay,
+        )
+
+    def build_scheduler(self):
+        scheduler_name = self.args.lr_scheduler
+        total_steps = self.args.scheduler_total_steps
+        if total_steps <= 0:
+            if scheduler_name == "onecycle_legacy":
+                total_steps = 1000 * len(self.train_loader)
+            else:
+                total_steps = self.args.num_epochs * len(self.train_loader)
+
+        if scheduler_name == "constant":
+            if self.rank == 0:
+                self.logger.info("Using constant LR (no scheduler stepping).")
+            return None
+
+        if scheduler_name in {"onecycle_legacy", "onecycle_epoch"}:
+            max_lr = self.max_lrs[0] if len(self.max_lrs) == 1 else self.max_lrs
+            if self.rank == 0:
+                self.logger.info(
+                    "Using %s scheduler with total_steps=%s max_lr=%s",
+                    scheduler_name,
+                    total_steps,
+                    max_lr,
+                )
+            return OneCycleLR(
+                self.optimizer,
+                max_lr=max_lr,
+                total_steps=total_steps,
+            )
+
+        if scheduler_name == "exponential":
+            gamma = (self.args.scheduler_min_lr / self.args.lr) ** (
+                1.0 / max(total_steps, 1)
+            )
+            if self.rank == 0:
+                self.logger.info(
+                    "Using exponential scheduler with total_steps=%s gamma=%.8f min_lr=%.2e",
+                    total_steps,
+                    gamma,
+                    self.args.scheduler_min_lr,
+                )
+            return ExponentialLR(self.optimizer, gamma=gamma)
+
+        raise ValueError(f"Unknown scheduler: {scheduler_name}")
+
+    def current_lr(self):
+        if self.scheduler is None:
+            return self.optimizer.param_groups[0]["lr"]
+        return self.scheduler.get_last_lr()[0]
+
+    def set_backbone_frozen(self, frozen):
+        frozen = bool(frozen)
+        if getattr(self, "_backbone_frozen", None) == frozen:
+            return
+
+        model_ref = self.unwrap_model()
+        for param in model_ref.backbone.parameters():
+            param.requires_grad = not frozen
+
+        self._backbone_frozen = frozen
+        if self.rank == 0:
+            self.logger.info(
+                "Backbone %s.",
+                "frozen" if frozen else "unfrozen",
+            )
+
+    def apply_backbone_train_mode(self):
+        if getattr(self, "_backbone_frozen", False):
+            self.unwrap_model().backbone.eval()
+
     def train_loop(self):
         if self.args.dataset == "hypersim":
             self.train_set = HypersimRPNDataset(
@@ -698,34 +833,9 @@ class Trainer:
                 generator=self.train_generator,
             )
 
-        self.optimizer = AdamW(
-            self.model.parameters(),
-            lr=self.args.lr,
-            weight_decay=self.args.weight_decay,
-        )
-
-        # if self.args.checkpoint:
-        #     self.logger.info("using exponential lr scheduler")
-        #     # Calculate the gamma value
-        #     num_epochs = self.args.num_epochs
-        #     max_lr = self.args.lr
-        #     min_lr = 5e-7  # The minimum learning rate you want to reach
-        #     gamma = (min_lr / max_lr) ** (1.0 / (num_epochs * len(self.train_loader)))
-        #     self.scheduler = ExponentialLR(self.optimizer, gamma=gamma)
-
-        # else:
-        # self.scheduler = OneCycleLR(
-        #     self.optimizer,
-        #     max_lr=self.args.lr,
-        #     total_steps=self.args.num_epochs * len(self.train_loader),
-        # )
-
-        self.scheduler = OneCycleLR(
-            self.optimizer,
-            max_lr=self.args.lr,
-            total_steps=1000 * len(self.train_loader),
-        )
-
+        self.optimizer = self.build_optimizer()
+        self.scheduler = self.build_scheduler()
+        self._backbone_frozen = None
 
         self.best_metric_ap50 = None
         self.best_metric_ap25 = None
@@ -733,6 +843,7 @@ class Trainer:
         # self.eval(self.val_set)
 
         for epoch in range(1, self.args.num_epochs + 1):
+            self.set_backbone_frozen(epoch <= self.args.freeze_backbone_epochs)
             if self.world_size > 1:
                 self.train_sampler.set_epoch(epoch)
 
@@ -798,6 +909,7 @@ class Trainer:
             #                   f'Grid size: {[x.shape for x in batch[0]]}, GT boxes: {[x.shape for x in batch[1]]}')
 
             self.model.train()
+            self.apply_backbone_train_mode()
             self.optimizer.zero_grad()
 
             rgbsigma, boxes, scene_name = batch
@@ -815,7 +927,8 @@ class Trainer:
                 self.model.parameters(), self.args.clip_grad_norm
             )
             self.optimizer.step()
-            self.scheduler.step()
+            if self.scheduler is not None:
+                self.scheduler.step()
 
             self.logger.debug(
                 f"GPU {self.device_id} Epoch {epoch} Iter {i} {batch[-1]} "
@@ -838,14 +951,14 @@ class Trainer:
             if i % self.args.log_interval == 0 and self.rank == 0:
                 self.logger.info(
                     f"epoch {epoch} [{i}/{len(self.train_loader)}]  "
-                    f"lr: {self.scheduler.get_last_lr()[0]:.6f}  "
+                    f"lr: {self.current_lr():.6f}  "
                     f"loss: {loss.item():.4f}"
                 )
 
             if self.args.wandb and self.rank == 0:
                 wandb.log(
                     {
-                        "lr": self.scheduler.get_last_lr()[0],
+                        "lr": self.current_lr(),
                         "loss": loss.item(),
                         "loss_cls": losses["loss_cls"].item(),
                         "loss_reg": losses["loss_reg"].item(),
@@ -1135,6 +1248,13 @@ def main_worker(proc, nprocs, args, gpu_ids, init_method):
 
 def main():
     args = parse_args()
+
+    if args.backbone_lr_scale <= 0:
+        raise ValueError("--backbone_lr_scale must be positive.")
+    if args.freeze_backbone_epochs < 0:
+        raise ValueError("--freeze_backbone_epochs must be non-negative.")
+    if args.scheduler_total_steps < 0:
+        raise ValueError("--scheduler_total_steps must be non-negative.")
 
     logging.basicConfig(
         level=logging.INFO, format="[%(asctime)s %(levelname)s] %(message)s"

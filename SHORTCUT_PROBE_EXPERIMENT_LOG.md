@@ -248,6 +248,44 @@ This is the current table to cite first.
 3. Re-read the existing diagnostic dumps with the new 3-seed interpretation in mind.
 4. Keep using `epoch_k.pt` fixed checkpoints for probe variants when the pretrain objective is not aligned with RGB PSNR.
 
+## Experiment 7: Downstream Protocol Diagnosis Chain
+
+Status:
+- launched on 2026-04-09
+- tmux session: `nerfmae_downstream_protocol_diagnosis_chain`
+- chain script:
+  - `/home/minesawa/ssl/NeRF-MAE/nerf_mae/probe_scripts/run_downstream_protocol_diagnosis_chain.sh`
+
+Planned phases:
+1. scheduler-fixed reevaluation
+   - `lr_scheduler=onecycle_epoch`
+   - `fair scratch / baseline_e30_epoch30 / alpha_only_e30_epoch30 / masked_only_e30_epoch30`
+   - `seed=1,2,3`
+2. deterministic + no-aug diagnostic
+   - same four conditions
+   - `seed=3`
+   - `rotate_prob=0`, `flip_prob=0`, `rot_scale_prob=0`
+3. `alpha_shuffle` multi-seed
+   - pretrain seeds `1,2,3`
+   - FCOS reevaluation with `lr_scheduler=onecycle_epoch`
+4. freeze-backbone diagnostic
+   - same four conditions
+   - `seed=3`
+   - `freeze_backbone_epochs=10`
+
+Implementation notes:
+- FCOS now accepts:
+  - `--lr_scheduler`
+  - `--scheduler_total_steps`
+  - `--scheduler_min_lr`
+  - `--freeze_backbone_epochs`
+  - `--backbone_lr_scale`
+- Shell launchers now also forward:
+  - `ROTATE_PROB`
+  - `FLIP_PROB`
+  - `ROT_SCALE_PROB`
+- `DETERMINISTIC=1` now exports `CUBLAS_WORKSPACE_CONFIG=:4096:8` before Python launch in both pretrain and FCOS scripts.
+
 ## Utility Scripts
 
 - Seeded pretraining / transfer entrypoints:
@@ -266,6 +304,8 @@ This is the current table to cite first.
 - Diagnostic dump scripts:
   - `/home/minesawa/ssl/NeRF-MAE/nerf_rpn/run_fcos_diagnostic_variant.sh`
   - `/home/minesawa/ssl/NeRF-MAE/nerf_mae/probe_scripts/run_shortcut_diagnostic_dump_chain.sh`
+- Downstream protocol diagnosis chain:
+  - `/home/minesawa/ssl/NeRF-MAE/nerf_mae/probe_scripts/run_downstream_protocol_diagnosis_chain.sh`
 
 The diagnostic dump chain writes raw analysis artifacts under:
 - `.../front3d_scratch_samepath_fcos100_diagnostics`
