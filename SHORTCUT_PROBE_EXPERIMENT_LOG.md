@@ -1,6 +1,6 @@
 # NeRF-MAE Shortcut Probe Experiment Log
 
-Last updated: 2026-04-08 JST
+Last updated: 2026-04-11 JST
 
 This file is the running log for the NeRF-MAE shortcut probe experiments.
 Primary result root: `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output`
@@ -463,6 +463,143 @@ Current takeaway after Experiment 8:
 - However, the heavier `e100` result suggests the full baseline may recover under more training, so the cleanest current statement is:
   - full RGBA reconstruction is not the decisive factor in the quick regime
   - but sample efficiency versus asymptotic behavior remains unresolved
+
+## Experiment 9: `e100` Multi-Seed And `alpha_target_shuffle`
+
+Date:
+- 2026-04-10 to 2026-04-11 JST
+
+Goal:
+- test whether the `e100` single-seed story survives replication
+- add a target-side causal control for `alpha_target_only`
+
+Launch family:
+- chain:
+  - `/home/minesawa/ssl/NeRF-MAE/nerf_mae/probe_scripts/run_e100_alpha_target_mechanism_chain.sh`
+- target-side corruption support:
+  - `/home/minesawa/ssl/NeRF-MAE/nerf_mae/model/mae/shortcut_probe.py`
+- pretrain helper:
+  - `/home/minesawa/ssl/NeRF-MAE/nerf_mae/probe_scripts/train_alpha_target_shuffle.sh`
+
+Protocol:
+- FCOS uses `lr_scheduler=onecycle_epoch`
+- `e100` lines use `epoch_100.pt`
+- `alpha_target_shuffle` is:
+  - `probe_mode=custom`
+  - `probe_rgb_input=zero`
+  - `probe_alpha_input=zero`
+  - `probe_alpha_target=shuffle`
+  - `probe_rgb_loss=none`
+  - `probe_alpha_loss=removed`
+
+### `e100`, `p0.1`, 3 seeds
+
+Per-seed results:
+
+| condition | seed1 AP@50 | seed2 AP@50 | seed3 AP@50 | mean AP@50 | AP@50 std | mean AP@25 | mean AP@75 | mean Recall@50 top300 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| baseline_e100 | 0.4227 | 0.4198 | 0.2707 | 0.3711 | 0.0710 | 0.7621 | 0.0255 | 0.5564 |
+| alpha_only_e100 | 0.4012 | 0.3535 | 0.3775 | 0.3774 | 0.0194 | 0.7918 | 0.0394 | 0.6152 |
+| alpha_target_only_e100 | 0.3993 | 0.4815 | 0.4296 | 0.4368 | 0.0340 | 0.7692 | 0.0293 | 0.6348 |
+
+Eval files:
+- baseline:
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json`
+- alpha_only:
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_only_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_only_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_only_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json`
+- alpha_target_only:
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_only_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_only_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json`
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_only_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json`
+
+Reading:
+- The earlier `e100` single-seed impression that the full baseline recovers is not robust.
+- On the 3-seed mean, `alpha_target_only_e100` is the best `AP@50` condition.
+- `alpha_only_e100` is still strongest on `AP@25`.
+- This strengthens the claim that dense full-RGBA reconstruction is not the decisive factor even beyond the quick `e30` regime.
+
+### `alpha_target_shuffle`, `p0.1`, `e30`, 3 seeds
+
+| condition | mean AP@50 | AP@50 std | mean AP@25 | mean AP@75 | mean Recall@50 top300 |
+|---|---:|---:|---:|---:|---:|
+| alpha_target_shuffle | 0.2913 | 0.0917 | 0.7526 | 0.0193 | 0.4828 |
+
+Per-seed AP@50:
+- seed1: `0.2888`
+- seed2: `0.4049`
+- seed3: `0.1802`
+
+Eval files:
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_shuffle_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_shuffle_p0.1_e30_seed2_epoch30_sched_epoch_seed2_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_shuffle_p0.1_e30_seed3_epoch30_sched_epoch_seed3_fcos100_eval/eval.json`
+
+Reading:
+- Shuffling target-side alpha hurts relative to `alpha_target_only`.
+- The variance is high, but this is the first result that points back toward target-side alpha structure mattering.
+- The safest current phrasing is:
+  - target-side alpha structure appears more important than encoder-side alpha layout preservation
+  - but this still needs a heavier-budget confirmation
+
+## Experiment 10: Low-Label Downstream
+
+Date:
+- 2026-04-10 to 2026-04-11 JST
+
+Goal:
+- test whether pretraining differences open up when downstream labeled data is reduced
+
+Protocol:
+- downstream FCOS only
+- scheduler fixed to `onecycle_epoch`
+- seed `1`
+- pretrained conditions use `epoch_100.pt`
+- compared:
+  - `scratch`
+  - `baseline_e100`
+  - `alpha_target_only_e100`
+
+### `percent_train = 0.1`
+
+| condition | AP@50 | AP@25 | AP@75 | Recall@50 top300 | AR top300 |
+|---|---:|---:|---:|---:|---:|
+| scratch_pt01 | 0.0941 | 0.4287 | 0.0009 | 0.2353 | 0.2490 |
+| baseline_pt01 | 0.1238 | 0.4868 | 0.0009 | 0.3309 | 0.2877 |
+| alpha_target_only_pt01 | 0.0747 | 0.4646 | 0.0000 | 0.2868 | 0.2681 |
+
+### `percent_train = 0.2`
+
+| condition | AP@50 | AP@25 | AP@75 | Recall@50 top300 | AR top300 |
+|---|---:|---:|---:|---:|---:|
+| scratch_pt02 | 0.1106 | 0.5782 | 0.0018 | 0.2794 | 0.2853 |
+| baseline_pt02 | 0.1828 | 0.5729 | 0.0007 | 0.4118 | 0.3196 |
+| alpha_target_only_pt02 | 0.1910 | 0.5728 | 0.0000 | 0.4044 | 0.3113 |
+
+Eval files:
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/front3d_scratch_samepath_sched_epoch_pt01_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/front3d_scratch_samepath_sched_epoch_pt02_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e100_seed1_epoch100_sched_epoch_pt01_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e100_seed1_epoch100_sched_epoch_pt02_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_only_p0.1_e100_seed1_epoch100_sched_epoch_pt01_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_only_p0.1_e100_seed1_epoch100_sched_epoch_pt02_seed1_fcos100_eval/eval.json`
+
+Reading:
+- At `10%` labels, `baseline_e100` is strongest.
+- At `20%` labels, `baseline_e100` and `alpha_target_only_e100` are nearly tied, with a slight `AP@50` edge for `alpha_target_only`.
+- Both pretrained conditions are clearly above scratch in low-label transfer.
+- This is the strongest evidence so far that the reduced objectives are not just matching full supervision in full-data transfer, but remain useful when downstream data is scarce.
+
+## Current Best Reading
+
+- The main story has shifted from "`baseline` is broken" to "full RGBA reconstruction is not the decisive factor."
+- Under the scheduler-corrected FCOS protocol, reduced objectives remain highly competitive with the full baseline at `e30`, and `alpha_target_only` is strongest at `e100` on the 3-seed mean.
+- `alpha_target_shuffle` weakens performance relative to `alpha_target_only`, so target-side alpha structure now looks more important than encoder-side alpha layout preservation.
+- Low-label transfer also supports the usefulness of reduced objectives: both `baseline_e100` and `alpha_target_only_e100` beat scratch, and `alpha_target_only` remains competitive at `20%` labels.
+- What is still unresolved is asymptotic behavior at much larger pretraining budgets and whether the target-side alpha effect survives heavier replication.
 
 ## Update Rules
 
