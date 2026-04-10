@@ -364,6 +364,106 @@ Each diagnostic directory is expected to contain:
 - `voxel_scores/*.npz`
 - `eval.json`
 
+## Experiment 8: Alpha-Target-Only Follow-Up and Heavier Budget
+
+Date:
+- 2026-04-09 to 2026-04-10 JST
+
+Goal:
+- Re-read diagnostic dumps under the scheduler-fixed FCOS protocol
+- Test `alpha_target_only`
+- Recheck the main reduced-objective story under a heavier pretraining budget
+
+Launch family:
+- follow-up chain:
+  - `/home/minesawa/ssl/NeRF-MAE/nerf_mae/probe_scripts/run_alpha_target_followup_chain.sh`
+- helper scripts:
+  - `/home/minesawa/ssl/NeRF-MAE/nerf_mae/probe_scripts/train_alpha_target_only.sh`
+  - `/home/minesawa/ssl/NeRF-MAE/nerf_rpn/tools/summarize_diagnostic_dumps.py`
+
+Protocol:
+- FCOS uses `lr_scheduler=onecycle_epoch`
+- `alpha_target_only` probe is:
+  - `probe_mode=custom`
+  - `probe_rgb_input=zero`
+  - `probe_alpha_input=zero`
+  - `probe_rgb_loss=none`
+  - `probe_alpha_loss=removed`
+- Main comparison remains Front3D FCOS transfer
+- Pretrain checkpoint is `epoch_30.pt` for the `e30` line and `epoch_100.pt` for the heavy line
+
+Diagnostic summary outputs:
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/analysis/sched_epoch_seed1_diagnostics_summary.md`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/analysis/sched_epoch_seed1_diagnostics_summary.json`
+
+### Alpha-Target-Only, `p0.1`, `e30`, `epoch_30.pt`, 3 seeds
+
+Per-seed results:
+
+| condition | AP@50 | AP@25 | AP@75 | Recall@50 top300 |
+|---|---:|---:|---:|---:|
+| alpha_target seed1 | 0.3650 | 0.7532 | 0.0226 | 0.5809 |
+| alpha_target seed2 | 0.4111 | 0.7538 | 0.0388 | 0.6103 |
+| alpha_target seed3 | 0.3887 | 0.7504 | 0.0233 | 0.6324 |
+
+3-seed mean:
+
+| condition | AP@50 | AP@25 | AP@75 | Recall@50 top300 |
+|---|---:|---:|---:|---:|
+| fair scratch | 0.3567 | 0.7520 | 0.0381 | 0.5784 |
+| baseline | 0.3416 | 0.7599 | 0.0123 | 0.5613 |
+| alpha_only | 0.3710 | 0.7537 | 0.0485 | 0.5931 |
+| masked_only | 0.3506 | 0.7523 | 0.0369 | 0.5760 |
+| alpha_shuffle | 0.3883 | 0.7580 | 0.0305 | 0.5931 |
+| alpha_target_only | 0.3883 | 0.7524 | 0.0282 | 0.6078 |
+
+Eval files:
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_only_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_only_p0.1_e30_seed2_epoch30_sched_epoch_seed2_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_only_p0.1_e30_seed3_epoch30_sched_epoch_seed3_fcos100_eval/eval.json`
+
+Reading:
+- `alpha_target_only` stays in the same band as `alpha_shuffle`, and both are above fair scratch on mean `AP@50`.
+- This weakens the story that preserving alpha input content, or preserving the correct alpha spatial layout at the encoder input, is necessary for transfer in the current quick regime.
+- The current evidence is more compatible with a "full RGBA reconstruction is not the decisive factor" interpretation than with a tight causal claim about alpha layout.
+
+### Heavier Pretraining Budget, `p0.1`, `e100`, `seed1`, `epoch_100.pt`
+
+| condition | AP@50 | AP@25 | AP@75 | Recall@50 top300 |
+|---|---:|---:|---:|---:|
+| baseline e100 seed1 | 0.4227 | 0.7779 | 0.0249 | 0.6324 |
+| alpha_only e100 seed1 | 0.4012 | 0.7941 | 0.0457 | 0.6471 |
+| alpha_shuffle e100 seed1 | 0.3530 | 0.7014 | 0.0608 | 0.5735 |
+| alpha_target_only e100 seed1 | 0.3993 | 0.7726 | 0.0296 | 0.6103 |
+
+Eval files:
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_only_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_shuffle_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_only_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json`
+
+Reading:
+- With a heavier pretraining budget, the full baseline improves and becomes the best `AP@50` condition in this single-seed comparison.
+- `alpha_only` remains competitive and is strongest on `AP@25` and `Recall@50 top300`.
+- `alpha_target_only` remains close to `alpha_only`, which still argues against dense RGBA reconstruction being uniquely necessary.
+- `alpha_shuffle` falls back at `e100`, so the earlier `e30` competitiveness of shuffled-alpha does not obviously survive a heavier budget.
+
+### ScanNet
+
+Status:
+- skipped
+
+Reason:
+- `scannet_rpn_data` was not present under:
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/dataset/finetune/scannet_rpn_data`
+
+Current takeaway after Experiment 8:
+- Under the scheduler-corrected FCOS recipe, reduced objectives remain highly competitive with the full RGBA baseline at `e30`.
+- `alpha_target_only` shows that strong transfer can persist even when both RGB and alpha inputs are zeroed and only target-side alpha prediction remains.
+- However, the heavier `e100` result suggests the full baseline may recover under more training, so the cleanest current statement is:
+  - full RGBA reconstruction is not the decisive factor in the quick regime
+  - but sample efficiency versus asymptotic behavior remains unresolved
+
 ## Update Rules
 
 When adding a new experiment to this file:
