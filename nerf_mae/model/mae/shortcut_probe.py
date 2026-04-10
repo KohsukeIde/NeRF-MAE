@@ -1,6 +1,6 @@
 """Shortcut-probe wrapper for the public NeRF-MAE training code.
 
-This module adds three MVP experiments motivated by the NeRF-MAE shortcut
+This module adds shortcut probes motivated by the NeRF-MAE shortcut
 hypothesis discussed in the chat:
 
 1. masked_only_rgb_loss
@@ -9,6 +9,8 @@ hypothesis discussed in the chat:
    Zero RGB before encoding and optimize alpha only.
 3. radiance_only
    Zero alpha before encoding and optimize RGB only on masked occupied voxels.
+4. custom target-side probes
+   Keep the public architecture but corrupt the alpha target used in the loss.
 
 The implementation is intentionally conservative: it subclasses the public
 `SwinTransformer_MAE3D_New` model instead of modifying the original model file.
@@ -37,6 +39,7 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
         "custom",
     )
     INPUT_MODES = ("keep", "zero", "shuffle")
+    TARGET_ALPHA_MODES = ("keep", "zero", "shuffle")
     RGB_LOSS_MODES = ("occupied", "removed_occupied", "removed_all", "none")
     ALPHA_LOSS_MODES = ("removed", "all", "none")
 
@@ -46,6 +49,7 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
         probe_mode: str = "baseline",
         probe_rgb_input: str = "keep",
         probe_alpha_input: str = "keep",
+        probe_alpha_target: str = "keep",
         probe_rgb_loss: str = "occupied",
         probe_alpha_loss: str = "removed",
         probe_alpha_threshold: float = 0.01,
@@ -60,11 +64,13 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
             probe_mode=probe_mode,
             probe_rgb_input=probe_rgb_input,
             probe_alpha_input=probe_alpha_input,
+            probe_alpha_target=probe_alpha_target,
             probe_rgb_loss=probe_rgb_loss,
             probe_alpha_loss=probe_alpha_loss,
         )
         self.probe_rgb_input = resolved["probe_rgb_input"]
         self.probe_alpha_input = resolved["probe_alpha_input"]
+        self.probe_alpha_target = resolved["probe_alpha_target"]
         self.probe_rgb_loss = resolved["probe_rgb_loss"]
         self.probe_alpha_loss = resolved["probe_alpha_loss"]
 
@@ -79,12 +85,14 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
         probe_mode: str,
         probe_rgb_input: str,
         probe_alpha_input: str,
+        probe_alpha_target: str,
         probe_rgb_loss: str,
         probe_alpha_loss: str,
     ) -> Dict[str, str]:
         for name, value, valid in (
             ("probe_rgb_input", probe_rgb_input, self.INPUT_MODES),
             ("probe_alpha_input", probe_alpha_input, self.INPUT_MODES),
+            ("probe_alpha_target", probe_alpha_target, self.TARGET_ALPHA_MODES),
             ("probe_rgb_loss", probe_rgb_loss, self.RGB_LOSS_MODES),
             ("probe_alpha_loss", probe_alpha_loss, self.ALPHA_LOSS_MODES),
         ):
@@ -94,6 +102,7 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
             return {
                 "probe_rgb_input": "keep",
                 "probe_alpha_input": "keep",
+                "probe_alpha_target": "keep",
                 "probe_rgb_loss": "occupied",
                 "probe_alpha_loss": "removed",
             }
@@ -101,6 +110,7 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
             return {
                 "probe_rgb_input": "keep",
                 "probe_alpha_input": "keep",
+                "probe_alpha_target": "keep",
                 "probe_rgb_loss": "removed_occupied",
                 "probe_alpha_loss": "removed",
             }
@@ -108,6 +118,7 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
             return {
                 "probe_rgb_input": "zero",
                 "probe_alpha_input": "keep",
+                "probe_alpha_target": "keep",
                 "probe_rgb_loss": "none",
                 "probe_alpha_loss": "removed",
             }
@@ -115,12 +126,14 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
             return {
                 "probe_rgb_input": "keep",
                 "probe_alpha_input": "zero",
+                "probe_alpha_target": "keep",
                 "probe_rgb_loss": "removed_occupied",
                 "probe_alpha_loss": "none",
             }
         return {
             "probe_rgb_input": probe_rgb_input,
             "probe_alpha_input": probe_alpha_input,
+            "probe_alpha_target": probe_alpha_target,
             "probe_rgb_loss": probe_rgb_loss,
             "probe_alpha_loss": probe_alpha_loss,
         }
@@ -185,6 +198,25 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
             return None
         raise ValueError(f"Unsupported probe_alpha_loss: {self.probe_alpha_loss}")
 
+    def _apply_probe_alpha_target_corruption(self, target_alpha: torch.Tensor) -> torch.Tensor:
+        if self.probe_alpha_target == "keep":
+            return target_alpha
+
+        target_alpha = target_alpha.clone()
+        if self.probe_alpha_target == "zero":
+            target_alpha.zero_()
+            return target_alpha
+
+        if self.probe_alpha_target == "shuffle":
+            batch_size = target_alpha.shape[0]
+            flat = target_alpha.reshape(batch_size, -1, target_alpha.shape[-1])
+            for b in range(batch_size):
+                perm = torch.randperm(flat.shape[1], device=flat.device)
+                flat[b] = flat[b, perm]
+            return flat.reshape_as(target_alpha)
+
+        raise ValueError(f"Unsupported probe_alpha_target: {self.probe_alpha_target}")
+
     def forward_loss(self, x, pred, mask_batch, mask_patches, is_eval=False):
         """Compute the probe-aware reconstruction loss.
 
@@ -202,6 +234,7 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
 
         target_rgb = target[..., :3]
         target_alpha = target[..., 3].unsqueeze(-1)
+        target_alpha = self._apply_probe_alpha_target_corruption(target_alpha)
         pred_rgb = pred[..., :3]
         pred_alpha = self.alpha_activation(pred[..., 3].unsqueeze(-1))
 

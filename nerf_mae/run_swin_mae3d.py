@@ -182,6 +182,12 @@ def parse_args():
         help="How to corrupt alpha channel before encoding.",
     )
     parser.add_argument(
+        "--probe_alpha_target",
+        default="keep",
+        choices=["keep", "zero", "shuffle"],
+        help="How to corrupt the alpha target used in reconstruction loss.",
+    )
+    parser.add_argument(
         "--probe_rgb_loss",
         default="occupied",
         choices=["occupied", "removed_occupied", "removed_all", "none"],
@@ -524,6 +530,7 @@ class Trainer:
             probe_mode=args.probe_mode,
             probe_rgb_input=args.probe_rgb_input,
             probe_alpha_input=args.probe_alpha_input,
+            probe_alpha_target=args.probe_alpha_target,
             probe_rgb_loss=args.probe_rgb_loss,
             probe_alpha_loss=args.probe_alpha_loss,
             probe_alpha_threshold=args.probe_alpha_threshold,

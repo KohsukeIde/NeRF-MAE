@@ -21,6 +21,7 @@ USE_WANDB="${USE_WANDB:-1}"
 PROBE_MODE="${PROBE_MODE:-}"
 PROBE_RGB_INPUT="${PROBE_RGB_INPUT:-}"
 PROBE_ALPHA_INPUT="${PROBE_ALPHA_INPUT:-}"
+PROBE_ALPHA_TARGET="${PROBE_ALPHA_TARGET:-}"
 PROBE_RGB_LOSS="${PROBE_RGB_LOSS:-}"
 PROBE_ALPHA_LOSS="${PROBE_ALPHA_LOSS:-}"
 PROBE_ALPHA_THRESHOLD="${PROBE_ALPHA_THRESHOLD:-}"
@@ -75,6 +76,9 @@ if [[ -n "${PROBE_RGB_INPUT}" ]]; then
 fi
 if [[ -n "${PROBE_ALPHA_INPUT}" ]]; then
   cmd+=(--probe_alpha_input "${PROBE_ALPHA_INPUT}")
+fi
+if [[ -n "${PROBE_ALPHA_TARGET}" ]]; then
+  cmd+=(--probe_alpha_target "${PROBE_ALPHA_TARGET}")
 fi
 if [[ -n "${PROBE_RGB_LOSS}" ]]; then
   cmd+=(--probe_rgb_loss "${PROBE_RGB_LOSS}")
