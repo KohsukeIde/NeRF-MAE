@@ -200,6 +200,18 @@ def parse_args():
         help="Which voxels contribute to alpha reconstruction loss.",
     )
     parser.add_argument(
+        "--probe_rgb_weight",
+        default=1.0,
+        type=float,
+        help="Weight applied to the probe RGB reconstruction loss.",
+    )
+    parser.add_argument(
+        "--probe_alpha_weight",
+        default=1.0,
+        type=float,
+        help="Weight applied to the probe alpha reconstruction loss.",
+    )
+    parser.add_argument(
         "--probe_alpha_threshold",
         default=0.01,
         type=float,
@@ -533,6 +545,8 @@ class Trainer:
             probe_alpha_target=args.probe_alpha_target,
             probe_rgb_loss=args.probe_rgb_loss,
             probe_alpha_loss=args.probe_alpha_loss,
+            probe_rgb_weight=args.probe_rgb_weight,
+            probe_alpha_weight=args.probe_alpha_weight,
             probe_alpha_threshold=args.probe_alpha_threshold,
         )
 

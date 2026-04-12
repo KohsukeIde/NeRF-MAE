@@ -24,6 +24,8 @@ PROBE_ALPHA_INPUT="${PROBE_ALPHA_INPUT:-}"
 PROBE_ALPHA_TARGET="${PROBE_ALPHA_TARGET:-}"
 PROBE_RGB_LOSS="${PROBE_RGB_LOSS:-}"
 PROBE_ALPHA_LOSS="${PROBE_ALPHA_LOSS:-}"
+PROBE_RGB_WEIGHT="${PROBE_RGB_WEIGHT:-}"
+PROBE_ALPHA_WEIGHT="${PROBE_ALPHA_WEIGHT:-}"
 PROBE_ALPHA_THRESHOLD="${PROBE_ALPHA_THRESHOLD:-}"
 SEED="${SEED:-}"
 DETERMINISTIC="${DETERMINISTIC:-0}"
@@ -85,6 +87,12 @@ if [[ -n "${PROBE_RGB_LOSS}" ]]; then
 fi
 if [[ -n "${PROBE_ALPHA_LOSS}" ]]; then
   cmd+=(--probe_alpha_loss "${PROBE_ALPHA_LOSS}")
+fi
+if [[ -n "${PROBE_RGB_WEIGHT}" ]]; then
+  cmd+=(--probe_rgb_weight "${PROBE_RGB_WEIGHT}")
+fi
+if [[ -n "${PROBE_ALPHA_WEIGHT}" ]]; then
+  cmd+=(--probe_alpha_weight "${PROBE_ALPHA_WEIGHT}")
 fi
 if [[ -n "${PROBE_ALPHA_THRESHOLD}" ]]; then
   cmd+=(--probe_alpha_threshold "${PROBE_ALPHA_THRESHOLD}")

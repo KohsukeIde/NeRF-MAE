@@ -52,6 +52,8 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
         probe_alpha_target: str = "keep",
         probe_rgb_loss: str = "occupied",
         probe_alpha_loss: str = "removed",
+        probe_rgb_weight: float = 1.0,
+        probe_alpha_weight: float = 1.0,
         probe_alpha_threshold: float = 0.01,
         **kwargs,
     ):
@@ -73,6 +75,8 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
         self.probe_alpha_target = resolved["probe_alpha_target"]
         self.probe_rgb_loss = resolved["probe_rgb_loss"]
         self.probe_alpha_loss = resolved["probe_alpha_loss"]
+        self.probe_rgb_weight = float(probe_rgb_weight)
+        self.probe_alpha_weight = float(probe_alpha_weight)
 
     @staticmethod
     def _validate_choice(name: str, value: str, valid: Iterable[str]) -> None:
@@ -246,7 +250,7 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
 
         loss_rgb = self._masked_mean(rgb_loss_map, rgb_mask)
         loss_alpha = self._masked_mean(alpha_loss_map, alpha_mask)
-        loss = loss_rgb + loss_alpha
+        loss = self.probe_rgb_weight * loss_rgb + self.probe_alpha_weight * loss_alpha
 
         if is_eval:
             occupied_mask = target_alpha > self.probe_alpha_threshold
