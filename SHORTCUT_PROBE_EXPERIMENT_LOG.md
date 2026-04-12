@@ -601,6 +601,69 @@ Reading:
 - Low-label transfer also supports the usefulness of reduced objectives: both `baseline_e100` and `alpha_target_only_e100` beat scratch, and `alpha_target_only` remains competitive at `20%` labels.
 - What is still unresolved is asymptotic behavior at much larger pretraining budgets and whether the target-side alpha effect survives heavier replication.
 
+## Experiment 11: Target-Side Alpha Structure Follow-Up
+
+Date:
+- 2026-04-11 to 2026-04-12 JST
+
+Goal:
+- test whether `alpha_target_shuffle` still drops under `e100`
+- add `alpha_target_zero` as a target-side causal control
+- regenerate proposal/voxel-score diagnostics for the target-side comparison
+
+Launch family:
+- chain:
+  - `/home/minesawa/ssl/NeRF-MAE/nerf_mae/probe_scripts/run_target_alpha_structure_chain.sh`
+- helper:
+  - `/home/minesawa/ssl/NeRF-MAE/nerf_mae/probe_scripts/train_alpha_target_zero.sh`
+
+Protocol:
+- FCOS uses `lr_scheduler=onecycle_epoch`
+- `alpha_target_shuffle_e100` uses `epoch_100.pt`
+- `alpha_target_zero_e30` uses `epoch_30.pt`
+- all results below are Front3D FCOS transfer with seed-matched pretrain and downstream seeds
+
+### `alpha_target_shuffle`, `p0.1`, `e100`, 3 seeds
+
+| seed | AP@50 | AP@25 | AP@75 | Recall@50 top300 |
+|---|---:|---:|---:|---:|
+| 1 | 0.3904 | 0.7647 | 0.0278 | 0.6029 |
+| 2 | 0.3907 | 0.7627 | 0.0118 | 0.6250 |
+| 3 | 0.1665 | 0.6794 | 0.0000 | 0.3971 |
+| mean | 0.3159 | 0.7356 | 0.0132 | 0.5417 |
+
+Eval files:
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_shuffle_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_shuffle_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_shuffle_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json`
+
+### `alpha_target_zero`, `p0.1`, `e30`, 3 seeds
+
+| seed | AP@50 | AP@25 | AP@75 | Recall@50 top300 |
+|---|---:|---:|---:|---:|
+| 1 | 0.3825 | 0.7576 | 0.0524 | 0.5441 |
+| 2 | 0.3343 | 0.7383 | 0.0190 | 0.5221 |
+| 3 | 0.3703 | 0.7439 | 0.0434 | 0.5956 |
+| mean | 0.3624 | 0.7466 | 0.0383 | 0.5539 |
+
+Eval files:
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_zero_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_zero_p0.1_e30_seed2_epoch30_sched_epoch_seed2_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_zero_p0.1_e30_seed3_epoch30_sched_epoch_seed3_fcos100_eval/eval.json`
+
+Diagnostics summary:
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/analysis/nerfmae_target_alpha_structure_diagnostics_summary.md`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/analysis/nerfmae_target_alpha_structure_diagnostics_summary.json`
+
+Reading:
+- `alpha_target_shuffle_e100` remains weaker than `alpha_target_only_e100` on mean AP@50 (`0.3159` vs `0.4368` from Experiment 9).
+- `alpha_target_zero_e30` does not collapse; it remains close to the competitive reduced-objective band at `0.3624` AP@50.
+- This means target-side alpha structure matters in the `shuffle` control, but the `zero` control complicates a simple `keep > shuffle > zero` causal chain.
+- The most conservative current phrasing is:
+  - visible RGBA input is not necessary for strong transfer in this protocol
+  - target-side alpha corruption by shuffle hurts
+  - but target-side zeroing does not fully destroy transfer, so architecture/position bias and simplified target supervision remain plausible contributors
+
 ## Update Rules
 
 When adding a new experiment to this file:
