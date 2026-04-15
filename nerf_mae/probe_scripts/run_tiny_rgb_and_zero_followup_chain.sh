@@ -183,14 +183,7 @@ run_parallel_probe_wave() {
   local gpu_csv="$1"
   local percent_train="$2"
   local -n jobs_ref=$3
-  if [[ "${WAIT_BEFORE_CHAIN}" == "1" ]]; then
-    GPU_IDS="${gpu_csv}" probe_wait_for_runway
-  fi
-  local gpus=()
-  parse_csv_to_array "${gpu_csv}" gpus
-  local pids=()
-  local names=()
-  local idx=0
+  local pending_jobs=()
   local job variant pretrain_save checkpoint save_name seed gpu_id
   for job in "${jobs_ref[@]}"; do
     IFS=':' read -r variant pretrain_save checkpoint save_name seed <<< "${job}"
@@ -198,6 +191,25 @@ run_parallel_probe_wave() {
       log "skip fcos variant=${variant} save=${save_name}"
       continue
     fi
+    pending_jobs+=("${job}")
+  done
+  if (( ${#pending_jobs[@]} == 0 )); then
+    log "skip fcos wave percent_train=${percent_train}; all evals exist"
+    return 0
+  fi
+  if [[ "${WAIT_BEFORE_CHAIN}" == "1" ]]; then
+    GPU_IDS="${gpu_csv}" probe_wait_for_runway
+  fi
+  local gpus=()
+  parse_csv_to_array "${gpu_csv}" gpus
+  if (( ${#pending_jobs[@]} > ${#gpus[@]} )); then
+    probe_die "not enough GPUs for wave: jobs=${#pending_jobs[@]} gpus=${#gpus[@]} gpu_csv=${gpu_csv}"
+  fi
+  local pids=()
+  local names=()
+  local idx=0
+  for job in "${pending_jobs[@]}"; do
+    IFS=':' read -r variant pretrain_save checkpoint save_name seed <<< "${job}"
     gpu_id="${gpus[$idx]}"
     idx=$((idx + 1))
     run_job_probe \
@@ -220,10 +232,8 @@ run_parallel_probe_wave() {
 run_tiny_rgb_e30_sweep() {
   local weights=()
   parse_csv_to_array "${TINY_RGB_WEIGHTS}" weights
-  if [[ "${WAIT_BEFORE_CHAIN}" == "1" ]]; then
-    GPU_IDS="${TINY_RGB_PRETRAIN_GPU_IDS}" probe_wait_for_runway
-  fi
   log "step_tiny_rgb_e30_pretrain start"
+  local pending_weights=()
   local weight tag save_name
   for weight in "${weights[@]}"; do
     tag="$(weight_tag "${weight}")"
@@ -232,6 +242,18 @@ run_tiny_rgb_e30_sweep() {
       log "skip tiny_rgb pretrain save=${save_name}"
       continue
     fi
+    pending_weights+=("${weight}")
+  done
+  if (( ${#pending_weights[@]} == 0 )); then
+    log "skip tiny_rgb pretrain wave; all checkpoints exist"
+  else
+    if [[ "${WAIT_BEFORE_CHAIN}" == "1" ]]; then
+      GPU_IDS="${TINY_RGB_PRETRAIN_GPU_IDS}" probe_wait_for_runway
+    fi
+  fi
+  for weight in "${pending_weights[@]}"; do
+    tag="$(weight_tag "${weight}")"
+    save_name="nerfmae_alpha_target_tiny_rgb_${tag}_p0.1_e30_seed${TINY_RGB_SEED}"
     run_pretrain_script \
       "${save_name}" \
       "${TINY_RGB_PRETRAIN_GPU_IDS}" \
@@ -264,10 +286,8 @@ run_tiny_rgb_e30_sweep() {
 run_alpha_target_zero_e100() {
   local seeds=()
   parse_csv_to_array "${ZERO_E100_SEEDS}" seeds
-  if [[ "${WAIT_BEFORE_CHAIN}" == "1" ]]; then
-    GPU_IDS="${ZERO_E100_PRETRAIN_GPU_IDS}" probe_wait_for_runway
-  fi
   log "step_alpha_target_zero_e100_pretrain start"
+  local pending_seeds=()
   local seed save_name
   for seed in "${seeds[@]}"; do
     save_name="nerfmae_alpha_target_zero_p0.1_e100_seed${seed}"
@@ -275,6 +295,17 @@ run_alpha_target_zero_e100() {
       log "skip alpha_target_zero e100 pretrain save=${save_name}"
       continue
     fi
+    pending_seeds+=("${seed}")
+  done
+  if (( ${#pending_seeds[@]} == 0 )); then
+    log "skip alpha_target_zero e100 pretrain wave; all checkpoints exist"
+  else
+    if [[ "${WAIT_BEFORE_CHAIN}" == "1" ]]; then
+      GPU_IDS="${ZERO_E100_PRETRAIN_GPU_IDS}" probe_wait_for_runway
+    fi
+  fi
+  for seed in "${pending_seeds[@]}"; do
+    save_name="nerfmae_alpha_target_zero_p0.1_e100_seed${seed}"
     run_pretrain_script \
       "${save_name}" \
       "${ZERO_E100_PRETRAIN_GPU_IDS}" \

@@ -664,6 +664,76 @@ Reading:
   - target-side alpha corruption by shuffle hurts
   - but target-side zeroing does not fully destroy transfer, so architecture/position bias and simplified target supervision remain plausible contributors
 
+## Experiment 12: Tiny-RGB and `alpha_target_zero_e100` Follow-Up
+
+Date:
+- 2026-04-14 to 2026-04-15 JST
+
+Goal:
+- test whether a small auxiliary RGB loss improves the `alpha_target_only` style objective
+- complete the heavier-budget `alpha_target_zero`, `p0.1`, `e100` causal control
+
+Launch family:
+- chain:
+  - `/home/minesawa/ssl/NeRF-MAE/nerf_mae/probe_scripts/run_tiny_rgb_and_zero_followup_chain.sh`
+- helper:
+  - `/home/minesawa/ssl/NeRF-MAE/nerf_mae/probe_scripts/train_alpha_target_tiny_rgb.sh`
+
+Protocol:
+- FCOS uses `lr_scheduler=onecycle_epoch`
+- tiny-RGB uses `probe_rgb_input=zero`, `probe_alpha_input=zero`, `probe_alpha_target=keep`, `probe_rgb_loss=removed_occupied`, `probe_alpha_loss=removed`
+- tiny-RGB weights are `probe_rgb_weight in {0.02, 0.05, 0.1}`, with `probe_alpha_weight=1.0`
+- tiny-RGB uses `p0.1`, `e30`, seed 1, checkpoint `epoch_30.pt`
+- `alpha_target_zero_e100` uses `probe_rgb_input=zero`, `probe_alpha_input=zero`, `probe_alpha_target=zero`, `probe_rgb_loss=none`, `probe_alpha_loss=removed`
+- `alpha_target_zero_e100` uses `p0.1`, `e100`, 3 seeds, checkpoint `epoch_100.pt`
+
+### Tiny-RGB, `p0.1`, `e30`, seed 1
+
+Full-label Front3D FCOS:
+
+| condition | AP@50 | AP@25 | AP@75 | Recall@50 top300 |
+|---|---:|---:|---:|---:|
+| tiny-RGB, lambda=0.02 | 0.4068 | 0.7736 | 0.0397 | 0.5809 |
+| tiny-RGB, lambda=0.05 | 0.3606 | 0.7470 | 0.0558 | 0.5809 |
+| tiny-RGB, lambda=0.10 | 0.3749 | 0.7651 | 0.0593 | 0.5956 |
+
+20% label Front3D FCOS:
+
+| condition | AP@50 | AP@25 | AP@75 | Recall@50 top300 |
+|---|---:|---:|---:|---:|
+| tiny-RGB, lambda=0.02 | 0.2059 | 0.5798 | 0.0012 | 0.3750 |
+| tiny-RGB, lambda=0.05 | 0.1612 | 0.5703 | 0.0000 | 0.3897 |
+| tiny-RGB, lambda=0.10 | 0.1228 | 0.5404 | 0.0017 | 0.3456 |
+
+Eval files:
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p05_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p1_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e30_seed1_epoch30_sched_epoch_pt02_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p05_p0.1_e30_seed1_epoch30_sched_epoch_pt02_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p1_p0.1_e30_seed1_epoch30_sched_epoch_pt02_seed1_fcos100_eval/eval.json`
+
+### `alpha_target_zero`, `p0.1`, `e100`, 3 seeds
+
+| seed | AP@50 | AP@25 | AP@75 | Recall@50 top300 |
+|---|---:|---:|---:|---:|
+| 1 | 0.3221 | 0.7863 | 0.0418 | 0.5294 |
+| 2 | 0.4119 | 0.7395 | 0.0302 | 0.6397 |
+| 3 | 0.1872 | 0.7040 | 0.0000 | 0.3750 |
+| mean | 0.3071 | 0.7433 | 0.0240 | 0.5147 |
+
+Eval files:
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_zero_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_zero_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_zero_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json`
+
+Reading:
+- The `alpha_target_zero_e100` mean AP@50 is `0.3071`, below `alpha_target_only_e100` (`0.4368`), `alpha_only_e100` (`0.3774`), baseline e100 (`0.3711`), and scratch (`0.3567`).
+- Unlike the `e30` zero control, the heavier `e100` zero control clearly weakens transfer. This supports the idea that target-side alpha supervision is not just an arbitrary regularizer; preserving a meaningful target matters at heavier budget.
+- `alpha_target_shuffle_e100` and `alpha_target_zero_e100` are both weak relative to `alpha_target_only_e100` and are close to each other on AP@50 (`0.3159` vs `0.3071`).
+- Tiny-RGB seed-1 sweep suggests small RGB help is not monotonic. Lambda `0.02` is best among the three in both full-label and 20% label settings, while larger RGB weights hurt the 20% label result.
+- Tiny-RGB is still single-seed, so it should be treated as a candidate selection result rather than a final method claim.
+
 ## Update Rules
 
 When adding a new experiment to this file:
