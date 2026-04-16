@@ -742,3 +742,52 @@ When adding a new experiment to this file:
 - state whether the pretrain checkpoint is `model_best.pt` or `epoch_k.pt`
 - note any fairness caveat
 - add the result to `Summary Table` only if it is directly comparable to the current main line
+
+## Experiment 13: Tiny-RGB w0p02 e100 Gate
+
+Date:
+- auto-appended by `run_tiny_rgb_w0p02_e100_gate_chain.sh`
+
+Goal:
+- promote the best tiny-RGB candidate from the e30 seed-1 sweep to the `p0.1`, `e100`, 3-seed gate
+
+Protocol:
+- pretrain: `probe_rgb_input=zero`, `probe_alpha_input=zero`, `probe_alpha_target=keep`, `probe_rgb_loss=removed_occupied`, `probe_alpha_loss=removed`
+- weights: `probe_rgb_weight=0.02`, `probe_alpha_weight=1.0`
+- pretrain budget: `percent_train=0.1`, `epochs=100`, checkpoint `epoch_100.pt`
+- downstream: Front3D FCOS, `FCOS_NUM_EPOCHS=100`, `LR_SCHEDULER=onecycle_epoch`, seeds `1,2,3`
+
+### Full-label Front3D FCOS
+
+| seed | AP@50 | AP@25 | AP@75 | Recall@50 top300 |
+|---|---:|---:|---:|---:|
+| 1 | 0.4516 | 0.7668 | 0.0340 | 0.5956 |
+| 2 | 0.4029 | 0.7500 | 0.0281 | 0.5956 |
+| 3 | 0.3947 | 0.7719 | 0.0371 | 0.5956 |
+| mean | 0.4164 | 0.7629 | 0.0330 | 0.5956 |
+| std | 0.0308 | 0.0115 | 0.0046 | 0.0000 |
+
+Eval files:
+- `/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json`
+
+### 20% label Front3D FCOS
+
+| seed | AP@50 | AP@25 | AP@75 | Recall@50 top300 |
+|---|---:|---:|---:|---:|
+| 1 | 0.1956 | 0.5818 | 0.0006 | 0.3824 |
+| 2 | 0.1893 | 0.5912 | 0.0000 | 0.3529 |
+| 3 | 0.1177 | 0.5692 | 0.0006 | 0.3456 |
+| mean | 0.1675 | 0.5808 | 0.0004 | 0.3603 |
+| std | 0.0433 | 0.0110 | 0.0003 | 0.0195 |
+
+Eval files:
+- `/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed1_epoch100_sched_epoch_pt02_seed1_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed2_epoch100_sched_epoch_pt02_seed2_fcos100_eval/eval.json`
+- `/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed3_epoch100_sched_epoch_pt02_seed3_fcos100_eval/eval.json`
+
+Reading:
+- Full-label mean AP@50 is `0.4164`; compare against the current e100 means: baseline `0.3711`, alpha_target_only `0.4368`.
+- 20% label mean AP@50 is `0.1675`; compare against the current seed-1 references: baseline e100 `0.1828`, alpha_target_only e100 `0.1910`, tiny-RGB e30 `0.2059`.
+- This is the method-candidate gate; if it is competitive with alpha_target_only and improves low-label stability, it should be promoted to paper-budget scout.
