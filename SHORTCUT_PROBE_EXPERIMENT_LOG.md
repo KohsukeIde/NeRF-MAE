@@ -791,3 +791,68 @@ Reading:
 - Full-label mean AP@50 is `0.4164`; compare against the current e100 means: baseline `0.3711`, alpha_target_only `0.4368`.
 - 20% label mean AP@50 is `0.1675`; compare against the current seed-1 references: baseline e100 `0.1828`, alpha_target_only e100 `0.1910`, tiny-RGB e30 `0.2059`.
 - This is the method-candidate gate; if it is competitive with alpha_target_only and improves low-label stability, it should be promoted to paper-budget scout.
+
+## Experiment 14: Paper-Budget Scout
+
+Date:
+- 2026-04-16 to 2026-04-25 JST
+
+Goal:
+- test whether the low-budget `alpha_target_only` advantage survives near-paper budget
+- compare controlled self-trained `baseline` and `alpha_target_only` under the same fork, data staging, downstream codepath, and checkpoint rule
+
+Launch script:
+- `/home/minesawa/ssl/NeRF-MAE/nerf_mae/probe_scripts/run_paper_budget_scout_chain.sh`
+
+Protocol:
+- pretrain dataset: NeRF-MAE pretrain split, `percent_train=1.0`
+- pretrain budget: `epochs=1200`, `seed=1`, `GPU_IDS=0,1,2,3`, `BATCH_SIZE_PER_GPU=4`
+- downstream dataset: Front3D FCOS
+- downstream budget: `FCOS_NUM_EPOCHS=1000`, `seed=1`, `LR_SCHEDULER=onecycle_epoch`
+- downstream checkpoint input: pretrain `epoch_1200.pt`
+- downstream selection: best FCOS checkpoint by validation `AP@50`, then test eval
+
+Pretrain checkpoints:
+- baseline:
+  - `/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_mae/results/nerfmae_all_p1.0_e1200_seed1/epoch_1200.pt`
+- alpha_target_only:
+  - `/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_mae/results/nerfmae_alpha_target_only_p1.0_e1200_seed1/epoch_1200.pt`
+
+### Front3D FCOS Test Results
+
+| condition | AP@50 | AP@25 | AP@75 | Recall@50 top300 | Recall@25 top300 |
+|---|---:|---:|---:|---:|---:|
+| baseline, continuous FCOS e1000 | 0.5892 | 0.8494 | 0.1469 | 0.7132 | 0.9485 |
+| alpha_target_only, original run best before crash | 0.4251 | 0.7631 | 0.0472 | 0.6250 | 0.9412 |
+| alpha_target_only, resume-from785 best | 0.4602 | 0.7198 | 0.0729 | 0.6324 | 0.9265 |
+
+Eval files:
+- baseline:
+  - `/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_all_p1.0_e1200_seed1_epoch1200_sched_epoch_seed1_fcos1000_eval/eval.json`
+- alpha_target_only, original run best before crash:
+  - `/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_only_p1.0_e1200_seed1_epoch1200_sched_epoch_seed1_fcos1000_eval/eval.json`
+- alpha_target_only, resume-from785 best:
+  - `/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_only_p1.0_e1200_seed1_epoch1200_sched_epoch_seed1_fcos1000_resume_from785_eval/eval.json`
+
+Run logs:
+- chain:
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/launcher/nerfmae_paper_budget_scout.chain.log`
+- baseline FCOS:
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/launcher/nerfmae_paper_budget_scout.nerfmae_all_p1.0_e1200_seed1_epoch1200_sched_epoch_seed1_fcos1000.log`
+- alpha_target_only FCOS original:
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/launcher/nerfmae_paper_budget_scout.nerfmae_alpha_target_only_p1.0_e1200_seed1_epoch1200_sched_epoch_seed1_fcos1000.log`
+- alpha_target_only resume:
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/launcher/nerfmae_alpha_target_paper_budget_resume.log`
+
+Important caveats:
+- The baseline paper-budget run completed normally.
+- The original `alpha_target_only` FCOS run failed at epoch `785` with `RuntimeError: Pin memory thread exited unexpectedly`.
+- The `alpha_target_only` partial result evaluates the best checkpoint saved before that crash.
+- The `alpha_target_only` resume result is not a strict optimizer/scheduler resume. FCOS checkpoints in this repo save backbone and FCOS module weights, but not optimizer or scheduler state. The resume run therefore fine-tunes for an additional `215` epochs from the saved best model in a separate save path.
+- This experiment is single-seed. It is suitable as a paper-budget scout, not as final multi-seed evidence.
+
+Reading:
+- At paper-budget scale, the full RGBA baseline is clearly stronger than `alpha_target_only` in this Front3D FCOS setting.
+- The low-budget story does not survive unchanged: `alpha_target_only` was competitive or best at `p0.1/e30-e100`, but with `p1.0/e1200` pretraining and `e1000` FCOS, baseline reaches `0.5892` AP@50 while the best alpha-target result is `0.4602`.
+- The conservative claim should shift from "alpha_target_only replaces the full baseline" to "target-side alpha is a sample-efficient learning signal, but full RGBA reconstruction becomes important at near-paper budget."
+- The original method-style claim should not be advanced without additional evidence. A defensible next step is to verify the official checkpoint / paper-number reproduction and, if needed, run a smaller set of controlled multi-seed or external-dataset checks.
