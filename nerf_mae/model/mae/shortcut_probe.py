@@ -78,6 +78,17 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
         self.probe_rgb_weight = float(probe_rgb_weight)
         self.probe_alpha_weight = float(probe_alpha_weight)
 
+    def set_probe_loss_weights(
+        self,
+        rgb_weight: Optional[float] = None,
+        alpha_weight: Optional[float] = None,
+    ) -> None:
+        """Update probe loss weights during curriculum training."""
+        if rgb_weight is not None:
+            self.probe_rgb_weight = float(rgb_weight)
+        if alpha_weight is not None:
+            self.probe_alpha_weight = float(alpha_weight)
+
     @staticmethod
     def _validate_choice(name: str, value: str, valid: Iterable[str]) -> None:
         if value not in valid:

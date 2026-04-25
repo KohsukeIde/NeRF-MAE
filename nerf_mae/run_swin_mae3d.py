@@ -6,6 +6,7 @@ import numpy as np
 import argparse
 import logging
 import importlib.util
+import math
 import socket
 from copy import deepcopy
 from functools import partial
@@ -216,6 +217,44 @@ def parse_args():
         default=0.01,
         type=float,
         help="Occupancy threshold used when building RGB supervision masks.",
+    )
+    parser.add_argument(
+        "--probe_curriculum",
+        default="none",
+        choices=["none", "alpha_warmup", "linear_rgb_ramp", "cosine_rgb_ramp"],
+        help=(
+            "Optional curriculum over probe RGB/alpha loss weights. "
+            "alpha_warmup uses the start RGB weight for the first "
+            "probe_curriculum_epochs and then switches to the end RGB weight; "
+            "the ramp modes interpolate RGB weight from start to end."
+        ),
+    )
+    parser.add_argument(
+        "--probe_curriculum_epochs",
+        default=0,
+        type=int,
+        help=(
+            "Warmup/ramp length in epochs. For ramp modes, 0 means num_epochs; "
+            "for alpha_warmup, values <=0 disable the warmup switch."
+        ),
+    )
+    parser.add_argument(
+        "--probe_curriculum_rgb_start_weight",
+        default=0.0,
+        type=float,
+        help="RGB loss weight at the beginning of a probe curriculum.",
+    )
+    parser.add_argument(
+        "--probe_curriculum_rgb_end_weight",
+        default=1.0,
+        type=float,
+        help="RGB loss weight after warmup or at the end of a probe curriculum.",
+    )
+    parser.add_argument(
+        "--probe_curriculum_alpha_weight",
+        default=1.0,
+        type=float,
+        help="Alpha loss weight used throughout a probe curriculum.",
     )
     parser.add_argument("--lr", default=5e-3, type=float, help="The learning rate.")
     parser.add_argument(
@@ -550,6 +589,66 @@ class Trainer:
             probe_alpha_threshold=args.probe_alpha_threshold,
         )
 
+    def _probe_model(self):
+        return self.model.module if hasattr(self.model, "module") else self.model
+
+    def _compute_probe_curriculum_weights(self, epoch):
+        if self.args.probe_curriculum == "none":
+            return None
+
+        rgb_start = float(self.args.probe_curriculum_rgb_start_weight)
+        rgb_end = float(self.args.probe_curriculum_rgb_end_weight)
+        alpha_weight = float(self.args.probe_curriculum_alpha_weight)
+
+        if self.args.probe_curriculum == "alpha_warmup":
+            warmup_epochs = int(self.args.probe_curriculum_epochs)
+            rgb_weight = rgb_start if warmup_epochs > 0 and epoch <= warmup_epochs else rgb_end
+            return rgb_weight, alpha_weight
+
+        ramp_epochs = int(self.args.probe_curriculum_epochs)
+        if ramp_epochs <= 0:
+            ramp_epochs = int(self.args.num_epochs)
+        if ramp_epochs <= 1:
+            progress = 1.0
+        else:
+            progress = min(max((epoch - 1) / float(ramp_epochs - 1), 0.0), 1.0)
+
+        if self.args.probe_curriculum == "cosine_rgb_ramp":
+            progress = 0.5 * (1.0 - math.cos(math.pi * progress))
+
+        rgb_weight = rgb_start + (rgb_end - rgb_start) * progress
+        return rgb_weight, alpha_weight
+
+    def apply_probe_curriculum(self, epoch):
+        weights = self._compute_probe_curriculum_weights(epoch)
+        if weights is None:
+            return
+
+        rgb_weight, alpha_weight = weights
+        model = self._probe_model()
+        if not hasattr(model, "set_probe_loss_weights"):
+            raise AttributeError("probe curriculum requires set_probe_loss_weights on the model")
+        model.set_probe_loss_weights(rgb_weight=rgb_weight, alpha_weight=alpha_weight)
+
+        should_log = (
+            epoch == 1
+            or epoch == self.args.num_epochs
+            or epoch % max(1, self.args.eval_interval) == 0
+            or (
+                self.args.probe_curriculum == "alpha_warmup"
+                and epoch in {self.args.probe_curriculum_epochs, self.args.probe_curriculum_epochs + 1}
+            )
+        )
+        if should_log and self.rank == 0:
+            self.logger.info(
+                "probe curriculum epoch %s/%s mode=%s rgb_weight=%.6f alpha_weight=%.6f",
+                epoch,
+                self.args.num_epochs,
+                self.args.probe_curriculum,
+                rgb_weight,
+                alpha_weight,
+            )
+
     def init_datasets(self):
         if not self.args.dataset_split and self.args.dataset != "general":
             raise ValueError(
@@ -788,6 +887,7 @@ class Trainer:
 
     def train_epoch(self, epoch):
         # torch.autograd.set_detect_anomaly(True)
+        self.apply_probe_curriculum(epoch)
         for i, batch in enumerate(self.train_loader):
             # self.logger.debug(f'GPU {self.device_id} Epoch {epoch} Iter {i} {batch[-1]} '
             #                   f'Grid size: {[x.shape for x in batch[0]]}, GT boxes: {[x.shape for x in batch[1]]}')

@@ -27,6 +27,11 @@ PROBE_ALPHA_LOSS="${PROBE_ALPHA_LOSS:-}"
 PROBE_RGB_WEIGHT="${PROBE_RGB_WEIGHT:-}"
 PROBE_ALPHA_WEIGHT="${PROBE_ALPHA_WEIGHT:-}"
 PROBE_ALPHA_THRESHOLD="${PROBE_ALPHA_THRESHOLD:-}"
+PROBE_CURRICULUM="${PROBE_CURRICULUM:-}"
+PROBE_CURRICULUM_EPOCHS="${PROBE_CURRICULUM_EPOCHS:-}"
+PROBE_CURRICULUM_RGB_START_WEIGHT="${PROBE_CURRICULUM_RGB_START_WEIGHT:-}"
+PROBE_CURRICULUM_RGB_END_WEIGHT="${PROBE_CURRICULUM_RGB_END_WEIGHT:-}"
+PROBE_CURRICULUM_ALPHA_WEIGHT="${PROBE_CURRICULUM_ALPHA_WEIGHT:-}"
 SEED="${SEED:-}"
 DETERMINISTIC="${DETERMINISTIC:-0}"
 
@@ -96,6 +101,21 @@ if [[ -n "${PROBE_ALPHA_WEIGHT}" ]]; then
 fi
 if [[ -n "${PROBE_ALPHA_THRESHOLD}" ]]; then
   cmd+=(--probe_alpha_threshold "${PROBE_ALPHA_THRESHOLD}")
+fi
+if [[ -n "${PROBE_CURRICULUM}" ]]; then
+  cmd+=(--probe_curriculum "${PROBE_CURRICULUM}")
+fi
+if [[ -n "${PROBE_CURRICULUM_EPOCHS}" ]]; then
+  cmd+=(--probe_curriculum_epochs "${PROBE_CURRICULUM_EPOCHS}")
+fi
+if [[ -n "${PROBE_CURRICULUM_RGB_START_WEIGHT}" ]]; then
+  cmd+=(--probe_curriculum_rgb_start_weight "${PROBE_CURRICULUM_RGB_START_WEIGHT}")
+fi
+if [[ -n "${PROBE_CURRICULUM_RGB_END_WEIGHT}" ]]; then
+  cmd+=(--probe_curriculum_rgb_end_weight "${PROBE_CURRICULUM_RGB_END_WEIGHT}")
+fi
+if [[ -n "${PROBE_CURRICULUM_ALPHA_WEIGHT}" ]]; then
+  cmd+=(--probe_curriculum_alpha_weight "${PROBE_CURRICULUM_ALPHA_WEIGHT}")
 fi
 if [[ -n "${SEED}" ]]; then
   cmd+=(--seed "${SEED}")
