@@ -856,3 +856,28 @@ Reading:
 - The low-budget story does not survive unchanged: `alpha_target_only` was competitive or best at `p0.1/e30-e100`, but with `p1.0/e1200` pretraining and `e1000` FCOS, baseline reaches `0.5892` AP@50 while the best alpha-target result is `0.4602`.
 - The conservative claim should shift from "alpha_target_only replaces the full baseline" to "target-side alpha is a sample-efficient learning signal, but full RGBA reconstruction becomes important at near-paper budget."
 - The original method-style claim should not be advanced without additional evidence. A defensible next step is to verify the official checkpoint / paper-number reproduction and, if needed, run a smaller set of controlled multi-seed or external-dataset checks.
+
+## Experiment 15: Alpha-to-RGBA Curriculum Scout (300 epochs, seed 1)
+
+Goal:
+- test alpha-target warmup / RGB-ramp curricula after paper-budget scout showed full RGBA wins asymptotically over zero-input alpha-target-only
+
+Protocol:
+- pretrain: `percent_train=1.0`, seed `1`, checkpoint `epoch_N.pt`, visible input kept as RGBA
+- loss: alpha loss on removed patches is always active; RGB loss on occupied voxels starts at weight 0 and returns or ramps to 1
+- pretrain optimizer setting: `LR=1e-3`, `WEIGHT_DECAY=0.0`, global batch 16 on 4 GPUs
+- downstream: Front3D FCOS, `FCOS_NUM_EPOCHS=1000`, `LR_SCHEDULER=onecycle_epoch`, AP50-best checkpoint selection
+
+| pretrain epochs | condition | AP@50 | AP@25 | AP@75 | Recall@50 top300 |
+|---:|---|---:|---:|---:|---:|
+| 300 | warmup10 | 0.5635 | 0.8181 | 0.0858 | 0.6765 |
+| 300 | warmup25 | 0.5391 | 0.8160 | 0.0915 | 0.6985 |
+| 300 | cosine_ramp | 0.5987 | 0.8443 | 0.1061 | 0.7059 |
+
+Eval files:
+- `/home/minesawa/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_rgba_curr_warmup10_p1.0_e300_seed1_epoch300_sched_epoch_seed1_fcos1000_eval/eval.json`
+- `/home/minesawa/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_rgba_curr_warmup25_p1.0_e300_seed1_epoch300_sched_epoch_seed1_fcos1000_eval/eval.json`
+- `/home/minesawa/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1_epoch300_sched_epoch_seed1_fcos1000_eval/eval.json`
+
+Reading:
+- This is a staged scout. Promote only the best curriculum to e600/e1200 or multi-seed if it improves sample efficiency against the existing paper-budget baseline reference.
