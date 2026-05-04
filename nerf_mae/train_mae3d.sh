@@ -48,6 +48,10 @@ BATCH_SIZE="${BATCH_SIZE:-${DEFAULT_BATCH_SIZE}}"
 SAVE_NAME="${SAVE_NAME:-${dataset_name}_all}"
 RUN_TAG="${RUN_TAG:-${SAVE_NAME}}"
 SAVE_PATH="${SAVE_PATH:-../output/nerf_mae/results/${SAVE_NAME}}"
+CHECKPOINT="${CHECKPOINT:-}"
+RESUME_CHECKPOINT="${RESUME_CHECKPOINT:-}"
+RESUME_ALLOW_PARTIAL="${RESUME_ALLOW_PARTIAL:-0}"
+RESUME_START_EPOCH="${RESUME_START_EPOCH:-}"
 
 cmd=(
   python3 -u run_swin_mae3d.py
@@ -72,6 +76,18 @@ cmd=(
   --tags "${RUN_TAG}"
 )
 
+if [[ -n "${CHECKPOINT}" ]]; then
+  cmd+=(--checkpoint "${CHECKPOINT}")
+fi
+if [[ -n "${RESUME_CHECKPOINT}" ]]; then
+  cmd+=(--resume_checkpoint "${RESUME_CHECKPOINT}")
+fi
+if [[ "${RESUME_ALLOW_PARTIAL}" == "1" ]]; then
+  cmd+=(--resume_allow_partial)
+fi
+if [[ -n "${RESUME_START_EPOCH}" ]]; then
+  cmd+=(--resume_start_epoch "${RESUME_START_EPOCH}")
+fi
 if [[ "${USE_WANDB}" == "1" ]]; then
   cmd+=(--wandb)
 fi

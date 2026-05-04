@@ -18,6 +18,7 @@ WAIT_TIMEOUT_SECONDS="${WAIT_TIMEOUT_SECONDS:-0}"
 WAIT_MEMORY_USED_MAX_MIB="${WAIT_MEMORY_USED_MAX_MIB:-2048}"
 WAIT_UTIL_MAX="${WAIT_UTIL_MAX:-10}"
 SKIP_EXISTING="${SKIP_EXISTING:-1}"
+AUTO_RESUME_PRETRAIN="${AUTO_RESUME_PRETRAIN:-1}"
 USE_WANDB="${USE_WANDB:-0}"
 WANDB_MODE="${WANDB_MODE:-offline}"
 DETERMINISTIC="${DETERMINISTIC:-1}"
@@ -54,7 +55,7 @@ if [[ "${FOREGROUND:-0}" != "1" ]]; then
     exit 0
   fi
   env -u LD_LIBRARY_PATH -u PYTHONPATH tmux new-session -d -s "${TMUX_SESSION}" \
-    "cd '${ROOT_DIR}' && FOREGROUND=1 CHAIN_LOG_ROOT='${CHAIN_LOG_ROOT}' CHAIN_LOG_FILE='${CHAIN_LOG_FILE}' CHAIN_PID_FILE='${CHAIN_PID_FILE}' WAIT_BEFORE_CHAIN='${WAIT_BEFORE_CHAIN}' WAIT_POLL_SECONDS='${WAIT_POLL_SECONDS}' WAIT_STABLE_SECONDS='${WAIT_STABLE_SECONDS}' WAIT_TIMEOUT_SECONDS='${WAIT_TIMEOUT_SECONDS}' WAIT_MEMORY_USED_MAX_MIB='${WAIT_MEMORY_USED_MAX_MIB}' WAIT_UTIL_MAX='${WAIT_UTIL_MAX}' SKIP_EXISTING='${SKIP_EXISTING}' USE_WANDB='${USE_WANDB}' WANDB_MODE='${WANDB_MODE}' DETERMINISTIC='${DETERMINISTIC}' PRETRAIN_GPU_IDS='${PRETRAIN_GPU_IDS}' PRETRAIN_PERCENT_TRAIN='${PRETRAIN_PERCENT_TRAIN}' PRETRAIN_BATCH_SIZE_PER_GPU='${PRETRAIN_BATCH_SIZE_PER_GPU}' PRETRAIN_LR='${PRETRAIN_LR}' PRETRAIN_WEIGHT_DECAY='${PRETRAIN_WEIGHT_DECAY}' PRETRAIN_LOG_INTERVAL='${PRETRAIN_LOG_INTERVAL}' PRETRAIN_EVAL_INTERVAL='${PRETRAIN_EVAL_INTERVAL}' FCOS_NUM_EPOCHS='${FCOS_NUM_EPOCHS}' FCOS_ALLOWED_GPU_IDS='${FCOS_ALLOWED_GPU_IDS}' FCOS_MAX_PARALLEL='${FCOS_MAX_PARALLEL}' FCOS_BATCH_SIZE_PER_GPU='${FCOS_BATCH_SIZE_PER_GPU}' FCOS_LR='${FCOS_LR}' FCOS_WEIGHT_DECAY='${FCOS_WEIGHT_DECAY}' FCOS_LR_SCHEDULER='${FCOS_LR_SCHEDULER}' BLOCK_ON_TMUX_SESSIONS='${BLOCK_ON_TMUX_SESSIONS:-}' BLOCK_ON_PID_FILES='${BLOCK_ON_PID_FILES:-}' EXPERIMENT_LOG='${EXPERIMENT_LOG}' EXPERIMENT_JOBS='${EXPERIMENT_JOBS}' bash '${SCRIPT_DIR}/run_cosine_curriculum_validation_chain.sh'"
+    "cd '${ROOT_DIR}' && FOREGROUND=1 CHAIN_LOG_ROOT='${CHAIN_LOG_ROOT}' CHAIN_LOG_FILE='${CHAIN_LOG_FILE}' CHAIN_PID_FILE='${CHAIN_PID_FILE}' WAIT_BEFORE_CHAIN='${WAIT_BEFORE_CHAIN}' WAIT_POLL_SECONDS='${WAIT_POLL_SECONDS}' WAIT_STABLE_SECONDS='${WAIT_STABLE_SECONDS}' WAIT_TIMEOUT_SECONDS='${WAIT_TIMEOUT_SECONDS}' WAIT_MEMORY_USED_MAX_MIB='${WAIT_MEMORY_USED_MAX_MIB}' WAIT_UTIL_MAX='${WAIT_UTIL_MAX}' SKIP_EXISTING='${SKIP_EXISTING}' AUTO_RESUME_PRETRAIN='${AUTO_RESUME_PRETRAIN}' USE_WANDB='${USE_WANDB}' WANDB_MODE='${WANDB_MODE}' DETERMINISTIC='${DETERMINISTIC}' PRETRAIN_GPU_IDS='${PRETRAIN_GPU_IDS}' PRETRAIN_PERCENT_TRAIN='${PRETRAIN_PERCENT_TRAIN}' PRETRAIN_BATCH_SIZE_PER_GPU='${PRETRAIN_BATCH_SIZE_PER_GPU}' PRETRAIN_LR='${PRETRAIN_LR}' PRETRAIN_WEIGHT_DECAY='${PRETRAIN_WEIGHT_DECAY}' PRETRAIN_LOG_INTERVAL='${PRETRAIN_LOG_INTERVAL}' PRETRAIN_EVAL_INTERVAL='${PRETRAIN_EVAL_INTERVAL}' FCOS_NUM_EPOCHS='${FCOS_NUM_EPOCHS}' FCOS_ALLOWED_GPU_IDS='${FCOS_ALLOWED_GPU_IDS}' FCOS_MAX_PARALLEL='${FCOS_MAX_PARALLEL}' FCOS_BATCH_SIZE_PER_GPU='${FCOS_BATCH_SIZE_PER_GPU}' FCOS_LR='${FCOS_LR}' FCOS_WEIGHT_DECAY='${FCOS_WEIGHT_DECAY}' FCOS_LR_SCHEDULER='${FCOS_LR_SCHEDULER}' BLOCK_ON_TMUX_SESSIONS='${BLOCK_ON_TMUX_SESSIONS:-}' BLOCK_ON_PID_FILES='${BLOCK_ON_PID_FILES:-}' EXPERIMENT_LOG='${EXPERIMENT_LOG}' EXPERIMENT_JOBS='${EXPERIMENT_JOBS}' bash '${SCRIPT_DIR}/run_cosine_curriculum_validation_chain.sh'"
   echo "[info] started detached chain"
   echo "[info] session=${TMUX_SESSION}"
   echo "[info] log=${CHAIN_LOG_FILE}"
@@ -111,6 +112,13 @@ pretrain_epoch_exists() {
   [[ -f "${ROOT_DIR}/output/nerf_mae/results/${save_name}/epoch_${epoch}.pt" ]]
 }
 
+latest_epoch_checkpoint() {
+  local save_name="$1"
+  local dir="${ROOT_DIR}/output/nerf_mae/results/${save_name}"
+  [[ -d "${dir}" ]] || return 1
+  find "${dir}" -maxdepth 1 -name 'epoch_*.pt' | sort -V | tail -n 1
+}
+
 eval_exists() {
   local save_name="$1"
   [[ -f "${ROOT_DIR}/output/nerf_rpn/results/${save_name}_eval/eval.json" ]]
@@ -121,6 +129,13 @@ run_baseline_pretrain() {
   local seed="$2"
   local save_name="$3"
   local log_file="$4"
+  local resume_checkpoint=""
+  if [[ "${AUTO_RESUME_PRETRAIN}" == "1" ]]; then
+    resume_checkpoint="$(latest_epoch_checkpoint "${save_name}" || true)"
+    if [[ -n "${resume_checkpoint}" ]]; then
+      log "auto-resume pretrain save=${save_name} checkpoint=${resume_checkpoint}"
+    fi
+  fi
   (
     cd "${ROOT_DIR}/nerf_mae"
     PATH="${PROBE_ENV_PREFIX}/bin:${PATH}" \
@@ -139,6 +154,8 @@ run_baseline_pretrain() {
       WANDB_MODE="${WANDB_MODE}" \
       SEED="${seed}" \
       DETERMINISTIC="${DETERMINISTIC}" \
+      RESUME_CHECKPOINT="${resume_checkpoint}" \
+      RESUME_ALLOW_PARTIAL=1 \
       PROBE_MODE=baseline \
       bash train_mae3d.sh
   ) >> "${log_file}" 2>&1
@@ -151,8 +168,15 @@ run_curriculum_pretrain() {
   local save_name="$4"
   local log_file="$5"
   local alpha_target="keep"
+  local resume_checkpoint=""
   if [[ "${condition}" == "cosine_ramp_alpha_shuffle" ]]; then
     alpha_target="shuffle"
+  fi
+  if [[ "${AUTO_RESUME_PRETRAIN}" == "1" ]]; then
+    resume_checkpoint="$(latest_epoch_checkpoint "${save_name}" || true)"
+    if [[ -n "${resume_checkpoint}" ]]; then
+      log "auto-resume pretrain save=${save_name} checkpoint=${resume_checkpoint}"
+    fi
   fi
 
   (
@@ -173,6 +197,8 @@ run_curriculum_pretrain() {
       WANDB_MODE="${WANDB_MODE}" \
       SEED="${seed}" \
       DETERMINISTIC="${DETERMINISTIC}" \
+      RESUME_CHECKPOINT="${resume_checkpoint}" \
+      RESUME_ALLOW_PARTIAL=1 \
       PROBE_MODE=custom \
       PROBE_RGB_INPUT=keep \
       PROBE_ALPHA_INPUT=keep \

@@ -64,6 +64,26 @@ def parse_args():
         "--checkpoint", default=None, help="The path to the checkpoint to load."
     )
     parser.add_argument(
+        "--resume_checkpoint",
+        default=None,
+        help=(
+            "Resume MAE pretraining from an epoch checkpoint. New checkpoints "
+            "include optimizer/scheduler state; older checkpoints can be used "
+            "with --resume_allow_partial as model-only warm restarts."
+        ),
+    )
+    parser.add_argument(
+        "--resume_allow_partial",
+        action="store_true",
+        help="Allow resume from old model-only checkpoints without optimizer/scheduler state.",
+    )
+    parser.add_argument(
+        "--resume_start_epoch",
+        default=0,
+        type=int,
+        help="Optional epoch to start from when resuming; 0 means checkpoint epoch + 1.",
+    )
+    parser.add_argument(
         "--load_backbone_only",
         action="store_true",
         help="Only load the backbone weights.",
@@ -483,6 +503,9 @@ class Trainer:
         self.eval_worker_init_fn = None
         self.train_generator = None
         self.eval_generator = None
+        self.start_epoch = 1
+        self.loaded_checkpoint = None
+        self.loaded_checkpoint_path = None
 
         if self.data_seed is not None:
             self.worker_init_fn = partial(seed_dataloader_worker, base_seed=self.data_seed)
@@ -504,12 +527,15 @@ class Trainer:
 
         self.build_model(args)
 
-        if args.checkpoint is not None:
-            assert os.path.exists(args.checkpoint), "The checkpoint does not exist."
-            self.logger.info(f"Loading checkpoint from {args.checkpoint}.")
+        checkpoint_path = args.resume_checkpoint or args.checkpoint
+        if checkpoint_path is not None:
+            assert os.path.exists(checkpoint_path), "The checkpoint does not exist."
+            self.logger.info(f"Loading checkpoint from {checkpoint_path}.")
             # if args.load_backbone_only:
             #     self.logger.info("Loading backbone only.")
-            checkpoint = torch.load(args.checkpoint, map_location="cpu")
+            checkpoint = torch.load(checkpoint_path, map_location="cpu")
+            self.loaded_checkpoint = checkpoint
+            self.loaded_checkpoint_path = checkpoint_path
 
             # print('Training args from checkpoint:')
             # print(checkpoint['train_args'])
@@ -708,24 +734,84 @@ class Trainer:
                 self.logger.info(f"Loaded {len(self.test_set)} scenes for evaluation")
 
     def save_checkpoint(self, epoch, path):
-        if self.world_size == 1:
-            torch.save(
-                {
-                    "epoch": epoch,
-                    "state_dict": self.model.state_dict(),
-                    "train_args": self.args.__dict__,
-                },
-                path,
+        model = self.model if self.world_size == 1 else self.model.module
+        payload = {
+            "epoch": epoch,
+            "state_dict": model.state_dict(),
+            "train_args": self.args.__dict__,
+        }
+        if hasattr(self, "optimizer"):
+            payload["optimizer_state_dict"] = self.optimizer.state_dict()
+        if hasattr(self, "scheduler"):
+            payload["scheduler_state_dict"] = self.scheduler.state_dict()
+        if hasattr(self, "best_metric"):
+            payload["best_metric"] = self.best_metric
+
+        torch.save(payload, path)
+
+    def restore_training_state_if_requested(self):
+        if self.args.resume_checkpoint is None:
+            return
+
+        checkpoint = self.loaded_checkpoint
+        if checkpoint is None:
+            raise RuntimeError("resume_checkpoint was set but no checkpoint is loaded")
+
+        checkpoint_epoch = int(checkpoint.get("epoch", 0))
+        self.start_epoch = (
+            int(self.args.resume_start_epoch)
+            if int(self.args.resume_start_epoch) > 0
+            else checkpoint_epoch + 1
+        )
+        if self.start_epoch < 1:
+            raise ValueError(f"invalid resume start epoch: {self.start_epoch}")
+
+        optimizer_state = checkpoint.get("optimizer_state_dict")
+        scheduler_state = checkpoint.get("scheduler_state_dict")
+
+        if optimizer_state is not None:
+            self.optimizer.load_state_dict(optimizer_state)
+            self.logger.info("Restored optimizer state from %s.", self.loaded_checkpoint_path)
+        elif not self.args.resume_allow_partial:
+            raise KeyError(
+                "resume checkpoint has no optimizer_state_dict; use --resume_allow_partial "
+                "for a model-only warm restart"
             )
         else:
-            torch.save(
-                {
-                    "epoch": epoch,
-                    "state_dict": self.model.module.state_dict(),
-                    "train_args": self.args.__dict__,
-                },
-                path,
+            self.logger.warning(
+                "Resume checkpoint has no optimizer state; using a fresh optimizer. "
+                "This is not bitwise-equivalent to uninterrupted training."
             )
+
+        if scheduler_state is not None:
+            self.scheduler.load_state_dict(scheduler_state)
+            self.logger.info("Restored scheduler state from %s.", self.loaded_checkpoint_path)
+        elif not self.args.resume_allow_partial:
+            raise KeyError(
+                "resume checkpoint has no scheduler_state_dict; use --resume_allow_partial "
+                "for a model-only warm restart"
+            )
+        else:
+            target_steps = min(
+                max((self.start_epoch - 1) * len(self.train_loader), 0),
+                self.args.num_epochs * len(self.train_loader),
+            )
+            for _ in range(target_steps):
+                self.scheduler.step()
+            self.logger.warning(
+                "Resume checkpoint has no scheduler state; fast-forwarded scheduler "
+                "by %s steps to approximate epoch %s.",
+                target_steps,
+                self.start_epoch,
+            )
+
+        self.best_metric = checkpoint.get("best_metric", self.best_metric)
+        self.logger.info(
+            "Resuming training from epoch %s using checkpoint epoch %s (%s).",
+            self.start_epoch,
+            checkpoint_epoch,
+            self.loaded_checkpoint_path,
+        )
 
     def delete_old_checkpoints(self, path, keep_latest=5):
         files = glob.glob(f"{path}/epoch_*.pt")
@@ -850,10 +936,11 @@ class Trainer:
         # self.scheduler = ExponentialLR(self.optimizer, gamma=gamma)
 
         self.best_metric = None
+        self.restore_training_state_if_requested()
         os.makedirs(self.args.save_path, exist_ok=True)
         # self.eval(self.val_set)
 
-        for epoch in range(1, self.args.num_epochs + 1):
+        for epoch in range(self.start_epoch, self.args.num_epochs + 1):
             if self.world_size > 1:
                 self.train_sampler.set_epoch(epoch)
 
