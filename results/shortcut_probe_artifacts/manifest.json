@@ -1,0 +1,377 @@
+[
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/front3d_scratch_samepath_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/front3d_scratch_samepath_fcos100_eval/eval.json",
+    "bytes": 2384257
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e10_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_all_p0.1_e10_fcos100_eval/eval.json",
+    "bytes": 2102129
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_only_p0.1_e10_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_only_p0.1_e10_fcos100_eval/eval.json",
+    "bytes": 2257343
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_radiance_only_p0.1_e10_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_radiance_only_p0.1_e10_fcos100_eval/eval.json",
+    "bytes": 2155309
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_masked_only_rgb_loss_p0.1_e10_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_masked_only_rgb_loss_p0.1_e10_fcos100_eval/eval.json",
+    "bytes": 2347715
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/launcher/nerfmae_shortcut_probe_30ep_fcos3way.csv",
+    "artifact": "results/shortcut_probe_artifacts/csv/nerfmae_shortcut_probe_30ep_fcos3way.csv",
+    "bytes": 1184
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e30_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_all_p0.1_e30_fcos100_eval/eval.json",
+    "bytes": 2309105
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_only_p0.1_e30_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_only_p0.1_e30_fcos100_eval/eval.json",
+    "bytes": 2203758
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_radiance_only_p0.1_e30_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_radiance_only_p0.1_e30_fcos100_eval/eval.json",
+    "bytes": 2310655
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e30_epoch30_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_all_p0.1_e30_epoch30_fcos100_eval/eval.json",
+    "bytes": 2294942
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_only_p0.1_e30_epoch30_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_only_p0.1_e30_epoch30_fcos100_eval/eval.json",
+    "bytes": 2192476
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_radiance_only_p0.1_e30_epoch30_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_radiance_only_p0.1_e30_epoch30_fcos100_eval/eval.json",
+    "bytes": 2290835
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_masked_only_rgb_loss_p0.1_e30_epoch30_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_masked_only_rgb_loss_p0.1_e30_epoch30_fcos100_eval/eval.json",
+    "bytes": 2166238
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/front3d_scratch_samepath_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/front3d_scratch_samepath_seed1_fcos100_eval/eval.json",
+    "bytes": 2090424
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/front3d_scratch_samepath_seed2_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/front3d_scratch_samepath_seed2_fcos100_eval/eval.json",
+    "bytes": 2203360
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/front3d_scratch_samepath_seed3_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/front3d_scratch_samepath_seed3_fcos100_eval/eval.json",
+    "bytes": 2143574
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e30_epoch30_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_all_p0.1_e30_epoch30_seed1_fcos100_eval/eval.json",
+    "bytes": 2271102
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e30_epoch30_seed2_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_all_p0.1_e30_epoch30_seed2_fcos100_eval/eval.json",
+    "bytes": 2198199
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e30_epoch30_seed3_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_all_p0.1_e30_epoch30_seed3_fcos100_eval/eval.json",
+    "bytes": 2580446
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_only_p0.1_e30_epoch30_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_only_p0.1_e30_epoch30_seed1_fcos100_eval/eval.json",
+    "bytes": 2080132
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_only_p0.1_e30_epoch30_seed2_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_only_p0.1_e30_epoch30_seed2_fcos100_eval/eval.json",
+    "bytes": 2031196
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_only_p0.1_e30_epoch30_seed3_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_only_p0.1_e30_epoch30_seed3_fcos100_eval/eval.json",
+    "bytes": 2091931
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_masked_only_rgb_loss_p0.1_e30_epoch30_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_masked_only_rgb_loss_p0.1_e30_epoch30_seed1_fcos100_eval/eval.json",
+    "bytes": 2097970
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_masked_only_rgb_loss_p0.1_e30_epoch30_seed2_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_masked_only_rgb_loss_p0.1_e30_epoch30_seed2_fcos100_eval/eval.json",
+    "bytes": 2136810
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_masked_only_rgb_loss_p0.1_e30_epoch30_seed3_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_masked_only_rgb_loss_p0.1_e30_epoch30_seed3_fcos100_eval/eval.json",
+    "bytes": 2300066
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_shuffle_p0.1_e30_seed1_epoch30_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_shuffle_p0.1_e30_seed1_epoch30_seed1_fcos100_eval/eval.json",
+    "bytes": 2210173
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_only_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_only_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json",
+    "bytes": 2940369
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_only_p0.1_e30_seed2_epoch30_sched_epoch_seed2_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_only_p0.1_e30_seed2_epoch30_sched_epoch_seed2_fcos100_eval/eval.json",
+    "bytes": 2382702
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_only_p0.1_e30_seed3_epoch30_sched_epoch_seed3_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_only_p0.1_e30_seed3_epoch30_sched_epoch_seed3_fcos100_eval/eval.json",
+    "bytes": 2600727
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_all_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json",
+    "bytes": 2734923
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_only_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_only_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json",
+    "bytes": 2725809
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_shuffle_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_shuffle_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json",
+    "bytes": 2355474
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_only_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_only_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json",
+    "bytes": 2787930
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_all_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json",
+    "bytes": 2924136
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_all_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json",
+    "bytes": 2425765
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_only_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_only_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json",
+    "bytes": 2612381
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_only_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_only_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json",
+    "bytes": 2357187
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_only_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_only_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json",
+    "bytes": 2511195
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_only_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_only_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json",
+    "bytes": 2674147
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_shuffle_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_shuffle_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json",
+    "bytes": 2446975
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_shuffle_p0.1_e30_seed2_epoch30_sched_epoch_seed2_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_shuffle_p0.1_e30_seed2_epoch30_sched_epoch_seed2_fcos100_eval/eval.json",
+    "bytes": 2920134
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_shuffle_p0.1_e30_seed3_epoch30_sched_epoch_seed3_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_shuffle_p0.1_e30_seed3_epoch30_sched_epoch_seed3_fcos100_eval/eval.json",
+    "bytes": 2159412
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/front3d_scratch_samepath_sched_epoch_pt01_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/front3d_scratch_samepath_sched_epoch_pt01_seed1_fcos100_eval/eval.json",
+    "bytes": 2469646
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/front3d_scratch_samepath_sched_epoch_pt02_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/front3d_scratch_samepath_sched_epoch_pt02_seed1_fcos100_eval/eval.json",
+    "bytes": 2654076
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e100_seed1_epoch100_sched_epoch_pt01_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_all_p0.1_e100_seed1_epoch100_sched_epoch_pt01_seed1_fcos100_eval/eval.json",
+    "bytes": 2613363
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p0.1_e100_seed1_epoch100_sched_epoch_pt02_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_all_p0.1_e100_seed1_epoch100_sched_epoch_pt02_seed1_fcos100_eval/eval.json",
+    "bytes": 2763680
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_only_p0.1_e100_seed1_epoch100_sched_epoch_pt01_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_only_p0.1_e100_seed1_epoch100_sched_epoch_pt01_seed1_fcos100_eval/eval.json",
+    "bytes": 2129604
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_only_p0.1_e100_seed1_epoch100_sched_epoch_pt02_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_only_p0.1_e100_seed1_epoch100_sched_epoch_pt02_seed1_fcos100_eval/eval.json",
+    "bytes": 1963709
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_shuffle_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_shuffle_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json",
+    "bytes": 2838519
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_shuffle_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_shuffle_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json",
+    "bytes": 2760596
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_shuffle_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_shuffle_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json",
+    "bytes": 2359787
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_zero_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_zero_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json",
+    "bytes": 2502412
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_zero_p0.1_e30_seed2_epoch30_sched_epoch_seed2_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_zero_p0.1_e30_seed2_epoch30_sched_epoch_seed2_fcos100_eval/eval.json",
+    "bytes": 2616903
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_zero_p0.1_e30_seed3_epoch30_sched_epoch_seed3_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_zero_p0.1_e30_seed3_epoch30_sched_epoch_seed3_fcos100_eval/eval.json",
+    "bytes": 2912371
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json",
+    "bytes": 2814248
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p05_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_tiny_rgb_w0p05_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json",
+    "bytes": 2854468
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p1_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_tiny_rgb_w0p1_p0.1_e30_seed1_epoch30_sched_epoch_seed1_fcos100_eval/eval.json",
+    "bytes": 2638857
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e30_seed1_epoch30_sched_epoch_pt02_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e30_seed1_epoch30_sched_epoch_pt02_seed1_fcos100_eval/eval.json",
+    "bytes": 2421746
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p05_p0.1_e30_seed1_epoch30_sched_epoch_pt02_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_tiny_rgb_w0p05_p0.1_e30_seed1_epoch30_sched_epoch_pt02_seed1_fcos100_eval/eval.json",
+    "bytes": 1908784
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p1_p0.1_e30_seed1_epoch30_sched_epoch_pt02_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_tiny_rgb_w0p1_p0.1_e30_seed1_epoch30_sched_epoch_pt02_seed1_fcos100_eval/eval.json",
+    "bytes": 2359882
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_zero_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_zero_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json",
+    "bytes": 2749134
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_zero_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_zero_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json",
+    "bytes": 2930211
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_target_zero_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_zero_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json",
+    "bytes": 2083395
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed1_epoch100_sched_epoch_seed1_fcos100_eval/eval.json",
+    "bytes": 2768097
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed2_epoch100_sched_epoch_seed2_fcos100_eval/eval.json",
+    "bytes": 2505751
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed3_epoch100_sched_epoch_seed3_fcos100_eval/eval.json",
+    "bytes": 2658797
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed1_epoch100_sched_epoch_pt02_seed1_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed1_epoch100_sched_epoch_pt02_seed1_fcos100_eval/eval.json",
+    "bytes": 2292756
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed2_epoch100_sched_epoch_pt02_seed2_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed2_epoch100_sched_epoch_pt02_seed2_fcos100_eval/eval.json",
+    "bytes": 1805782
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed3_epoch100_sched_epoch_pt02_seed3_fcos100_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_tiny_rgb_w0p02_p0.1_e100_seed3_epoch100_sched_epoch_pt02_seed3_fcos100_eval/eval.json",
+    "bytes": 2252930
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_all_p1.0_e1200_seed1_epoch1200_sched_epoch_seed1_fcos1000_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_all_p1.0_e1200_seed1_epoch1200_sched_epoch_seed1_fcos1000_eval/eval.json",
+    "bytes": 3436062
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_only_p1.0_e1200_seed1_epoch1200_sched_epoch_seed1_fcos1000_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_only_p1.0_e1200_seed1_epoch1200_sched_epoch_seed1_fcos1000_eval/eval.json",
+    "bytes": 3167586
+  },
+  {
+    "source": "/mnt/urashima/users/minesawa/home-offload/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_only_p1.0_e1200_seed1_epoch1200_sched_epoch_seed1_fcos1000_resume_from785_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_target_only_p1.0_e1200_seed1_epoch1200_sched_epoch_seed1_fcos1000_resume_from785_eval/eval.json",
+    "bytes": 3085856
+  },
+  {
+    "source": "/home/minesawa/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_rgba_curr_warmup10_p1.0_e300_seed1_epoch300_sched_epoch_seed1_fcos1000_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_rgba_curr_warmup10_p1.0_e300_seed1_epoch300_sched_epoch_seed1_fcos1000_eval/eval.json",
+    "bytes": 3223222
+  },
+  {
+    "source": "/home/minesawa/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_rgba_curr_warmup25_p1.0_e300_seed1_epoch300_sched_epoch_seed1_fcos1000_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_rgba_curr_warmup25_p1.0_e300_seed1_epoch300_sched_epoch_seed1_fcos1000_eval/eval.json",
+    "bytes": 2942020
+  },
+  {
+    "source": "/home/minesawa/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1_epoch300_sched_epoch_seed1_fcos1000_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1_epoch300_sched_epoch_seed1_fcos1000_eval/eval.json",
+    "bytes": 3006476
+  }
+]
