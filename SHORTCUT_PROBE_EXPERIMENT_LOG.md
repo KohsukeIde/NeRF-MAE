@@ -881,3 +881,57 @@ Eval files:
 
 Reading:
 - This is a staged scout. Promote only the best curriculum to e600/e1200 or multi-seed if it improves sample efficiency against the existing paper-budget baseline reference.
+
+## Experiment 16: Cosine Curriculum Method Validation
+
+Date:
+- 2026-05-09 to 2026-05-12 JST
+
+Goal:
+- validate the best `cosine_ramp` curriculum against a same-budget vanilla baseline
+- check whether increasing the curriculum pretrain budget from e300 to e600 improves fidelity/localization
+- test whether the cosine curriculum depends on meaningful early target-alpha structure via `cosine_ramp_alpha_shuffle`
+
+Protocol:
+- pretrain dataset: NeRF-MAE pretrain split, `percent_train=1.0`
+- pretrain checkpoint rule: downstream uses `epoch_N.pt`, not `model_best.pt`
+- downstream dataset: Front3D FCOS
+- downstream budget: `FCOS_NUM_EPOCHS=1000`, seed `1`, `LR_SCHEDULER=onecycle_epoch`
+- downstream selection: best FCOS checkpoint by validation `AP@50`, then test eval
+
+### Front3D FCOS Test Results
+
+| condition | pretrain epochs | AP@50 | AP@25 | AP@75 | Recall@50 top300 | Recall@25 top300 |
+|---|---:|---:|---:|---:|---:|---:|
+| baseline | 300 | 0.4903 | 0.7818 | 0.1010 | 0.6618 | 0.9559 |
+| cosine_ramp | 300 | 0.5987 | 0.8443 | 0.1061 | 0.7059 | 0.9632 |
+| cosine_ramp | 600 | 0.5895 | 0.8401 | 0.0912 | 0.7132 | 0.9706 |
+| cosine_ramp_alpha_shuffle | 300 | 0.4138 | 0.7186 | 0.0597 | 0.6029 | 0.9485 |
+| baseline reference | 1200 | 0.5892 | 0.8494 | 0.1469 | 0.7132 | 0.9485 |
+
+Eval files:
+- baseline e300:
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_all_p1.0_e300_seed1_epoch300_sched_epoch_seed1_fcos1000_eval/eval.json`
+- cosine_ramp e300:
+  - `/home/minesawa/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1_epoch300_sched_epoch_seed1_fcos1000_eval/eval.json`
+- cosine_ramp e600:
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e600_seed1_epoch600_sched_epoch_seed1_fcos1000_eval/eval.json`
+- cosine_ramp_alpha_shuffle e300:
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/nerf_rpn/results/nerfmae_alpha_rgba_curr_cosine_ramp_alpha_shuffle_p1.0_e300_seed1_epoch300_sched_epoch_seed1_fcos1000_eval/eval.json`
+- baseline e1200 reference:
+  - `/home/minesawa/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_all_p1.0_e1200_seed1_epoch1200_sched_epoch_seed1_fcos1000_eval/eval.json`
+
+Run notes:
+- The original validation chain was initially serial over FCOS jobs.
+- After both new pretrains finished, the remaining FCOS jobs were parallelized manually:
+  - baseline e300 on GPU1 via `nerfmae_local_minimal_gate_chain`
+  - cosine_ramp e600 on GPU0 via `nerfmae_fcos_cosine_e600_parallel`
+  - cosine_ramp_alpha_shuffle e300 on GPU2 via `nerfmae_fcos_shuffle_e300_parallel`
+- The old serial chain was stopped after baseline e300 eval was produced to avoid duplicate FCOS launches.
+
+Reading:
+- Same-budget improvement is strong: `cosine_ramp e300` beats `baseline e300` by `+0.1085` AP@50 (`0.5987` vs `0.4903`).
+- Sample-efficiency signal is strong: `cosine_ramp e300` is slightly above the single-seed `baseline e1200` AP@50 reference (`0.5987` vs `0.5892`) while using one quarter of the pretraining epochs.
+- Increasing to `cosine_ramp e600` does not improve over e300 in this seed. AP@50 stays near the e1200 baseline reference (`0.5895` vs `0.5892`), but AP@75 remains weaker (`0.0912` vs `0.1469`).
+- The shuffle control is decisive in this seed: `cosine_ramp_alpha_shuffle e300` falls far below `cosine_ramp e300` (`0.4138` vs `0.5987` AP@50), supporting the claim that meaningful early target-alpha structure is part of the curriculum effect rather than a pure schedule artifact.
+- Current strongest claim: cosine alpha-to-RGBA curriculum improves AP@50 sample efficiency on Front3D FCOS, but fine-localization/AP@75 is not yet recovered relative to the e1200 vanilla baseline.
