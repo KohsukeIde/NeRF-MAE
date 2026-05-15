@@ -935,3 +935,78 @@ Reading:
 - Increasing to `cosine_ramp e600` does not improve over e300 in this seed. AP@50 stays near the e1200 baseline reference (`0.5895` vs `0.5892`), but AP@75 remains weaker (`0.0912` vs `0.1469`).
 - The shuffle control is decisive in this seed: `cosine_ramp_alpha_shuffle e300` falls far below `cosine_ramp e300` (`0.4138` vs `0.5987` AP@50), supporting the claim that meaningful early target-alpha structure is part of the curriculum effect rather than a pure schedule artifact.
 - Current strongest claim: cosine alpha-to-RGBA curriculum improves AP@50 sample efficiency on Front3D FCOS, but fine-localization/AP@75 is not yet recovered relative to the e1200 vanilla baseline.
+
+## Experiment 17: Cosine Curriculum Seed1 Diagnostic Dumps and Seed2 FCOS Status
+
+Date:
+- 2026-05-13 to 2026-05-15 JST
+
+Goal:
+- dump proposal / voxel-score diagnostics for the key single-seed cosine curriculum comparisons
+- opportunistically run completed `baseline_e300 seed2` FCOS while waiting for more 4-GPU pretraining slots
+
+### Diagnostic Dump Summary
+
+Protocol:
+- checkpoint: best FCOS checkpoint selected by validation AP@50 from each completed seed1 run
+- diagnostic mode: `run_fcos_diagnostic_variant.sh`
+- outputs: `--output_proposals`, `--save_level_index`, `--output_voxel_scores`
+- dataset: Front3D test split
+- top-k diagnostic summary: top300 proposals, TP IoU threshold 0.5
+
+| condition | AP@50 | AP@25 | AP@75 | Recall@50 top300 | top300 mean IoU | frac IoU>=0.5 | TP score mean | FP score mean | first TP rank | voxel peakiness |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| baseline e300 | 0.4903 | 0.7819 | 0.1009 | 0.6618 | 0.0595 | 0.0178 | 0.5955 | 0.0373 | 1.25 | 14.7951 |
+| cosine_ramp e300 | 0.5987 | 0.8443 | 0.1061 | 0.7059 | 0.0591 | 0.0188 | 0.6060 | 0.0475 | 1.18 | 12.0121 |
+| cosine_ramp_alpha_shuffle e300 | 0.4137 | 0.7185 | 0.0597 | 0.6029 | 0.0603 | 0.0165 | 0.5246 | 0.0400 | 3.00 | 13.5157 |
+| baseline e1200 | 0.5892 | 0.8494 | 0.1469 | 0.7132 | 0.0523 | 0.0190 | 0.6672 | 0.0118 | 1.12 | 19.4645 |
+
+Diagnostic artifact files:
+- `/home/minesawa/ssl/NeRF-MAE/results/shortcut_probe_artifacts/cosine_curriculum_seed1_diagnostics_summary.md`
+- `/home/minesawa/ssl/NeRF-MAE/results/shortcut_probe_artifacts/cosine_curriculum_seed1_diagnostics_summary.json`
+- `/home/minesawa/ssl/NeRF-MAE/results/shortcut_probe_artifacts/cosine_curriculum_seed1_diagnostics_summary.csv`
+
+Diagnostic dump dirs:
+- baseline e300:
+  - `/home/minesawa/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_all_p1.0_e300_seed1_epoch300_sched_epoch_seed1_fcos1000_diagnostics`
+- cosine_ramp e300:
+  - `/home/minesawa/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1_epoch300_sched_epoch_seed1_fcos1000_diagnostics`
+- cosine_ramp_alpha_shuffle e300:
+  - `/home/minesawa/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_rgba_curr_cosine_ramp_alpha_shuffle_p1.0_e300_seed1_epoch300_sched_epoch_seed1_fcos1000_diagnostics`
+- baseline e1200:
+  - `/home/minesawa/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_all_p1.0_e1200_seed1_epoch1200_sched_epoch_seed1_fcos1000_diagnostics`
+
+Reading:
+- The diagnostic eval values match the previously recorded test results up to rounding.
+- `cosine_ramp e300` improves AP@50 and Recall@50 top300 over `baseline e300`, but the top300 proposal IoU distribution is very similar. The difference is therefore not a simple increase in raw proposal IoU coverage.
+- `cosine_ramp_alpha_shuffle e300` is clearly weaker in AP@50 and first-TP rank, consistent with the earlier reading that meaningful early target-alpha structure matters.
+- `baseline e1200` still has the best AP@75 and the sharpest voxel score maps, so the AP@75 / localization gap remains a real open issue for the curriculum method.
+
+### Baseline e300 Seed2 FCOS Status
+
+Completed before FCOS:
+- pretrain checkpoint exists:
+  - `/home/minesawa/ssl/NeRF-MAE/output/nerf_mae/results/nerfmae_all_p1.0_e300_seed2/epoch_300.pt`
+
+FCOS attempt:
+- save name:
+  - `nerfmae_all_p1.0_e300_seed2_epoch300_sched_epoch_seed2_fcos1000`
+- launcher log:
+  - `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output/launcher/nerfmae_fcos_baseline_e300_seed2_parallel.log`
+- status:
+  - run reached epoch `640`
+  - process stopped during the epoch-640 validation pass before producing the final eval directory
+  - no `*_eval/eval.json` exists for this condition yet
+- best checkpoints saved before stopping:
+  - AP@50-best checkpoint: `model_best_ap50_ap25_0.5291156768798828_0.8227242231369019.pt`
+  - later AP@25-best checkpoints are also present, with best observed validation AP@25 `0.829770028591156`
+
+Important caveat:
+- Because the seed2 FCOS run did not complete and no final test `eval.json` was produced, it should not be used in the main 3-seed gate table yet.
+- A clean continuation or rerun is needed before reporting `baseline_e300 seed2` as a completed downstream seed.
+
+Implementation notes:
+- To run FCOS under the current base Python 3.11 / NumPy 1.26 environment, two source compatibility fixes were required:
+  - `np.float` -> `float` in `nerf_mae/model/mae/torch_utils.py`
+  - `np.int` -> `int` in `nerf_rpn/model/fcos/fcos.py`
+- The rotated IoU CUDA wrapper was also adjusted to prefer package-relative import of `sort_vertices`.

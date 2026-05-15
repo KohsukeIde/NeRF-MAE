@@ -1,7 +1,10 @@
 import torch
 from torch import nn
 from torch.autograd import Function
-import sort_vertices
+try:
+    from . import sort_vertices
+except ImportError:
+    import sort_vertices
 
 class SortVertices(Function):
     @staticmethod

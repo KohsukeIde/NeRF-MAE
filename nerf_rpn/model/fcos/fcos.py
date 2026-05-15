@@ -326,7 +326,7 @@ class FCOSModule(torch.nn.Module):
                 score = box_cls[level][i].sigmoid() * centerness[level][i].sigmoid()
                 w, l, h = np.ceil(
                     np.array(ori_sizes[i]) / self.fpn_strides[level]
-                ).astype(np.int)
+                ).astype(int)
                 score = score[0, :w, :l, :h]
                 score = torch.sqrt(score)
                 score = score.cpu().numpy()
