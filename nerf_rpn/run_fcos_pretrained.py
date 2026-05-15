@@ -86,6 +86,15 @@ def parse_args():
         help="Only load the backbone weights.",
     )
     parser.add_argument(
+        "--resume_training",
+        action="store_true",
+        help=(
+            "Resume FCOS training state from --checkpoint, including optimizer, "
+            "scheduler, best metrics, and RNG state. Without this flag, --checkpoint "
+            "is treated as a model-weight warm start."
+        ),
+    )
+    parser.add_argument(
         "--seed",
         type=int,
         default=None,
@@ -236,6 +245,11 @@ def parse_args():
         default=1,
         type=int,
         help="The number of latest checkpoints to keep.",
+    )
+    parser.add_argument(
+        "--last_checkpoint_name",
+        default="checkpoint_last.pt",
+        help="Filename used for the per-epoch resumable FCOS checkpoint.",
     )
     parser.add_argument(
         "--wandb", action="store_true", help="Whether to use wandb for logging."
@@ -447,6 +461,8 @@ class Trainer:
             resolution=args.resolution,
         )
 
+        self.loaded_checkpoint = None
+        self.start_epoch = 1
         if args.checkpoint:
             assert os.path.exists(args.checkpoint), "The checkpoint does not exist."
             self.logger.info(
@@ -459,6 +475,7 @@ class Trainer:
             # print('Training args from previous checkpoint (Not MAE checkpoint):')
             # print(checkpoint['train_args'])
 
+            self.loaded_checkpoint = checkpoint
             self.model.backbone.load_state_dict(checkpoint["backbone_state_dict"])
             if not args.load_backbone_only:
                 self.model.fcos_module.load_state_dict(checkpoint["fcos_state_dict"])
@@ -585,25 +602,88 @@ class Trainer:
                 self.logger.info(f"Loaded {len(self.test_set)} scenes for evaluation")
 
     def save_checkpoint(self, epoch, path):
-        if self.world_size == 1:
-            torch.save(
-                {
-                    "epoch": epoch,
-                    "backbone_state_dict": self.model.backbone.state_dict(),
-                    "fcos_state_dict": self.model.fcos_module.state_dict(),
-                    "train_args": self.args.__dict__,
-                },
-                path,
-            )
+        model_ref = self.unwrap_model()
+        checkpoint = {
+            "epoch": epoch,
+            "backbone_state_dict": model_ref.backbone.state_dict(),
+            "fcos_state_dict": model_ref.fcos_module.state_dict(),
+            "train_args": self.args.__dict__,
+            "best_metric_ap50": self.best_metric_ap50,
+            "best_metric_ap25": self.best_metric_ap25,
+            "rng_state": self.capture_rng_state(),
+        }
+        if hasattr(self, "optimizer"):
+            checkpoint["optimizer_state_dict"] = self.optimizer.state_dict()
+        if hasattr(self, "scheduler") and self.scheduler is not None:
+            checkpoint["scheduler_state_dict"] = self.scheduler.state_dict()
         else:
-            torch.save(
-                {
-                    "epoch": epoch,
-                    "backbone_state_dict": self.model.module.backbone.state_dict(),
-                    "fcos_state_dict": self.model.module.fcos_module.state_dict(),
-                    "train_args": self.args.__dict__,
-                },
-                path,
+            checkpoint["scheduler_state_dict"] = None
+
+        tmp_path = f"{path}.tmp"
+        torch.save(checkpoint, tmp_path)
+        os.replace(tmp_path, path)
+
+    def capture_rng_state(self):
+        state = {
+            "python": random.getstate(),
+            "numpy": np.random.get_state(),
+            "torch": torch.get_rng_state(),
+        }
+        if self.train_generator is not None:
+            state["train_generator"] = self.train_generator.get_state()
+        if self.eval_generator is not None:
+            state["eval_generator"] = self.eval_generator.get_state()
+        if torch.cuda.is_available():
+            state["cuda"] = torch.cuda.get_rng_state_all()
+        return state
+
+    def restore_rng_state(self, state):
+        if not state:
+            return
+        if "python" in state:
+            random.setstate(state["python"])
+        if "numpy" in state:
+            np.random.set_state(state["numpy"])
+        if "torch" in state:
+            torch.set_rng_state(state["torch"])
+        if self.train_generator is not None and "train_generator" in state:
+            self.train_generator.set_state(state["train_generator"])
+        if self.eval_generator is not None and "eval_generator" in state:
+            self.eval_generator.set_state(state["eval_generator"])
+        if torch.cuda.is_available() and "cuda" in state:
+            torch.cuda.set_rng_state_all(state["cuda"])
+
+    def restore_training_state_if_requested(self):
+        if not self.args.resume_training:
+            return
+        if self.args.load_backbone_only:
+            raise ValueError("--resume_training cannot be combined with --load_backbone_only.")
+        if self.loaded_checkpoint is None:
+            raise ValueError("--resume_training requires --checkpoint.")
+        if "optimizer_state_dict" not in self.loaded_checkpoint:
+            raise ValueError(
+                "Checkpoint does not contain optimizer_state_dict. "
+                "It can be used as a model warm start, but not for exact training resume."
+            )
+
+        self.optimizer.load_state_dict(self.loaded_checkpoint["optimizer_state_dict"])
+        scheduler_state = self.loaded_checkpoint.get("scheduler_state_dict")
+        if self.scheduler is not None:
+            if scheduler_state is None:
+                raise ValueError(
+                    "Checkpoint does not contain scheduler_state_dict, but the current run uses a scheduler."
+                )
+            self.scheduler.load_state_dict(scheduler_state)
+
+        self.best_metric_ap50 = self.loaded_checkpoint.get("best_metric_ap50")
+        self.best_metric_ap25 = self.loaded_checkpoint.get("best_metric_ap25")
+        self.restore_rng_state(self.loaded_checkpoint.get("rng_state"))
+        self.start_epoch = int(self.loaded_checkpoint["epoch"]) + 1
+        if self.rank == 0:
+            self.logger.info(
+                "Resumed FCOS training state from epoch %s; next epoch is %s.",
+                self.loaded_checkpoint["epoch"],
+                self.start_epoch,
             )
 
     def delete_old_checkpoints(self, path, keep_latest=5):
@@ -630,7 +710,7 @@ class Trainer:
         self, checkpoint_dir, metric_name_to_sort, max_to_keep, min_to_keep
     ):
         # Get all checkpoint filenames in the checkpoint directory
-        checkpoint_files = glob.glob(os.path.join(checkpoint_dir, "*.pt"))
+        checkpoint_files = glob.glob(os.path.join(checkpoint_dir, "model_best_*.pt"))
         # Sort the checkpoint filenames based on the metric value
         checkpoint_files.sort(
             key=lambda x: self.extract_and_sort_metric(x, metric_name_to_sort)
@@ -839,10 +919,19 @@ class Trainer:
 
         self.best_metric_ap50 = None
         self.best_metric_ap25 = None
+        self.restore_training_state_if_requested()
         os.makedirs(self.args.save_path, exist_ok=True)
         # self.eval(self.val_set)
 
-        for epoch in range(1, self.args.num_epochs + 1):
+        if self.start_epoch > self.args.num_epochs:
+            if self.rank == 0:
+                self.logger.info(
+                    "Checkpoint epoch already reaches num_epochs=%s; nothing to train.",
+                    self.args.num_epochs,
+                )
+            return
+
+        for epoch in range(self.start_epoch, self.args.num_epochs + 1):
             self.set_backbone_frozen(epoch <= self.args.freeze_backbone_epochs)
             if self.world_size > 1:
                 self.train_sampler.set_epoch(epoch)
@@ -850,6 +939,11 @@ class Trainer:
             self.train_epoch(epoch)
             if self.rank != 0:
                 continue
+
+            self.save_checkpoint(
+                epoch,
+                os.path.join(self.args.save_path, self.args.last_checkpoint_name),
+            )
 
             if epoch % self.args.eval_interval == 0 or epoch == self.args.num_epochs:
                 recalls, APs = self.eval(self.val_set)
@@ -1255,6 +1349,10 @@ def main():
         raise ValueError("--freeze_backbone_epochs must be non-negative.")
     if args.scheduler_total_steps < 0:
         raise ValueError("--scheduler_total_steps must be non-negative.")
+    if args.resume_training and not args.checkpoint:
+        raise ValueError("--resume_training requires --checkpoint.")
+    if args.resume_training and args.mode != "train":
+        raise ValueError("--resume_training is only valid with --mode train.")
 
     logging.basicConfig(
         level=logging.INFO, format="[%(asctime)s %(levelname)s] %(message)s"

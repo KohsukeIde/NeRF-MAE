@@ -996,17 +996,36 @@ FCOS attempt:
 - status:
   - run reached epoch `640`
   - process stopped during the epoch-640 validation pass before producing the final eval directory
-  - no `*_eval/eval.json` exists for this condition yet
+  - no original final `*_eval/eval.json` was produced for this condition
 - best checkpoints saved before stopping:
   - AP@50-best checkpoint: `model_best_ap50_ap25_0.5291156768798828_0.8227242231369019.pt`
   - later AP@25-best checkpoints are also present, with best observed validation AP@25 `0.829770028591156`
 
+Partial recovery eval:
+- evaluated the stopped run's AP@50-best checkpoint as a partial-status diagnostic
+- save name:
+  - `nerfmae_all_p1.0_e300_seed2_epoch300_sched_epoch_seed2_fcos1000_partial640_eval`
+- eval file:
+  - `/home/minesawa/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_all_p1.0_e300_seed2_epoch300_sched_epoch_seed2_fcos1000_partial640_eval/eval.json`
+- metrics:
+  - AP@50: `0.4395`
+  - AP@25: `0.8209`
+  - AP@75: `0.0701`
+  - Recall@50 top300: `0.6397`
+  - Recall@25 top300: `0.9632`
+
 Important caveat:
-- Because the seed2 FCOS run did not complete and no final test `eval.json` was produced, it should not be used in the main 3-seed gate table yet.
-- A clean continuation or rerun is needed before reporting `baseline_e300 seed2` as a completed downstream seed.
+- Because the seed2 FCOS run did not complete normally, the partial recovery eval should not be used in the main 3-seed gate table.
+- A continuation or rerun is still needed before reporting `baseline_e300 seed2` as a completed downstream seed.
+- The existing stopped checkpoint only contains model weights, not optimizer/scheduler state, so the current continuation is necessarily a non-strict model-weight continuation rather than an exact optimizer-state resume.
 
 Implementation notes:
 - To run FCOS under the current base Python 3.11 / NumPy 1.26 environment, two source compatibility fixes were required:
   - `np.float` -> `float` in `nerf_mae/model/mae/torch_utils.py`
   - `np.int` -> `int` in `nerf_rpn/model/fcos/fcos.py`
 - The rotated IoU CUDA wrapper was also adjusted to prefer package-relative import of `sort_vertices`.
+- FCOS training resume support was added after this stop:
+  - each completed training epoch now writes a resumable `checkpoint_last.pt`
+  - FCOS checkpoints now include optimizer state, scheduler state, best validation metrics, and RNG states
+  - `--resume_training --checkpoint <checkpoint_last.pt>` restores those states and continues from `epoch + 1`
+  - pruning of validation-best checkpoints now only considers `model_best_*.pt`, so `checkpoint_last.pt` is not deleted by AP-based pruning
