@@ -1029,3 +1029,62 @@ Implementation notes:
   - FCOS checkpoints now include optimizer state, scheduler state, best validation metrics, and RNG states
   - `--resume_training --checkpoint <checkpoint_last.pt>` restores those states and continues from `epoch + 1`
   - pruning of validation-best checkpoints now only considers `model_best_*.pt`, so `checkpoint_last.pt` is not deleted by AP-based pruning
+
+### Pending e300 3-Seed Gate Status
+
+Snapshot:
+- 2026-05-16 JST
+
+Purpose:
+- before moving to fixed-ramp / external-dataset experiments, finish the e300 3-seed gate for:
+  - `baseline_e300`
+  - `cosine_ramp_e300`
+  - `cosine_ramp_alpha_shuffle_e300`
+
+Current completed items:
+- `baseline e300 seed1`
+  - pretrain: complete, `epoch_300.pt`
+  - FCOS e1000 eval: complete
+- `baseline e300 seed2`
+  - pretrain: complete, `epoch_300.pt`
+  - original FCOS e1000: stopped at epoch 640 during validation
+  - partial AP@50-best checkpoint eval: complete but diagnostic-only
+  - non-strict continuation from AP@50-best model checkpoint reached epoch 360 of the continuation run
+  - continuation produced validation checkpoints up to `model_best_ap50_ap25_0.5458228588104248_0.8243664503097534.pt`
+  - continuation final test eval is still missing and must be run before treating this seed as completed
+- `cosine_ramp e300 seed1`
+  - pretrain: complete, `epoch_300.pt`
+  - FCOS e1000 eval: complete
+- `cosine_ramp_alpha_shuffle e300 seed1`
+  - pretrain: complete, `epoch_300.pt`
+  - FCOS e1000 eval: complete
+
+Current incomplete pretraining:
+- `baseline e300 seed3`
+  - latest available checkpoint: `epoch_180.pt`
+  - remaining: finish pretrain to `epoch_300.pt`, then run FCOS e1000
+- `cosine_ramp e300 seed2`
+  - pretrain not started / no result directory
+  - remaining: pretrain to `epoch_300.pt`, then run FCOS e1000
+- `cosine_ramp e300 seed3`
+  - pretrain not started / no result directory
+  - remaining: pretrain to `epoch_300.pt`, then run FCOS e1000
+- `cosine_ramp_alpha_shuffle e300 seed2`
+  - pretrain not started / no result directory
+  - remaining: pretrain to `epoch_300.pt`, then run FCOS e1000
+- `cosine_ramp_alpha_shuffle e300 seed3`
+  - pretrain not started / no result directory
+  - remaining: pretrain to `epoch_300.pt`, then run FCOS e1000
+
+Immediate next actions:
+1. Run missing final test eval for `baseline_e300 seed2` continuation checkpoint.
+2. Finish `baseline_e300 seed3` pretrain from the latest available checkpoint or rerun cleanly to `epoch_300.pt`.
+3. Launch `cosine_ramp_e300 seed2/3` pretraining.
+4. Launch `cosine_ramp_alpha_shuffle_e300 seed2/3` pretraining.
+5. Run FCOS e1000 for each completed pretrain checkpoint.
+
+Gate decision rule:
+- continue toward fixed-ramp / external-dataset experiments only if the 3-seed gate preserves:
+  - `cosine_ramp_e300` > `baseline_e300` in mean AP@50
+  - `cosine_ramp_e300` > `cosine_ramp_alpha_shuffle_e300` in mean AP@50
+  - at least 2/3 paired seeds support each comparison
