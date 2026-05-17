@@ -428,5 +428,10 @@
     "source": "/home/minesawa/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_all_p1.0_e300_seed2_epoch300_sched_epoch_seed2_fcos1000_partial640_eval/eval.json",
     "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_all_p1.0_e300_seed2_epoch300_sched_epoch_seed2_fcos1000_partial640_eval/eval.json",
     "bytes": 3015541
+  },
+  {
+    "source": "/home/minesawa/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_all_p1.0_e300_seed2_epoch300_sched_epoch_seed2_fcos1000_resume_from640_eval/eval.json",
+    "artifact": "results/shortcut_probe_artifacts/eval/nerfmae_all_p1.0_e300_seed2_epoch300_sched_epoch_seed2_fcos1000_resume_from640_eval/eval.json",
+    "bytes": 3199682
   }
 ]

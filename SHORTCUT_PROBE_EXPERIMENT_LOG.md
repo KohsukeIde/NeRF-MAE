@@ -1014,9 +1014,25 @@ Partial recovery eval:
   - Recall@50 top300: `0.6397`
   - Recall@25 top300: `0.9632`
 
+Non-strict continuation eval:
+- continuation source:
+  - started from the stopped run's AP@50-best model checkpoint because the original FCOS checkpoints did not contain optimizer/scheduler state
+  - ran an additional 360-epoch continuation with fresh optimizer state and exponential LR decay
+  - selected the continuation AP@50-best validation checkpoint `model_best_ap50_ap25_0.5458228588104248_0.8243664503097534.pt`
+- save name:
+  - `nerfmae_all_p1.0_e300_seed2_epoch300_sched_epoch_seed2_fcos1000_resume_from640_eval`
+- eval file:
+  - `/home/minesawa/ssl/NeRF-MAE/output/nerf_rpn/results/nerfmae_all_p1.0_e300_seed2_epoch300_sched_epoch_seed2_fcos1000_resume_from640_eval/eval.json`
+- metrics:
+  - AP@50: `0.4894`
+  - AP@25: `0.8024`
+  - AP@75: `0.1197`
+  - Recall@50 top300: `0.6618`
+  - Recall@25 top300: `0.9485`
+
 Important caveat:
 - Because the seed2 FCOS run did not complete normally, the partial recovery eval should not be used in the main 3-seed gate table.
-- A continuation or rerun is still needed before reporting `baseline_e300 seed2` as a completed downstream seed.
+- The non-strict continuation eval is useful as a status point, but a clean uninterrupted rerun remains the safest option before reporting `baseline_e300 seed2` as a main-table downstream seed.
 - The existing stopped checkpoint only contains model weights, not optimizer/scheduler state, so the current continuation is necessarily a non-strict model-weight continuation rather than an exact optimizer-state resume.
 
 Implementation notes:
@@ -1051,7 +1067,8 @@ Current completed items:
   - partial AP@50-best checkpoint eval: complete but diagnostic-only
   - non-strict continuation from AP@50-best model checkpoint reached epoch 360 of the continuation run
   - continuation produced validation checkpoints up to `model_best_ap50_ap25_0.5458228588104248_0.8243664503097534.pt`
-  - continuation final test eval is still missing and must be run before treating this seed as completed
+  - continuation final test eval is complete: AP@50 `0.4894`, AP@25 `0.8024`, AP@75 `0.1197`, Recall@50 top300 `0.6618`
+  - caveat: still non-strict because the continuation could not restore optimizer/scheduler state
 - `cosine_ramp e300 seed1`
   - pretrain: complete, `epoch_300.pt`
   - FCOS e1000 eval: complete
