@@ -1,20 +1,24 @@
 # NeRF-MAE Shortcut Probe Experiment Log
 
-Last updated: 2026-04-11 JST
+Last updated: 2026-05-19 JST
 
 This file is the running log for the NeRF-MAE shortcut probe experiments.
 Primary result root: `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output`
+Current ABCI3 workspace root: `/groups/gag51404/ide/vgi/NeRF-MAE`
 
 ## Scope
 
 - Task: Front3D downstream 3D object detection via FCOS
-- Main question: whether NeRF-MAE transfer gains come from semantic pretraining or from shortcut-heavy occupancy/layout signals
-- Main probe variants:
+- Main question: whether the NeRF-MAE pretraining gain can be explained by alpha/occupancy structure, and whether an explicit alpha-to-RGBA curriculum improves sample efficiency.
+- Historical probe variants:
   - `baseline`
   - `alpha_only`
   - `radiance_only`
   - `masked_only_rgb_loss`
   - `fair scratch`
+- Current method/control pair:
+  - `cosine_ramp`: alpha+RGBA input, alpha target kept, RGB loss ramped from 0 to 1 with a cosine schedule
+  - `cosine_ramp_alpha_shuffle`: same schedule, but alpha target shuffled as a structure-destroying control
 
 ## Important Caveat
 
@@ -23,10 +27,10 @@ Because of that, the more reliable e30 comparison is the follow-up run that fixe
 
 ## Current Best Reading
 
-- The checkpoint-selection confound was real.
-- After fixing that confound with `epoch_30.pt`, `alpha_only_e30` becomes the strongest pretrained condition on `AP@50`.
-- `masked_only_rgb_loss` is weak at both e10 and e30, which supports the claim that the original RGB supervision path matters for the learned encoder representation.
-- `baseline` does not consistently beat fair scratch in this quick setting.
+- The early shortcut-probe result was useful, but the strongest current paper direction is now the alpha-to-RGBA curriculum rather than the original `alpha_only` claim.
+- Single-seed Experiment 16 shows `cosine_ramp e300` beating same-budget `baseline e300` by `+0.1085` AP@50 (`0.5987` vs `0.4903`), while matching/slightly exceeding the single-seed `baseline e1200` AP@50 reference (`0.5892`) at one quarter of the pretraining epochs.
+- The `cosine_ramp_alpha_shuffle e300` control is much weaker (`0.4138` AP@50), which supports the interpretation that meaningful target-alpha structure matters rather than the schedule alone.
+- For the immediate AAAI/ICLR submission path, a clean single-seed ABCI3 rerun/eval of the key comparison is sufficient if it reproduces the current margin; the 3-seed gate is optional robustness work rather than the default plan.
 
 ## Experiment 1: Quick Pretraining Only
 
@@ -1105,3 +1109,324 @@ Gate decision rule:
   - `cosine_ramp_e300` > `baseline_e300` in mean AP@50
   - `cosine_ramp_e300` > `cosine_ramp_alpha_shuffle_e300` in mean AP@50
   - at least 2/3 paired seeds support each comparison
+
+## Experiment 18: ABCI3 Clean e300 Gate Preparation
+
+Snapshot:
+- 2026-05-19 JST
+
+Purpose:
+- run only the submission-critical single-seed comparison in the new ABCI3 environment unless additional robustness is needed
+- finish the clean comparison as quickly as possible while preserving the downstream FCOS protocol
+
+ABCI3 implementation updates:
+- environment setup script:
+  - `nerf_mae/probe_scripts/setup_abci3_env.sh`
+  - creates `${ROOT_DIR}/.venv-abci3`
+  - installs PyTorch `2.7.0+cu118`, torchvision `0.22.0`, numpy `1.26.4`, and the Python packages required by MAE/FCOS
+- preflight script:
+  - `nerf_mae/probe_scripts/abci3_e300_gate_preflight.sh`
+  - checks `qsub`, `qstat`, the Python env, pretrain data, FCOS data, and required imports
+- data symlink helper:
+  - `nerf_mae/probe_scripts/setup_abci3_data_links.sh`
+  - expects preprocessed NeRF-MAE data, not raw Structured3D
+  - required pretrain source: `features/` plus `nerfmae_split.npz`
+  - required FCOS source: `features/`, `obb/`, plus `3dfront_split.npz`
+- pretrain PBS:
+  - `nerf_mae/probe_scripts/abci3_e300_gate_pretrain.pbs`
+  - supports single-node 8-GPU DDP and multi-node DDP via `pbsdsh`
+  - for 2 rt_HF nodes, default is 16 GPUs total with `PRETRAIN_BATCH_SIZE_PER_GPU=1`, preserving global batch size 16
+- FCOS PBS:
+  - `nerf_mae/probe_scripts/abci3_e300_gate_fcos.pbs`
+  - keeps the downstream protocol single-GPU by default
+- submitter:
+  - `nerf_mae/probe_scripts/submit_abci3_e300_gate.sh`
+  - submits 9 pretrain jobs and 9 dependent FCOS jobs:
+    - `baseline` seeds 1/2/3
+    - `cosine_ramp` seeds 1/2/3
+    - `cosine_ramp_alpha_shuffle` seeds 1/2/3
+- pipeline submitter:
+  - `nerf_mae/probe_scripts/submit_abci3_e300_gate_pipeline.sh`
+  - defaults to the minimal paper-critical jobs:
+    - `baseline e300 seed1`
+    - `cosine_ramp e300 seed1`
+    - `cosine_ramp_alpha_shuffle e300 seed1`
+  - with available checkpoints, use `SUBMIT_PRETRAIN=0` and run only three clean FCOS evals
+  - if checkpoints are unavailable, use `PRETRAIN_NODES=2 PRETRAIN_SLOTS=3 PRETRAIN_BATCH_SIZE_PER_GPU=1` to regenerate only these three pretrains
+  - the old 3-seed/full gate remains available by overriding `GATE_JOBS`, but it is not the default
+
+DDP code update:
+- `nerf_mae/run_swin_mae3d.py` now accepts environment-driven multi-node DDP settings:
+  - `NERFMAE_DDP_USE_ENV=1`
+  - `NERFMAE_DDP_NODE_RANK`
+  - `NERFMAE_DDP_NUM_NODES`
+  - `NERFMAE_DDP_WORLD_SIZE`
+  - `NERFMAE_DDP_MASTER_ADDR`
+  - `NERFMAE_DDP_MASTER_PORT`
+- global rank is now `node_rank * local_world_size + local_rank`, avoiding rank collisions across nodes
+- `nerf_rpn/run_fcos_pretrained.py` received the same DDP rank fix for future multi-node downstream experiments, though the clean gate keeps FCOS single-GPU unless explicitly changed
+
+Data status:
+- `/groups/gag51402/datasets` is accessible.
+- Top-level candidates include `Structure3D`, `HM3D`, `ARKitScenes`, `ScanNet`, and others.
+- No directly usable preprocessed NeRF-MAE/Front3D RPN directory was found at the obvious paths:
+  - `/groups/gag51402/datasets/front3d_rpn_data`
+  - `/groups/gag51402/datasets/3dfront_rpn_data`
+  - `/groups/gag51402/datasets/nerfmae`
+  - `/groups/gag51402/datasets/Structure3D/front3d_rpn_data`
+  - `/groups/gag51402/datasets/Structure3D/nerfmae`
+- `/groups/gag51402/datasets/Structure3D` appears to be raw or converted Structured3D data, not the `features/`, `obb/`, `*_split.npz` format consumed by the current NeRF-MAE/FCOS scripts.
+- Therefore, do not symlink `Structure3D` directly to `dataset/pretrain` or `dataset/finetune/front3d_rpn_data`. Locate or create the preprocessed feature/box directories first.
+
+Recommended launch sequence:
+1. Create/verify the env:
+   - `PROBE_ENV_PREFIX=/groups/gag51404/ide/vgi/NeRF-MAE/.venv-abci3 bash nerf_mae/probe_scripts/setup_abci3_env.sh`
+2. Link preprocessed data once the correct source directories are known:
+   - `PRETRAIN_DATA_SRC=/path/to/pretrain FCOS_DATA_SRC=/path/to/front3d_rpn_data bash nerf_mae/probe_scripts/setup_abci3_data_links.sh`
+
+## Experiment 19: ABCI3 Checkpoint Bundle Install and e300 3-Seed Gate Readiness
+
+Snapshot:
+- 2026-05-19 JST
+
+Input bundle:
+- `/groups/gag51404/ide/vgi/NeRF-MAE/nerfmae_abci_pretrain_checkpoints_20260519.zip`
+
+Installed checkpoint payload:
+- `baseline e300 seed1`: `epoch_300.pt`
+- `baseline e300 seed2`: `epoch_300.pt`
+- `baseline e300 seed3`: `epoch_220.pt` only; usable for resume toward `epoch_300.pt`
+- `cosine_ramp e300 seed1`: `epoch_300.pt`
+- `cosine_ramp_alpha_shuffle e300 seed1`: `epoch_300.pt`
+- `cosine_ramp e600 seed1`: `epoch_600.pt`
+- `baseline e1200 seed1`: `epoch_1200.pt`
+
+Verification:
+- extracted with `nerf_mae/probe_scripts/install_abci_checkpoint_bundle.sh`
+- `sha256sum -c checksums.sha256`: all included checkpoints passed
+- created `*_abci3clean` symlinks so clean ABCI3 FCOS outputs can use a separate result namespace
+- ABCI3 Python import preflight passed with data checks disabled:
+  - PyTorch `2.7.0+cu118`
+  - torchvision `0.22.0+cu118`
+  - NumPy `1.26.4`
+
+Script updates:
+- `abci3_e300_gate_pretrain.pbs` now auto-resumes from the latest `epoch_*.pt`
+  in the target pretrain directory when final `epoch_N.pt` is absent.
+- `submit_abci3_e300_gate_pipeline.sh` now defaults to the full e300 3-seed
+  gate and skips pretrain submission for jobs whose final checkpoint already
+  exists.
+- The current dry-run submits direct FCOS for:
+  - `baseline e300 seed1/2`
+  - `cosine_ramp e300 seed1`
+  - `cosine_ramp_alpha_shuffle e300 seed1`
+- The same dry-run submits 2-node pretrain plus dependent FCOS for:
+  - `baseline e300 seed3` resumed from `epoch_220.pt`
+  - `cosine_ramp e300 seed2/3`
+  - `cosine_ramp_alpha_shuffle e300 seed2/3`
+
+Remaining blocker before real qsub:
+- preprocessed data links are still missing.
+- The required FCOS data layout is:
+  - `features/`
+  - `obb/`
+  - `3dfront_split.npz`
+- The required pretrain layout is:
+  - `features/`
+  - `nerfmae_split.npz`
+- Obvious paths under `/groups/gag51402/datasets` still do not contain those layouts:
+  - `/groups/gag51402/datasets/front3d_rpn_data`
+  - `/groups/gag51402/datasets/3dfront_rpn_data`
+  - `/groups/gag51402/datasets/NeRF-MAE/front3d_rpn_data`
+  - `/groups/gag51402/datasets/NeRF-MAE/pretrain`
+  - `/groups/gag51402/datasets/nerfmae`
+  - `/groups/gag51402/datasets/Structure3D/front3d_rpn_data`
+  - `/groups/gag51402/datasets/Structure3D/nerfmae`
+
+Next command once data paths are known:
+
+```bash
+PRETRAIN_DATA_SRC=/path/to/pretrain \
+FCOS_DATA_SRC=/path/to/front3d_rpn_data \
+bash nerf_mae/probe_scripts/setup_abci3_data_links.sh
+
+PRETRAIN_NODES=2 PRETRAIN_SLOTS=3 PRETRAIN_BATCH_SIZE_PER_GPU=1 PRETRAIN_EVAL_INTERVAL=300 \
+bash nerf_mae/probe_scripts/submit_abci3_e300_gate_pipeline.sh
+```
+
+Interpretation:
+- The checkpoint bundle is sufficient to avoid rerunning several completed
+  pretrains, but it is not sufficient to complete Gate 1 by FCOS-only execution.
+- Gate 1 still needs new pretraining for `cosine_ramp seed2/3`,
+  `cosine_ramp_alpha_shuffle seed2/3`, and completion of `baseline seed3` from
+  `epoch_220.pt` to `epoch_300.pt`.
+
+## Experiment 20: ABCI3 Data Preparation and Dependent e300 Gate Submission
+
+Snapshot:
+- 2026-05-19 JST
+
+Decision:
+- Since the repo was moved from the previous machine to ABCI, the missing
+  preprocessed datasets must be prepared on ABCI rather than symlinking raw
+  `Structure3D`.
+- The correct source for Front3D FCOS data is the NeRF-RPN Hugging Face dataset,
+  because the old Google Drive folder now fails through `gdown`.
+
+Data sources:
+- NeRF-MAE pretrain:
+  - `https://s3.amazonaws.com/tri-ml-public.s3.amazonaws.com/github/nerfmae/NeRF-MAE_pretrain.tar.gz`
+  - HEAD size: about `60.5G`
+- Front3D RPN finetune:
+  - `https://huggingface.co/datasets/lyclyc52/NeRF_RPN/resolve/main/front3d_rpn_data.zip`
+  - HEAD size: about `4.3G` / HF listed size `4.62GB`
+
+Implementation:
+- added `nerf_mae/probe_scripts/prepare_abci3_data.sh`
+  - downloads with `wget --continue`
+  - extracts into `dataset/_downloads`
+  - locates `features/` plus split files
+  - links:
+    - `dataset/pretrain`
+    - `dataset/finetune/front3d_rpn_data`
+  - validates split keys and feature/OBB file presence
+- added `nerf_mae/probe_scripts/abci3_prepare_data.pbs`
+- added `nerf_mae/probe_scripts/submit_abci3_prepare_data.sh`
+- updated `submit_abci3_e300_gate_pipeline.sh` with `GLOBAL_DEPENDENCY`, so
+  Gate 1 can be submitted immediately and held until data preparation passes.
+
+Submitted jobs:
+- data preparation:
+  - `1776943.pbs1`
+  - queue: `rt_HC`
+  - status at submit check: running
+- dependent e300 Gate 1 jobs:
+  - `baseline e300 seed1` FCOS: `1776946.pbs1`, depends on data
+  - `baseline e300 seed2` FCOS: `1776947.pbs1`, depends on data
+  - `baseline e300 seed3` pretrain: `1776948.pbs1`, depends on data
+  - `baseline e300 seed3` FCOS: `1776949.pbs1`, depends on seed3 pretrain
+  - `cosine_ramp e300 seed1` FCOS: `1776950.pbs1`, depends on data
+  - `cosine_ramp e300 seed2` pretrain: `1776951.pbs1`, depends on data
+  - `cosine_ramp e300 seed2` FCOS: `1776952.pbs1`, depends on seed2 pretrain
+  - `cosine_ramp e300 seed3` pretrain: `1776953.pbs1`, depends on data
+  - `cosine_ramp e300 seed3` FCOS: `1776954.pbs1`, depends on seed3 pretrain
+  - `shuffle e300 seed1` FCOS: `1776955.pbs1`, depends on data
+  - `shuffle e300 seed2` pretrain: `1776956.pbs1`, depends on data and the
+    baseline seed3 pretrain slot
+  - `shuffle e300 seed2` FCOS: `1776957.pbs1`, depends on seed2 shuffle pretrain
+  - `shuffle e300 seed3` pretrain: `1776958.pbs1`, depends on data and the
+    cosine seed2 pretrain slot
+  - `shuffle e300 seed3` FCOS: `1776959.pbs1`, depends on seed3 shuffle pretrain
+
+Status:
+- data download started; `dataset/_downloads/archives/NeRF-MAE_pretrain.tar.gz`
+  was growing at the first check.
+- all Gate 1 jobs were held by dependencies at the first submit check.
+
+Fast-path correction:
+- Initial Gate 1 submission used `PRETRAIN_SLOTS=3`, so the first wave after
+  data would have been three 2-node pretrains (`6` rt_HF nodes / `48` GPUs).
+- Because total nodes are available, this was not the absolute fastest plan.
+- `qalter` is unavailable for normal users on ABCI, so the dependent shuffle
+  seed2/3 pretrain and FCOS jobs were deleted and resubmitted without the
+  slot-tail dependency.
+- Active fast-path pretrain jobs after data prep:
+  - `baseline seed3`: `1776948.pbs1`
+  - `cosine seed2`: `1776951.pbs1`
+  - `cosine seed3`: `1776953.pbs1`
+  - `shuffle seed2`: `1776981.pbs1`
+  - `shuffle seed3`: `1776983.pbs1`
+- These five pretrain jobs each request `2` rt_HF nodes / `16` GPUs, so the
+  post-data maximum is `10` rt_HF nodes / `80` GPUs.
+- FCOS remains single-node/single-GPU by design to preserve the downstream
+  protocol, and the FCOS jobs are dependent on either data prep or their own
+  pretrain.
+3. Run preflight:
+   - `bash nerf_mae/probe_scripts/abci3_e300_gate_preflight.sh`
+4. Submit the clean minimal comparison:
+   - if checkpoints were brought over:
+     - `SUBMIT_PRETRAIN=0 SUBMIT_FCOS=1 bash nerf_mae/probe_scripts/submit_abci3_e300_gate_pipeline.sh`
+   - if checkpoints must be regenerated:
+     - `PRETRAIN_NODES=2 PRETRAIN_SLOTS=3 PRETRAIN_BATCH_SIZE_PER_GPU=1 PRETRAIN_EVAL_INTERVAL=300 bash nerf_mae/probe_scripts/submit_abci3_e300_gate_pipeline.sh`
+
+Current blocker:
+- the clean gate should not be submitted until preflight passes.
+- `.venv-abci3` is built and import checks pass.
+- the remaining blocker is the expected preprocessed data symlinks:
+  - `dataset/pretrain/features`
+  - `dataset/pretrain/nerfmae_split.npz`
+  - `dataset/finetune/front3d_rpn_data/features`
+  - `dataset/finetune/front3d_rpn_data/obb`
+  - `dataset/finetune/front3d_rpn_data/3dfront_split.npz`
+
+## Experiment 21: ABCI3 2-seed e300 Gate Restart After Environment Fixes
+
+Snapshot:
+- 2026-05-19 JST
+
+Updated decision:
+- Do not spend points on full 3-seed unless the early gate survives.
+- Current gate is a 2-seed paired check:
+  - `baseline_e300` seeds 1/2
+  - `cosine_ramp_e300` seeds 1/2
+  - `cosine_ramp_alpha_shuffle_e300` seeds 1/2
+- Seed3 jobs from the earlier full-gate submission were cancelled or left out.
+
+Data status:
+- ABCI3 data preparation completed successfully.
+- Active links:
+  - `dataset/pretrain -> dataset/_downloads/pretrain_extract/NeRF-MAE/pretrain`
+  - `dataset/finetune/front3d_rpn_data -> dataset/_downloads/front3d_rpn_extract/front3d_rpn_data`
+- Validation counts:
+  - pretrain feature files: `3260`
+  - pretrain split train/val/test: `3260/20/18`
+  - FCOS feature/OBB files: `159/159`
+  - FCOS split train/val/test: `122/20/17`
+
+ABCI3 environment fixes:
+- Built the missing `sort_vertices` CUDA extension for Python 3.11 / PyTorch
+  2.7.0+cu118.
+- Updated `nerf_rpn/build_rotated_iou.sh` to fall back to system `gcc/g++`
+  when conda compiler wrappers are absent.
+- Added default `TORCH_CUDA_ARCH_LIST=8.0;9.0`, because login nodes do not
+  expose GPUs for architecture auto-detection.
+- Added FCOS job preflight build of `sort_vertices` in
+  `abci3_e300_gate_fcos.pbs`.
+- Fixed multi-node pretrain node-entry env propagation in
+  `abci3_e300_gate_pretrain.pbs`; the generated per-node script now embeds
+  `ABCI3_PRETRAIN_SCRIPT`, hosts/status files, and DDP master/world variables.
+- Patched trusted checkpoint loads for the new PyTorch default
+  `weights_only=True`:
+  - MAE checkpoint load in `nerf_rpn/model/feature_extractor.py`
+  - FCOS checkpoint load in `nerf_rpn/run_fcos_pretrained.py`
+
+Current submitted jobs:
+- Missing pretrains, each `2` rt_HF nodes / `16` GPUs:
+  - `cosine_ramp e300 seed2`: `1777162.pbs1`
+  - `shuffle e300 seed2`: `1777165.pbs1`
+- Held FCOS jobs that will start after their matching pretrain:
+  - `cosine_ramp e300 seed2`: `1777163.pbs1`
+  - `shuffle e300 seed2`: `1777166.pbs1`
+- Existing-checkpoint FCOS jobs resubmitted after the checkpoint-load fix:
+  - `baseline e300 seed1`: `1777173.pbs1`
+  - `baseline e300 seed2`: `1777174.pbs1`
+  - `cosine_ramp e300 seed1`: `1777175.pbs1`
+  - `shuffle e300 seed1`: `1777176.pbs1`
+- Summary job:
+  - `1777177.pbs1`
+  - dependency: `afterany` on all six FCOS jobs
+  - output directory:
+    `output/launcher/abci3_e300_gate_2seed_retry2_existing_fcos`
+
+Result summary tooling:
+- Added `nerf_mae/probe_scripts/summarize_abci3_e300_gate.py`.
+- Added `nerf_mae/probe_scripts/abci3_e300_gate_summary.pbs`.
+- The summary reports AP@50/AP@25/AP@75/Recall@50 top300 plus paired AP@50
+  diffs:
+  - `cosine - baseline`
+  - `cosine - shuffle`
+
+Interpretation rule for this gate:
+- If 2 seeds agree that `cosine > baseline` and `cosine > shuffle`, then spend
+  seed3 / e600 / fixed-ramp points.
+- If seed2 does not agree, stop before expanding the grid.

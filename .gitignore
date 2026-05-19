@@ -1,10 +1,24 @@
+# Data & pretrained weights (local / ABCI symlinks)
 checkpoints/
 dataset/
-nerf_rpn/output/
-# Ignore all __pycache__ directories
-**/__pycache__/
 
-# Ignore all .pyc, .pyo, .pyd files
+# ABCI3 probe virtualenv (see nerf_mae/probe_scripts/setup_abci3_env.sh)
+.venv-abci3/
+
+# Training outputs, launcher logs, wandb (repo-root layout on ABCI3)
+output/
+
+# Job runtime: tmp, caches, torch extensions, multinode PBS artifacts
+runtime/
+
+# Legacy per-package output path (pre-ABCI3 local runs)
+nerf_rpn/output/
+
+# CUDA extension build artifacts (see nerf_rpn/build_rotated_iou.sh)
+nerf_rpn/model/rotated_iou/cuda_op/build/
+
+# Python bytecode
+**/__pycache__/
 **/*.pyc
 **/*.pyo
 **/*.pyd

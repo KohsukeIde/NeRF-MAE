@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+#PBS -q rt_HC
+#PBS -l select=1
+#PBS -l walltime=24:00:00
+#PBS -P gag51404
+#PBS -j oe
+
+set -euo pipefail
+
+cd "${PBS_O_WORKDIR:?PBS_O_WORKDIR is not set}"
+
+ROOT_DIR="${ROOT_DIR:-${PBS_O_WORKDIR}}"
+PROBE_ENV_PREFIX="${PROBE_ENV_PREFIX:-${ROOT_DIR}/.venv-abci3}"
+
+export PATH="${PROBE_ENV_PREFIX}/bin:${PATH}"
+export TMPDIR="${TMPDIR:-${ROOT_DIR}/runtime/tmp}"
+mkdir -p "${ROOT_DIR}/runtime/tmp"
+
+bash "${ROOT_DIR}/nerf_mae/probe_scripts/prepare_abci3_data.sh"

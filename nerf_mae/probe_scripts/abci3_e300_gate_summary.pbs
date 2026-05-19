@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+#PBS -q rt_HC
+#PBS -l select=1
+#PBS -l walltime=01:00:00
+#PBS -P gag51404
+#PBS -j oe
+
+set -euo pipefail
+
+cd "${PBS_O_WORKDIR:?PBS_O_WORKDIR is not set}"
+
+ROOT_DIR="${ROOT_DIR:-${PBS_O_WORKDIR}}"
+PROBE_ENV_PREFIX="${PROBE_ENV_PREFIX:-${ROOT_DIR}/.venv-abci3}"
+SUMMARY_DIR="${SUMMARY_DIR:-${ROOT_DIR}/output/launcher/abci3_e300_gate_2seed_retry1}"
+EPOCHS="${EPOCHS:-300}"
+FCOS_NUM_EPOCHS="${FCOS_NUM_EPOCHS:-1000}"
+RUN_SUFFIX="${RUN_SUFFIX:-abci3clean}"
+SEEDS="${SEEDS:-1 2}"
+
+export PATH="${PROBE_ENV_PREFIX}/bin:${PATH}"
+
+mkdir -p "${SUMMARY_DIR}"
+
+"${PROBE_ENV_PREFIX}/bin/python" "${ROOT_DIR}/nerf_mae/probe_scripts/summarize_abci3_e300_gate.py" \
+  --root "${ROOT_DIR}" \
+  --epochs "${EPOCHS}" \
+  --fcos-epochs "${FCOS_NUM_EPOCHS}" \
+  --run-suffix "${RUN_SUFFIX}" \
+  --seeds ${SEEDS} \
+  --csv-out "${SUMMARY_DIR}/summary.csv" \
+  --md-out "${SUMMARY_DIR}/summary.md" \
+  --json-out "${SUMMARY_DIR}/summary.json"
+
+cat "${SUMMARY_DIR}/summary.md"

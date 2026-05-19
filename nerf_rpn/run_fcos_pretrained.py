@@ -49,6 +49,13 @@ from tqdm import tqdm
 import wandb
 
 
+def torch_load_trusted_checkpoint(path, map_location="cpu"):
+    try:
+        return torch.load(path, map_location=map_location, weights_only=False)
+    except TypeError:
+        return torch.load(path, map_location=map_location)
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Train and eval the NeRF RPN baseline using FCOS."
@@ -380,6 +387,63 @@ def find_free_port():
         return sock.getsockname()[1]
 
 
+def ddp_uses_env():
+    return os.environ.get("NERFMAE_DDP_USE_ENV", "0").lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
+def resolve_ddp_from_env(local_world_size):
+    node_rank = int(
+        os.environ.get("NERFMAE_DDP_NODE_RANK")
+        or os.environ.get("MACHINE_RANK")
+        or os.environ.get("NODE_RANK")
+        or "0"
+    )
+    num_nodes = int(
+        os.environ.get("NERFMAE_DDP_NUM_NODES")
+        or os.environ.get("NUM_MACHINES")
+        or "1"
+    )
+    world_size = int(
+        os.environ.get("NERFMAE_DDP_WORLD_SIZE")
+        or os.environ.get("WORLD_SIZE")
+        or str(num_nodes * local_world_size)
+    )
+    master_addr = (
+        os.environ.get("NERFMAE_DDP_MASTER_ADDR")
+        or os.environ.get("MASTER_ADDR")
+        or os.environ.get("MAIN_PROCESS_IP")
+    )
+    master_port = (
+        os.environ.get("NERFMAE_DDP_MASTER_PORT")
+        or os.environ.get("MASTER_PORT")
+        or os.environ.get("MAIN_PROCESS_PORT")
+        or "29500"
+    )
+
+    if not master_addr:
+        raise ValueError(
+            "NERFMAE_DDP_USE_ENV=1 requires NERFMAE_DDP_MASTER_ADDR or MASTER_ADDR"
+        )
+    if local_world_size < 1:
+        raise ValueError("DDP requires at least one local GPU id")
+    if world_size < local_world_size:
+        raise ValueError(
+            f"world_size={world_size} is smaller than local_world_size={local_world_size}"
+        )
+    if node_rank * local_world_size >= world_size:
+        raise ValueError(
+            f"node_rank={node_rank} and local_world_size={local_world_size} exceed "
+            f"world_size={world_size}"
+        )
+
+    return world_size, node_rank, f"tcp://{master_addr}:{master_port}"
+
+
 def set_random_seed(seed, deterministic=False):
     if deterministic and "CUBLAS_WORKSPACE_CONFIG" not in os.environ:
         os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
@@ -470,7 +534,7 @@ class Trainer:
             )
             if args.load_backbone_only:
                 self.logger.info("Loading backbone only.")
-            checkpoint = torch.load(args.checkpoint, map_location="cpu")
+            checkpoint = torch_load_trusted_checkpoint(args.checkpoint, map_location="cpu")
 
             # print('Training args from previous checkpoint (Not MAE checkpoint):')
             # print(checkpoint['train_args'])
@@ -1303,21 +1367,23 @@ class Trainer:
         print(f"Average inference time: {mean_syn:.4f} ms, std: {std_syn:.4f} ms")
 
 
-def main_worker(proc, nprocs, args, gpu_ids, init_method):
+def main_worker(proc, world_size, args, gpu_ids, init_method, node_rank=0):
     """
     Main worker function for multiprocessing.
     """
+    local_world_size = len(gpu_ids)
+    global_rank = node_rank * local_world_size + proc
     dist.init_process_group(
         backend="nccl",
         # init_method="tcp://127.0.0.1:17700",
         init_method=init_method,
-        world_size=nprocs,
-        rank=proc,
+        world_size=world_size,
+        rank=global_rank,
     )
     torch.cuda.set_device(gpu_ids[proc])
     set_random_seed(args.seed, deterministic=args.deterministic)
 
-    logger = logging.getLogger(f"worker_{proc}")
+    logger = logging.getLogger(f"worker_{global_rank}")
     logger.setLevel(logging.DEBUG)
     logger.propagate = False
     formatter = logging.Formatter("[%(asctime)s %(levelname)s] %(message)s")
@@ -1329,12 +1395,14 @@ def main_worker(proc, nprocs, args, gpu_ids, init_method):
     if args.log_to_file:
         log_dir = os.path.join(args.save_path, "log")
         os.makedirs(log_dir, exist_ok=True)
-        file_handler = logging.FileHandler(os.path.join(log_dir, f"worker_{proc}.log"))
+        file_handler = logging.FileHandler(
+            os.path.join(log_dir, f"worker_{global_rank}.log")
+        )
         file_handler.setFormatter(formatter)
         file_handler.setLevel(logging.DEBUG)
         logger.addHandler(file_handler)
 
-    trainer = Trainer(args, proc, nprocs, gpu_ids[proc], logger)
+    trainer = Trainer(args, global_rank, world_size, gpu_ids[proc], logger)
     dist.barrier()
     if args.mode == "train":
         trainer.train_loop()
@@ -1370,11 +1438,9 @@ def main():
             else:
                 gpu_ids.append(int(token))
 
-    port = find_free_port()
-    init_method = f"tcp://127.0.0.1:{port}"
-    print("init_method", init_method)
+    use_env_ddp = ddp_uses_env()
 
-    if len(gpu_ids) <= 1:
+    if len(gpu_ids) <= 1 and not use_env_ddp:
         if len(gpu_ids) == 1:
             torch.cuda.set_device(gpu_ids[0])
 
@@ -1402,12 +1468,26 @@ def main():
         elif args.mode == "benchmark":
             trainer.benchmark()
     else:
-        nprocs = len(gpu_ids)
-        logging.info(f"Using {nprocs} processes for DDP, GPUs: {gpu_ids}")
+        local_world_size = len(gpu_ids)
+        if use_env_ddp:
+            world_size, node_rank, init_method = resolve_ddp_from_env(local_world_size)
+        else:
+            port = find_free_port()
+            init_method = f"tcp://127.0.0.1:{port}"
+            world_size = local_world_size
+            node_rank = 0
+        print("init_method", init_method)
+        logging.info(
+            "Using DDP world_size=%s local_world_size=%s node_rank=%s GPUs=%s",
+            world_size,
+            local_world_size,
+            node_rank,
+            gpu_ids,
+        )
         mp.spawn(
             main_worker,
-            nprocs=nprocs,
-            args=(nprocs, args, gpu_ids, init_method),
+            nprocs=local_world_size,
+            args=(world_size, args, gpu_ids, init_method, node_rank),
             join=True,
         )
 

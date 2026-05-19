@@ -1,0 +1,7 @@
+292M	output/nerf_mae/results/nerfmae_all_p1.0_e300_seed1/epoch_300.pt
+1.7G	output/nerf_mae/results/nerfmae_all_p1.0_e300_seed2/epoch_300.pt
+827M	output/nerf_mae/results/nerfmae_all_p1.0_e300_seed3/epoch_220.pt
+292M	output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1/epoch_300.pt
+827M	output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_alpha_shuffle_p1.0_e300_seed1/epoch_300.pt
+827M	output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e600_seed1/epoch_600.pt
+292M	output/nerf_mae/results/nerfmae_all_p1.0_e1200_seed1/epoch_1200.pt

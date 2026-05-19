@@ -4,6 +4,7 @@ set -x
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+source "${ROOT_DIR}/nerf_mae/probe_scripts/_probe_common.sh"
 
 PRETRAIN_SAVE_NAME="${PRETRAIN_SAVE_NAME:?PRETRAIN_SAVE_NAME is required}"
 VARIANT_NAME="${VARIANT_NAME:?VARIANT_NAME is required}"
@@ -11,6 +12,7 @@ VARIANT_NAME="${VARIANT_NAME:?VARIANT_NAME is required}"
 GPU_IDS="${GPU_IDS:-0}"
 DATASET_NAME="${DATASET_NAME:-front3d}"
 SPLIT_NAME="${SPLIT_NAME:-3dfront}"
+DATA_ROOT="${DATA_ROOT:-../dataset/finetune/${DATASET_NAME}_rpn_data}"
 PERCENT_TRAIN="${PERCENT_TRAIN:-1.0}"
 FCOS_NUM_EPOCHS="${FCOS_NUM_EPOCHS:-100}"
 FCOS_LR="${FCOS_LR:-1e-4}"
@@ -30,12 +32,13 @@ EVAL_SAVE_PATH="${EVAL_SAVE_PATH:-../output/nerf_rpn/results/${EVAL_SAVE_NAME}}"
 
 cd "${SCRIPT_DIR}"
 
-export PATH="/home/minesawa/anaconda3/envs/nerf-mae-shortcut-probe/bin:${PATH}"
+export PATH="${PROBE_ENV_PREFIX}/bin:${PATH}"
 export PYTHONPATH="${ROOT_DIR}"
 export WANDB_MODE="${WANDB_MODE:-offline}"
 
 export DATASET_NAME
 export SPLIT_NAME
+export DATA_ROOT
 export GPU_IDS
 export PERCENT_TRAIN
 export NUM_EPOCHS="${FCOS_NUM_EPOCHS}"

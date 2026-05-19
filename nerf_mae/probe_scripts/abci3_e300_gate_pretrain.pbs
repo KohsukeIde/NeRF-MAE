@@ -1,0 +1,345 @@
+#!/usr/bin/env bash
+#PBS -q rt_HF
+#PBS -l select=1
+#PBS -l walltime=72:00:00
+#PBS -P gag51404
+#PBS -j oe
+
+set -euo pipefail
+
+cd "${PBS_O_WORKDIR:?PBS_O_WORKDIR is not set}"
+
+ROOT_DIR="${ROOT_DIR:-${PBS_O_WORKDIR}}"
+KIND="${KIND:?KIND is required}"
+CONDITION="${CONDITION:?CONDITION is required}"
+EPOCHS="${EPOCHS:?EPOCHS is required}"
+SEED="${SEED:?SEED is required}"
+RUN_SUFFIX="${RUN_SUFFIX:-abci3clean}"
+
+PROBE_ENV_PREFIX="${PROBE_ENV_PREFIX:-${ROOT_DIR}/.venv-abci3}"
+PRETRAIN_DATA_ROOT="${PRETRAIN_DATA_ROOT:-${ROOT_DIR}/dataset/pretrain}"
+ABCI3_CUDA_MODULE="${ABCI3_CUDA_MODULE:-cuda/11.8/11.8.0}"
+PRETRAIN_GPU_IDS="${PRETRAIN_GPU_IDS:-0,1,2,3,4,5,6,7}"
+PRETRAIN_GPU_IDS="${PRETRAIN_GPU_IDS//:/,}"
+PRETRAIN_NODES="${PRETRAIN_NODES:-}"
+PRETRAIN_BATCH_SIZE_PER_GPU="${PRETRAIN_BATCH_SIZE_PER_GPU:-}"
+PRETRAIN_LR="${PRETRAIN_LR:-1e-3}"
+PRETRAIN_WEIGHT_DECAY="${PRETRAIN_WEIGHT_DECAY:-0.0}"
+PRETRAIN_EVAL_INTERVAL="${PRETRAIN_EVAL_INTERVAL:-10}"
+PRETRAIN_LOG_INTERVAL="${PRETRAIN_LOG_INTERVAL:-30}"
+AUTO_RESUME_PRETRAIN="${AUTO_RESUME_PRETRAIN:-1}"
+RESUME_ALLOW_PARTIAL="${RESUME_ALLOW_PARTIAL:-1}"
+SKIP_EXISTING="${SKIP_EXISTING:-1}"
+USE_WANDB="${USE_WANDB:-0}"
+WANDB_MODE="${WANDB_MODE:-offline}"
+DETERMINISTIC="${DETERMINISTIC:-1}"
+PRETRAIN_MASTER_PORT="${PRETRAIN_MASTER_PORT:-29500}"
+
+count_gpu_ids() {
+  local spec="$1"
+  local count=0 token start end
+  IFS=',' read -r -a tokens <<< "${spec}"
+  for token in "${tokens[@]}"; do
+    token="${token//[[:space:]]/}"
+    [[ -n "${token}" ]] || continue
+    if [[ "${token}" == *-* ]]; then
+      IFS='-' read -r start end <<< "${token}"
+      count=$((count + end - start + 1))
+    else
+      count=$((count + 1))
+    fi
+  done
+  [[ "${count}" -gt 0 ]] || count=1
+  printf "%s\n" "${count}"
+}
+
+pbs_unique_node_count() {
+  if [[ -n "${PBS_NODEFILE:-}" && -f "${PBS_NODEFILE}" ]]; then
+    awk '!seen[$0]++ { count++ } END { print count + 0 }' "${PBS_NODEFILE}"
+  else
+    printf "1\n"
+  fi
+}
+
+write_unique_hosts() {
+  local out="$1"
+  if [[ -n "${PBS_NODEFILE:-}" && -f "${PBS_NODEFILE}" ]]; then
+    awk '!seen[$0]++ { print }' "${PBS_NODEFILE}" > "${out}"
+  else
+    hostname > "${out}"
+  fi
+}
+
+resolve_node_rank() {
+  local hosts_file="$1"
+  local host short
+  host="$(hostname)"
+  short="${host%%.*}"
+  awk -v host="${host}" -v short="${short}" '
+    {
+      candidate=$1
+      candidate_short=candidate
+      sub(/\..*/, "", candidate_short)
+      if (candidate == host || candidate_short == short) {
+        print NR - 1
+        found=1
+        exit
+      }
+    }
+    END {
+      if (!found) {
+        exit 1
+      }
+    }
+  ' "${hosts_file}"
+}
+
+configure_node_network() {
+  local iface=""
+  if command -v ip >/dev/null 2>&1; then
+    iface="$(ip -o link show 2>/dev/null | awk -F': ' '/: ibp/ { print $2; exit }')"
+  fi
+  if [[ -n "${iface}" ]]; then
+    export NCCL_SOCKET_IFNAME="${NCCL_SOCKET_IFNAME:-${iface}}"
+    export GLOO_SOCKET_IFNAME="${GLOO_SOCKET_IFNAME:-${iface}}"
+  fi
+  export NCCL_IB_HCA="${NCCL_IB_HCA:-mlx5_0,mlx5_1}"
+  export NCCL_DEBUG="${NCCL_DEBUG:-WARN}"
+}
+
+suffix_part=""
+if [[ -n "${RUN_SUFFIX}" ]]; then
+  suffix_part="_${RUN_SUFFIX}"
+fi
+
+case "${KIND}:${CONDITION}" in
+  baseline:baseline)
+    SAVE_NAME="nerfmae_all_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
+    ;;
+  curriculum:cosine_ramp|curriculum:cosine_ramp_alpha_shuffle)
+    SAVE_NAME="nerfmae_alpha_rgba_curr_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
+    ;;
+  *)
+    echo "[error] unknown KIND:CONDITION=${KIND}:${CONDITION}" >&2
+    exit 1
+    ;;
+esac
+
+CHECKPOINT_PATH="${ROOT_DIR}/output/nerf_mae/results/${SAVE_NAME}/epoch_${EPOCHS}.pt"
+if [[ "${SKIP_EXISTING}" == "1" && -f "${CHECKPOINT_PATH}" ]]; then
+  echo "[info] skip existing pretrain checkpoint=${CHECKPOINT_PATH}"
+  exit 0
+fi
+
+latest_epoch_checkpoint() {
+  local dir="${ROOT_DIR}/output/nerf_mae/results/${SAVE_NAME}"
+  [[ -d "${dir}" ]] || return 0
+  find "${dir}" -maxdepth 1 -name 'epoch_*.pt' -print | sort -V | tail -n 1
+}
+
+if [[ "${1:-}" == "--resolve-node-rank" ]]; then
+  resolve_node_rank "${2:?hosts file is required}"
+  exit 0
+fi
+
+PRETRAIN_LOCAL_WORLD_SIZE="$(count_gpu_ids "${PRETRAIN_GPU_IDS}")"
+if [[ -z "${PRETRAIN_NODES}" ]]; then
+  PRETRAIN_NODES="$(pbs_unique_node_count)"
+fi
+PRETRAIN_WORLD_SIZE=$((PRETRAIN_NODES * PRETRAIN_LOCAL_WORLD_SIZE))
+if [[ -z "${PRETRAIN_BATCH_SIZE_PER_GPU}" ]]; then
+  if (( PRETRAIN_NODES > 1 )); then
+    PRETRAIN_BATCH_SIZE_PER_GPU=1
+  else
+    PRETRAIN_BATCH_SIZE_PER_GPU=2
+  fi
+fi
+PRETRAIN_BATCH_SIZE="${PRETRAIN_BATCH_SIZE:-$((PRETRAIN_WORLD_SIZE * PRETRAIN_BATCH_SIZE_PER_GPU))}"
+
+if (( PRETRAIN_NODES > 1 && ${ABCI3_NODE_ENTRY:-0} != 1 )); then
+  command -v pbsdsh >/dev/null 2>&1 || {
+    echo "[error] pbsdsh is required for PRETRAIN_NODES=${PRETRAIN_NODES}" >&2
+    exit 1
+  }
+
+  mkdir -p "${ROOT_DIR}/runtime/abci3_multinode"
+  HOSTS_FILE="${ROOT_DIR}/runtime/abci3_multinode/${SAVE_NAME}.${PBS_JOBID:-$$}.hosts"
+  NODE_ENTRY="${ROOT_DIR}/runtime/abci3_multinode/${SAVE_NAME}.${PBS_JOBID:-$$}.node_entry.sh"
+  STATUS_DIR="${ROOT_DIR}/runtime/abci3_multinode/${SAVE_NAME}.${PBS_JOBID:-$$}.status"
+  rm -rf "${STATUS_DIR}"
+  mkdir -p "${STATUS_DIR}"
+  write_unique_hosts "${HOSTS_FILE}"
+
+  actual_nodes="$(wc -l < "${HOSTS_FILE}" | tr -d '[:space:]')"
+  if [[ "${actual_nodes}" != "${PRETRAIN_NODES}" ]]; then
+    echo "[error] PRETRAIN_NODES=${PRETRAIN_NODES}, but PBS allocated ${actual_nodes} unique nodes" >&2
+    exit 1
+  fi
+
+  MASTER_HOST="$(sed -n '1p' "${HOSTS_FILE}")"
+  MASTER_ADDR="$(getent ahostsv4 "${MASTER_HOST}" | awk '{ print $1; exit }')"
+  MASTER_ADDR="${MASTER_ADDR:-${MASTER_HOST}}"
+
+  export ABCI3_PRETRAIN_SCRIPT="${BASH_SOURCE[0]}"
+  export ABCI3_PRETRAIN_HOSTS_FILE="${HOSTS_FILE}"
+  export ABCI3_PRETRAIN_STATUS_DIR="${STATUS_DIR}"
+  export NERFMAE_DDP_USE_ENV=1
+  export NERFMAE_DDP_NUM_NODES="${PRETRAIN_NODES}"
+  export NERFMAE_DDP_WORLD_SIZE="${PRETRAIN_WORLD_SIZE}"
+  export NERFMAE_DDP_MASTER_ADDR="${MASTER_ADDR}"
+  export NERFMAE_DDP_MASTER_PORT="${PRETRAIN_MASTER_PORT}"
+  export PRETRAIN_BATCH_SIZE
+  export PRETRAIN_BATCH_SIZE_PER_GPU
+
+  cat > "${NODE_ENTRY}" <<EOS
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(printf '%q' "${ROOT_DIR}")"
+export ABCI3_PRETRAIN_SCRIPT="$(printf '%q' "${BASH_SOURCE[0]}")"
+export ABCI3_PRETRAIN_HOSTS_FILE="$(printf '%q' "${HOSTS_FILE}")"
+export ABCI3_PRETRAIN_STATUS_DIR="$(printf '%q' "${STATUS_DIR}")"
+export NERFMAE_DDP_USE_ENV=1
+export NERFMAE_DDP_NUM_NODES="$(printf '%q' "${PRETRAIN_NODES}")"
+export NERFMAE_DDP_WORLD_SIZE="$(printf '%q' "${PRETRAIN_WORLD_SIZE}")"
+export NERFMAE_DDP_MASTER_ADDR="$(printf '%q' "${MASTER_ADDR}")"
+export NERFMAE_DDP_MASTER_PORT="$(printf '%q' "${PRETRAIN_MASTER_PORT}")"
+export PRETRAIN_NODES="$(printf '%q' "${PRETRAIN_NODES}")"
+export PRETRAIN_BATCH_SIZE="$(printf '%q' "${PRETRAIN_BATCH_SIZE}")"
+export PRETRAIN_BATCH_SIZE_PER_GPU="$(printf '%q' "${PRETRAIN_BATCH_SIZE_PER_GPU}")"
+export PRETRAIN_GPU_IDS="$(printf '%q' "${PRETRAIN_GPU_IDS}")"
+export PRETRAIN_MASTER_PORT="$(printf '%q' "${PRETRAIN_MASTER_PORT}")"
+rank="\$(bash "\${ABCI3_PRETRAIN_SCRIPT}" --resolve-node-rank "\${ABCI3_PRETRAIN_HOSTS_FILE}")"
+export NERFMAE_DDP_NODE_RANK="\${rank}"
+export ABCI3_NODE_ENTRY=1
+
+if bash "\${ABCI3_PRETRAIN_SCRIPT}"; then
+  touch "\${ABCI3_PRETRAIN_STATUS_DIR}/rank_\${rank}.ok"
+else
+  status=\$?
+  touch "\${ABCI3_PRETRAIN_STATUS_DIR}/rank_\${rank}.fail"
+  exit "\${status}"
+fi
+EOS
+  chmod +x "${NODE_ENTRY}"
+
+  echo "[info] launching multi-node pretrain nodes=${PRETRAIN_NODES} local_gpus=${PRETRAIN_LOCAL_WORLD_SIZE} world=${PRETRAIN_WORLD_SIZE} master=${MASTER_ADDR}:${PRETRAIN_MASTER_PORT}"
+  pbsdsh -c "${PRETRAIN_NODES}" "${NODE_ENTRY}"
+
+  if find "${STATUS_DIR}" -maxdepth 1 -name 'rank_*.fail' | grep -q .; then
+    echo "[error] at least one node failed; status dir=${STATUS_DIR}" >&2
+    exit 1
+  fi
+  for rank in $(seq 0 $((PRETRAIN_NODES - 1))); do
+    if [[ ! -f "${STATUS_DIR}/rank_${rank}.ok" ]]; then
+      echo "[error] missing completion marker for node rank ${rank}; status dir=${STATUS_DIR}" >&2
+      exit 1
+    fi
+  done
+
+  test -f "${CHECKPOINT_PATH}"
+  echo "[info] pretrain complete checkpoint=${CHECKPOINT_PATH}"
+  exit 0
+fi
+
+source /etc/profile.d/modules.sh
+module load "${ABCI3_CUDA_MODULE}"
+configure_node_network
+
+export PROBE_ENV_PREFIX
+export PROBE_RUNTIME_ROOT="${PROBE_RUNTIME_ROOT:-${ROOT_DIR}/runtime}"
+export PROBE_LOG_ROOT_DEFAULT="${PROBE_LOG_ROOT_DEFAULT:-${ROOT_DIR}/output/launcher}"
+export WANDB_DIR="${WANDB_DIR:-${ROOT_DIR}/output/wandb}"
+export TMPDIR="${TMPDIR:-${ROOT_DIR}/runtime/tmp}"
+export TORCH_EXTENSIONS_DIR="${TORCH_EXTENSIONS_DIR:-${ROOT_DIR}/runtime/torch_extensions}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-${ROOT_DIR}/runtime/cache}"
+export TORCH_HOME="${TORCH_HOME:-${ROOT_DIR}/runtime/torch_home}"
+export WANDB_MODE
+export PYTHONPATH="${ROOT_DIR}"
+export PATH="${PROBE_ENV_PREFIX}/bin:${PATH}"
+
+if (( PRETRAIN_NODES > 1 )); then
+  export NERFMAE_DDP_USE_ENV="${NERFMAE_DDP_USE_ENV:-1}"
+  export NERFMAE_DDP_NUM_NODES="${NERFMAE_DDP_NUM_NODES:-${PRETRAIN_NODES}}"
+  export NERFMAE_DDP_WORLD_SIZE="${NERFMAE_DDP_WORLD_SIZE:-${PRETRAIN_WORLD_SIZE}}"
+  export NERFMAE_DDP_MASTER_PORT="${NERFMAE_DDP_MASTER_PORT:-${PRETRAIN_MASTER_PORT}}"
+fi
+
+mkdir -p "${ROOT_DIR}/output/launcher" "${ROOT_DIR}/runtime"
+
+common_env=(
+  DATA_ROOT="${PRETRAIN_DATA_ROOT}"
+  DATASET_NAME=nerfmae
+  SAVE_NAME="${SAVE_NAME}"
+  RUN_TAG="${SAVE_NAME}"
+  GPU_IDS="${PRETRAIN_GPU_IDS}"
+  NUM_EPOCHS="${EPOCHS}"
+  PERCENT_TRAIN=1.0
+  BATCH_SIZE="${PRETRAIN_BATCH_SIZE}"
+  BATCH_SIZE_PER_GPU="${PRETRAIN_BATCH_SIZE_PER_GPU}"
+  LR="${PRETRAIN_LR}"
+  WEIGHT_DECAY="${PRETRAIN_WEIGHT_DECAY}"
+  LOG_INTERVAL="${PRETRAIN_LOG_INTERVAL}"
+  EVAL_INTERVAL="${PRETRAIN_EVAL_INTERVAL}"
+  USE_WANDB="${USE_WANDB}"
+  WANDB_MODE="${WANDB_MODE}"
+  SEED="${SEED}"
+  DETERMINISTIC="${DETERMINISTIC}"
+)
+
+resume_env=()
+if [[ "${AUTO_RESUME_PRETRAIN}" == "1" ]]; then
+  resume_checkpoint="$(latest_epoch_checkpoint || true)"
+  if [[ -n "${resume_checkpoint}" && "${resume_checkpoint}" != "${CHECKPOINT_PATH}" ]]; then
+    echo "[info] auto-resume pretrain save=${SAVE_NAME} checkpoint=${resume_checkpoint}"
+    resume_env=(
+      RESUME_CHECKPOINT="${resume_checkpoint}"
+      RESUME_ALLOW_PARTIAL="${RESUME_ALLOW_PARTIAL}"
+    )
+  fi
+fi
+
+cd "${ROOT_DIR}/nerf_mae"
+
+case "${KIND}:${CONDITION}" in
+  baseline:baseline)
+    env "${common_env[@]}" "${resume_env[@]}" PROBE_MODE=baseline bash train_mae3d.sh
+    ;;
+  curriculum:cosine_ramp)
+    env "${common_env[@]}" "${resume_env[@]}" \
+      PROBE_MODE=custom \
+      PROBE_RGB_INPUT=keep \
+      PROBE_ALPHA_INPUT=keep \
+      PROBE_ALPHA_TARGET=keep \
+      PROBE_RGB_LOSS=occupied \
+      PROBE_ALPHA_LOSS=removed \
+      PROBE_RGB_WEIGHT=1.0 \
+      PROBE_ALPHA_WEIGHT=1.0 \
+      PROBE_CURRICULUM=cosine_rgb_ramp \
+      PROBE_CURRICULUM_EPOCHS="${EPOCHS}" \
+      PROBE_CURRICULUM_RGB_START_WEIGHT=0.0 \
+      PROBE_CURRICULUM_RGB_END_WEIGHT=1.0 \
+      PROBE_CURRICULUM_ALPHA_WEIGHT=1.0 \
+      bash train_mae3d.sh
+    ;;
+  curriculum:cosine_ramp_alpha_shuffle)
+    env "${common_env[@]}" "${resume_env[@]}" \
+      PROBE_MODE=custom \
+      PROBE_RGB_INPUT=keep \
+      PROBE_ALPHA_INPUT=keep \
+      PROBE_ALPHA_TARGET=shuffle \
+      PROBE_RGB_LOSS=occupied \
+      PROBE_ALPHA_LOSS=removed \
+      PROBE_RGB_WEIGHT=1.0 \
+      PROBE_ALPHA_WEIGHT=1.0 \
+      PROBE_CURRICULUM=cosine_rgb_ramp \
+      PROBE_CURRICULUM_EPOCHS="${EPOCHS}" \
+      PROBE_CURRICULUM_RGB_START_WEIGHT=0.0 \
+      PROBE_CURRICULUM_RGB_END_WEIGHT=1.0 \
+      PROBE_CURRICULUM_ALPHA_WEIGHT=1.0 \
+      bash train_mae3d.sh
+    ;;
+esac
+
+test -f "${CHECKPOINT_PATH}"
+echo "[info] pretrain complete checkpoint=${CHECKPOINT_PATH}"

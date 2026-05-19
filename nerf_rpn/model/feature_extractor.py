@@ -36,6 +36,13 @@ from nerf_mae.model.mae.torch_utils import *
 # import segmentation_models_pytorch as smp
 
 
+def _torch_load_trusted_checkpoint(path, map_location="cpu"):
+    try:
+        return torch.load(path, map_location=map_location, weights_only=False)
+    except TypeError:
+        return torch.load(path, map_location=map_location)
+
+
 # Simplified 3D Residual Block
 class ResidualBlockSimplified(nn.Module):
     """The simplified Basic Residual block of ResNet."""
@@ -1152,7 +1159,7 @@ class SwinTransformer_FPN_Pretrained_Skip(nn.Module):  # TODO: change to 3D
             )
 
             # print(f"Loading checkpoint from {checkpoint_path}.")
-            checkpoint = torch.load(checkpoint_path, map_location="cpu")
+            checkpoint = _torch_load_trusted_checkpoint(checkpoint_path, map_location="cpu")
             model.load_state_dict(checkpoint["state_dict"])
 
         del model.decoder4
