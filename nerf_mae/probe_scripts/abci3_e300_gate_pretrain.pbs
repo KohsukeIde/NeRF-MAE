@@ -26,7 +26,15 @@ PRETRAIN_BATCH_SIZE_PER_GPU="${PRETRAIN_BATCH_SIZE_PER_GPU:-}"
 PRETRAIN_LR="${PRETRAIN_LR:-1e-3}"
 PRETRAIN_WEIGHT_DECAY="${PRETRAIN_WEIGHT_DECAY:-0.0}"
 PRETRAIN_EVAL_INTERVAL="${PRETRAIN_EVAL_INTERVAL:-10}"
+PRETRAIN_CHECKPOINT_INTERVAL="${PRETRAIN_CHECKPOINT_INTERVAL:-10}"
 PRETRAIN_LOG_INTERVAL="${PRETRAIN_LOG_INTERVAL:-30}"
+DISABLE_ABS_POS_EMBED="${DISABLE_ABS_POS_EMBED:-0}"
+DISABLE_RELATIVE_POSITION_BIAS="${DISABLE_RELATIVE_POSITION_BIAS:-0}"
+ROTATE_PROB="${ROTATE_PROB:-}"
+FLIP_PROB="${FLIP_PROB:-}"
+ROT_SCALE_PROB="${ROT_SCALE_PROB:-}"
+COORD_SHIFT_PROB="${COORD_SHIFT_PROB:-}"
+COORD_SHIFT_MAX_VOXELS="${COORD_SHIFT_MAX_VOXELS:-}"
 AUTO_RESUME_PRETRAIN="${AUTO_RESUME_PRETRAIN:-1}"
 RESUME_ALLOW_PARTIAL="${RESUME_ALLOW_PARTIAL:-1}"
 SKIP_EXISTING="${SKIP_EXISTING:-1}"
@@ -34,6 +42,18 @@ USE_WANDB="${USE_WANDB:-0}"
 WANDB_MODE="${WANDB_MODE:-offline}"
 DETERMINISTIC="${DETERMINISTIC:-1}"
 PRETRAIN_MASTER_PORT="${PRETRAIN_MASTER_PORT:-29500}"
+
+normalize_empty_literal() {
+  local name="$1"
+  local value="${!name:-}"
+  if [[ "${value}" == "''" || "${value}" == '""' ]]; then
+    printf -v "${name}" '%s' ""
+  fi
+}
+
+for optional_arg in ROTATE_PROB FLIP_PROB ROT_SCALE_PROB COORD_SHIFT_PROB COORD_SHIFT_MAX_VOXELS; do
+  normalize_empty_literal "${optional_arg}"
+done
 
 count_gpu_ids() {
   local spec="$1"
@@ -119,6 +139,9 @@ case "${KIND}:${CONDITION}" in
   curriculum:cosine_ramp|curriculum:cosine_ramp_alpha_shuffle)
     SAVE_NAME="nerfmae_alpha_rgba_curr_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
+  diagnostic:alpha_target_only|diagnostic:alpha_target_only_no_pos|diagnostic:alpha_target_only_coord_jitter|diagnostic:baseline_no_pos|diagnostic:cosine_no_pos|diagnostic:cosine_coord_jitter)
+    SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
+    ;;
   *)
     echo "[error] unknown KIND:CONDITION=${KIND}:${CONDITION}" >&2
     exit 1
@@ -180,7 +203,8 @@ if (( PRETRAIN_NODES > 1 && ${ABCI3_NODE_ENTRY:-0} != 1 )); then
   MASTER_ADDR="$(getent ahostsv4 "${MASTER_HOST}" | awk '{ print $1; exit }')"
   MASTER_ADDR="${MASTER_ADDR:-${MASTER_HOST}}"
 
-  export ABCI3_PRETRAIN_SCRIPT="${BASH_SOURCE[0]}"
+  PRETRAIN_SCRIPT_PATH="${ROOT_DIR}/nerf_mae/probe_scripts/abci3_e300_gate_pretrain.pbs"
+  export ABCI3_PRETRAIN_SCRIPT="${PRETRAIN_SCRIPT_PATH}"
   export ABCI3_PRETRAIN_HOSTS_FILE="${HOSTS_FILE}"
   export ABCI3_PRETRAIN_STATUS_DIR="${STATUS_DIR}"
   export NERFMAE_DDP_USE_ENV=1
@@ -196,9 +220,31 @@ if (( PRETRAIN_NODES > 1 && ${ABCI3_NODE_ENTRY:-0} != 1 )); then
 set -euo pipefail
 
 cd "$(printf '%q' "${ROOT_DIR}")"
-export ABCI3_PRETRAIN_SCRIPT="$(printf '%q' "${BASH_SOURCE[0]}")"
+export ABCI3_PRETRAIN_SCRIPT="$(printf '%q' "${PRETRAIN_SCRIPT_PATH}")"
 export ABCI3_PRETRAIN_HOSTS_FILE="$(printf '%q' "${HOSTS_FILE}")"
 export ABCI3_PRETRAIN_STATUS_DIR="$(printf '%q' "${STATUS_DIR}")"
+export ROOT_DIR="$(printf '%q' "${ROOT_DIR}")"
+export KIND="$(printf '%q' "${KIND}")"
+export CONDITION="$(printf '%q' "${CONDITION}")"
+export EPOCHS="$(printf '%q' "${EPOCHS}")"
+export SEED="$(printf '%q' "${SEED}")"
+export RUN_SUFFIX="$(printf '%q' "${RUN_SUFFIX}")"
+export PROBE_ENV_PREFIX="$(printf '%q' "${PROBE_ENV_PREFIX}")"
+export PRETRAIN_DATA_ROOT="$(printf '%q' "${PRETRAIN_DATA_ROOT}")"
+export ABCI3_CUDA_MODULE="$(printf '%q' "${ABCI3_CUDA_MODULE}")"
+export AUTO_RESUME_PRETRAIN="$(printf '%q' "${AUTO_RESUME_PRETRAIN}")"
+export RESUME_ALLOW_PARTIAL="$(printf '%q' "${RESUME_ALLOW_PARTIAL}")"
+export SKIP_EXISTING="$(printf '%q' "${SKIP_EXISTING}")"
+export USE_WANDB="$(printf '%q' "${USE_WANDB}")"
+export WANDB_MODE="$(printf '%q' "${WANDB_MODE}")"
+export DETERMINISTIC="$(printf '%q' "${DETERMINISTIC}")"
+export DISABLE_ABS_POS_EMBED="$(printf '%q' "${DISABLE_ABS_POS_EMBED}")"
+export DISABLE_RELATIVE_POSITION_BIAS="$(printf '%q' "${DISABLE_RELATIVE_POSITION_BIAS}")"
+export ROTATE_PROB="$(printf '%q' "${ROTATE_PROB}")"
+export FLIP_PROB="$(printf '%q' "${FLIP_PROB}")"
+export ROT_SCALE_PROB="$(printf '%q' "${ROT_SCALE_PROB}")"
+export COORD_SHIFT_PROB="$(printf '%q' "${COORD_SHIFT_PROB}")"
+export COORD_SHIFT_MAX_VOXELS="$(printf '%q' "${COORD_SHIFT_MAX_VOXELS}")"
 export NERFMAE_DDP_USE_ENV=1
 export NERFMAE_DDP_NUM_NODES="$(printf '%q' "${PRETRAIN_NODES}")"
 export NERFMAE_DDP_WORLD_SIZE="$(printf '%q' "${PRETRAIN_WORLD_SIZE}")"
@@ -208,6 +254,7 @@ export PRETRAIN_NODES="$(printf '%q' "${PRETRAIN_NODES}")"
 export PRETRAIN_BATCH_SIZE="$(printf '%q' "${PRETRAIN_BATCH_SIZE}")"
 export PRETRAIN_BATCH_SIZE_PER_GPU="$(printf '%q' "${PRETRAIN_BATCH_SIZE_PER_GPU}")"
 export PRETRAIN_GPU_IDS="$(printf '%q' "${PRETRAIN_GPU_IDS}")"
+export PRETRAIN_CHECKPOINT_INTERVAL="$(printf '%q' "${PRETRAIN_CHECKPOINT_INTERVAL}")"
 export PRETRAIN_MASTER_PORT="$(printf '%q' "${PRETRAIN_MASTER_PORT}")"
 rank="\$(bash "\${ABCI3_PRETRAIN_SCRIPT}" --resolve-node-rank "\${ABCI3_PRETRAIN_HOSTS_FILE}")"
 export NERFMAE_DDP_NODE_RANK="\${rank}"
@@ -281,10 +328,18 @@ common_env=(
   WEIGHT_DECAY="${PRETRAIN_WEIGHT_DECAY}"
   LOG_INTERVAL="${PRETRAIN_LOG_INTERVAL}"
   EVAL_INTERVAL="${PRETRAIN_EVAL_INTERVAL}"
+  CHECKPOINT_INTERVAL="${PRETRAIN_CHECKPOINT_INTERVAL}"
   USE_WANDB="${USE_WANDB}"
   WANDB_MODE="${WANDB_MODE}"
   SEED="${SEED}"
   DETERMINISTIC="${DETERMINISTIC}"
+  DISABLE_ABS_POS_EMBED="${DISABLE_ABS_POS_EMBED}"
+  DISABLE_RELATIVE_POSITION_BIAS="${DISABLE_RELATIVE_POSITION_BIAS}"
+  ROTATE_PROB="${ROTATE_PROB}"
+  FLIP_PROB="${FLIP_PROB}"
+  ROT_SCALE_PROB="${ROT_SCALE_PROB}"
+  COORD_SHIFT_PROB="${COORD_SHIFT_PROB}"
+  COORD_SHIFT_MAX_VOXELS="${COORD_SHIFT_MAX_VOXELS}"
 )
 
 resume_env=()
@@ -328,6 +383,66 @@ case "${KIND}:${CONDITION}" in
       PROBE_RGB_INPUT=keep \
       PROBE_ALPHA_INPUT=keep \
       PROBE_ALPHA_TARGET=shuffle \
+      PROBE_RGB_LOSS=occupied \
+      PROBE_ALPHA_LOSS=removed \
+      PROBE_RGB_WEIGHT=1.0 \
+      PROBE_ALPHA_WEIGHT=1.0 \
+      PROBE_CURRICULUM=cosine_rgb_ramp \
+      PROBE_CURRICULUM_EPOCHS="${EPOCHS}" \
+      PROBE_CURRICULUM_RGB_START_WEIGHT=0.0 \
+      PROBE_CURRICULUM_RGB_END_WEIGHT=1.0 \
+      PROBE_CURRICULUM_ALPHA_WEIGHT=1.0 \
+      bash train_mae3d.sh
+    ;;
+  diagnostic:alpha_target_only|diagnostic:alpha_target_only_no_pos|diagnostic:alpha_target_only_coord_jitter)
+    extra_env=()
+    if [[ "${CONDITION}" == "alpha_target_only_no_pos" ]]; then
+      extra_env=(DISABLE_ABS_POS_EMBED=1 DISABLE_RELATIVE_POSITION_BIAS=1)
+    elif [[ "${CONDITION}" == "alpha_target_only_coord_jitter" ]]; then
+      extra_env=(
+        ROTATE_PROB="${ROTATE_PROB:-1.0}"
+        FLIP_PROB="${FLIP_PROB:-0.5}"
+        ROT_SCALE_PROB="${ROT_SCALE_PROB:-0.0}"
+        COORD_SHIFT_PROB="${COORD_SHIFT_PROB:-1.0}"
+        COORD_SHIFT_MAX_VOXELS="${COORD_SHIFT_MAX_VOXELS:-8}"
+      )
+    fi
+    env "${common_env[@]}" "${resume_env[@]}" "${extra_env[@]}" \
+      PROBE_MODE=custom \
+      PROBE_RGB_INPUT=zero \
+      PROBE_ALPHA_INPUT=zero \
+      PROBE_ALPHA_TARGET=keep \
+      PROBE_RGB_LOSS=none \
+      PROBE_ALPHA_LOSS=removed \
+      PROBE_RGB_WEIGHT=0.0 \
+      PROBE_ALPHA_WEIGHT=1.0 \
+      bash train_mae3d.sh
+    ;;
+  diagnostic:baseline_no_pos)
+    env "${common_env[@]}" "${resume_env[@]}" \
+      DISABLE_ABS_POS_EMBED=1 \
+      DISABLE_RELATIVE_POSITION_BIAS=1 \
+      PROBE_MODE=baseline \
+      bash train_mae3d.sh
+    ;;
+  diagnostic:cosine_no_pos|diagnostic:cosine_coord_jitter)
+    extra_env=()
+    if [[ "${CONDITION}" == "cosine_no_pos" ]]; then
+      extra_env=(DISABLE_ABS_POS_EMBED=1 DISABLE_RELATIVE_POSITION_BIAS=1)
+    elif [[ "${CONDITION}" == "cosine_coord_jitter" ]]; then
+      extra_env=(
+        ROTATE_PROB="${ROTATE_PROB:-1.0}"
+        FLIP_PROB="${FLIP_PROB:-0.5}"
+        ROT_SCALE_PROB="${ROT_SCALE_PROB:-0.0}"
+        COORD_SHIFT_PROB="${COORD_SHIFT_PROB:-1.0}"
+        COORD_SHIFT_MAX_VOXELS="${COORD_SHIFT_MAX_VOXELS:-8}"
+      )
+    fi
+    env "${common_env[@]}" "${resume_env[@]}" "${extra_env[@]}" \
+      PROBE_MODE=custom \
+      PROBE_RGB_INPUT=keep \
+      PROBE_ALPHA_INPUT=keep \
+      PROBE_ALPHA_TARGET=keep \
       PROBE_RGB_LOSS=occupied \
       PROBE_ALPHA_LOSS=removed \
       PROBE_RGB_WEIGHT=1.0 \

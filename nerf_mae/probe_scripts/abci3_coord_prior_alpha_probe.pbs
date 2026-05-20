@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+#PBS -q rt_HC
+#PBS -l select=1
+#PBS -l walltime=04:00:00
+#PBS -P gag51404
+#PBS -j oe
+
+set -euo pipefail
+
+cd "${PBS_O_WORKDIR:?PBS_O_WORKDIR is not set}"
+
+ROOT_DIR="${ROOT_DIR:-${PBS_O_WORKDIR}}"
+PROBE_ENV_PREFIX="${PROBE_ENV_PREFIX:-${ROOT_DIR}/.venv-abci3}"
+OUT_DIR="${OUT_DIR:-${ROOT_DIR}/output/coord_prior_alpha_probe}"
+MAX_TRAIN_SCENES="${MAX_TRAIN_SCENES:-512}"
+MAX_VAL_SCENES="${MAX_VAL_SCENES:-64}"
+SAMPLES_PER_SCENE="${SAMPLES_PER_SCENE:-1024}"
+EPOCHS="${EPOCHS:-20}"
+SEED="${SEED:-1}"
+
+export PATH="${PROBE_ENV_PREFIX}/bin:${PATH}"
+
+mkdir -p "${OUT_DIR}"
+
+"${PROBE_ENV_PREFIX}/bin/python" "${ROOT_DIR}/nerf_mae/tools/coord_prior_alpha_probe.py" \
+  --features-path "${ROOT_DIR}/dataset/pretrain/features" \
+  --split "${ROOT_DIR}/dataset/pretrain/nerfmae_split.npz" \
+  --out-json "${OUT_DIR}/coord_prior_alpha_probe.json" \
+  --out-md "${OUT_DIR}/coord_prior_alpha_probe.md" \
+  --max-train-scenes "${MAX_TRAIN_SCENES}" \
+  --max-val-scenes "${MAX_VAL_SCENES}" \
+  --samples-per-scene "${SAMPLES_PER_SCENE}" \
+  --epochs "${EPOCHS}" \
+  --seed "${SEED}"
+
+cat "${OUT_DIR}/coord_prior_alpha_probe.md"

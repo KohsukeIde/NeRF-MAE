@@ -1430,3 +1430,120 @@ Interpretation rule for this gate:
 - If 2 seeds agree that `cosine > baseline` and `cosine > shuffle`, then spend
   seed3 / e600 / fixed-ramp points.
 - If seed2 does not agree, stop before expanding the grid.
+
+## Experiment 22: ABCI3 Global-Batch-16 8GPU Restart and Null-Prior Scouts
+
+Snapshot:
+- 2026-05-19 JST
+
+Batch/parallelism correction:
+- A 2-node/16GPU pretrain attempt with global batch 16 made each GPU see batch
+  size 1 and was communication-heavy.
+- A later global-batch-64 attempt was intentionally stopped after discussion,
+  because it changes the training protocol.
+- Current main pretrain protocol is global batch 16 on two HF nodes:
+  - `PRETRAIN_NODES=2`
+  - `PRETRAIN_GPU_IDS=0-7` per node
+  - `PRETRAIN_BATCH_SIZE_PER_GPU=1`
+  - global batch = `2 * 8 * 1 = 16`
+
+Existing-checkpoint FCOS jobs still running:
+  - `baseline e300 seed1`: `1777173.pbs1`
+  - `baseline e300 seed2`: `1777174.pbs1`
+  - `cosine_ramp e300 seed1`: `1777175.pbs1`
+  - `shuffle e300 seed1`: `1777176.pbs1`
+
+Startup check:
+- A 1-node/8GPU global-batch-16 restart reached epoch 1 step 0 but was too
+  slow: step `0 -> 30` took about `112s`.
+- A 2-node/16GPU global-batch-16 restart reached epoch 1 and is faster:
+  step `0 -> 30` takes about `59s`.
+- A 1-node/4GPU global-batch-16 speed scout was also tested and stopped:
+  step `0 -> 10` took about `106s`, so it is much slower than 16GPU.
+- `rt_HG` is a 1-GPU queue (`resources_max.ngpus=1`), so it is not a
+  multi-GPU replacement for HF pretraining.
+
+Current main gate pretrain jobs:
+- `cosine_ramp e300 seed2`, 2 HF nodes / 16 GPUs / global batch 16:
+  `1777284.pbs1`
+- `shuffle e300 seed2`, 2 HF nodes / 16 GPUs / global batch 16:
+  `1777286.pbs1`
+- Dependent FCOS jobs:
+  - `1777285.pbs1`
+  - `1777287.pbs1`
+
+Null-prior diagnostic additions:
+- Added no-position and coordinate-jitter controls to the MAE pretrain script:
+  - disable absolute position embedding
+  - disable relative position bias
+  - horizontal rotation/flip
+  - zero-fill horizontal coordinate shift
+- Added a coordinate-only alpha prior probe:
+  `nerf_mae/tools/coord_prior_alpha_probe.py`.
+- Coordinate-only probe result:
+  - val MSE: `0.052610`
+  - occupied IoU: `0.3056`
+  - precision / recall: `0.3058 / 0.9981`
+  - predicted occupied rate: `0.9864`
+- This suggests a coordinate-only tiny prior mostly predicts broad occupancy
+  and is not yet a strong standalone explanation for the alpha-target signal.
+
+Queued diagnostic scouts:
+- These are queued behind both seed2 main pretrains and run sequentially with
+  a 1-node/8GPU global-batch-16 scout protocol:
+  - `alpha_target_only_no_pos e100 seed1`: `1777288.pbs1`
+  - `baseline_no_pos e100 seed1`: `1777290.pbs1`
+  - `alpha_target_only_coord_jitter e100 seed1`: `1777292.pbs1`
+  - `cosine_coord_jitter e100 seed1`: `1777294.pbs1`
+- Dependent FCOS scout jobs use `FCOS_NUM_EPOCHS=300`:
+  - `1777289.pbs1`, `1777291.pbs1`, `1777293.pbs1`, `1777295.pbs1`
+- These diagnostics are single-seed only. They are not intended to estimate
+  seed variance; they are used as cheap mechanism checks for the null-prior
+  hypothesis.
+- Queue pruning check:
+  - no multi-seed diagnostic jobs are queued.
+  - all diagnostic scouts are seed1 only.
+  - unrelated `3D-NEPA` jobs were not modified.
+
+Current priority:
+- Wait for the two seed2 main pretrains, then their FCOS jobs.
+- Use the diagnostic scouts only as null-prior sanity checks; do not expand to
+  heavy method runs until the 2-seed e300 gate is read.
+
+## Experiment 23: ABCI3 Checkpoint/Resume Correction
+
+Snapshot:
+- 2026-05-20 JST
+
+Issue:
+- The running seed2 pretrain jobs do not have intermediate `epoch_*.pt`
+  checkpoints.
+- Resume support exists, and saved checkpoints include model, optimizer,
+  scheduler, epoch, train args, and best metric.
+- The practical issue was the launch setting:
+  `PRETRAIN_EVAL_INTERVAL=300`.
+- In the current training loop, epoch checkpoints were saved only inside the
+  eval block. For an e300 run with eval interval 300, this means no
+  intermediate `epoch_*.pt` is written before epoch 300.
+
+Impact:
+- Running jobs `1777284.pbs1` and `1777286.pbs1` cannot be safely interrupted
+  and resumed from an intermediate checkpoint, because none has been written.
+- Stopping them now would lose the already completed training time.
+
+Fix for future jobs:
+- Added an eval-independent `--checkpoint_interval` argument to
+  `nerf_mae/run_swin_mae3d.py`.
+- Added `CHECKPOINT_INTERVAL` forwarding in `nerf_mae/train_mae3d.sh`.
+- Added `PRETRAIN_CHECKPOINT_INTERVAL=10` default forwarding in the ABCI3
+  pretrain and submit scripts.
+- The intended setting is now:
+  - eval interval: 300 epochs
+  - checkpoint interval: 10 epochs
+  - keep latest epoch checkpoints according to `--keep_checkpoints`
+
+Verification:
+- `python -m py_compile nerf_mae/run_swin_mae3d.py`
+- `bash -n nerf_mae/train_mae3d.sh`
+- `bash -n nerf_mae/probe_scripts/abci3_e300_gate_pretrain.pbs`
+- `bash -n nerf_mae/probe_scripts/submit_abci3_e300_gate_pipeline.sh`

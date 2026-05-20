@@ -14,6 +14,7 @@ LR="${LR:-1e-4}"
 WEIGHT_DECAY="${WEIGHT_DECAY:-1e-3}"
 LOG_INTERVAL="${LOG_INTERVAL:-30}"
 EVAL_INTERVAL="${EVAL_INTERVAL:-10}"
+CHECKPOINT_INTERVAL="${CHECKPOINT_INTERVAL:-0}"
 MASKING_PROB="${MASKING_PROB:-0.75}"
 PERCENT_TRAIN="${PERCENT_TRAIN:-1.0}"
 BATCH_SIZE_PER_GPU="${BATCH_SIZE_PER_GPU:-4}"
@@ -32,8 +33,27 @@ PROBE_CURRICULUM_EPOCHS="${PROBE_CURRICULUM_EPOCHS:-}"
 PROBE_CURRICULUM_RGB_START_WEIGHT="${PROBE_CURRICULUM_RGB_START_WEIGHT:-}"
 PROBE_CURRICULUM_RGB_END_WEIGHT="${PROBE_CURRICULUM_RGB_END_WEIGHT:-}"
 PROBE_CURRICULUM_ALPHA_WEIGHT="${PROBE_CURRICULUM_ALPHA_WEIGHT:-}"
+DISABLE_ABS_POS_EMBED="${DISABLE_ABS_POS_EMBED:-0}"
+DISABLE_RELATIVE_POSITION_BIAS="${DISABLE_RELATIVE_POSITION_BIAS:-0}"
+ROTATE_PROB="${ROTATE_PROB:-}"
+FLIP_PROB="${FLIP_PROB:-}"
+ROT_SCALE_PROB="${ROT_SCALE_PROB:-}"
+COORD_SHIFT_PROB="${COORD_SHIFT_PROB:-}"
+COORD_SHIFT_MAX_VOXELS="${COORD_SHIFT_MAX_VOXELS:-}"
 SEED="${SEED:-}"
 DETERMINISTIC="${DETERMINISTIC:-0}"
+
+normalize_empty_literal() {
+  local name="$1"
+  local value="${!name:-}"
+  if [[ "${value}" == "''" || "${value}" == '""' ]]; then
+    printf -v "${name}" '%s' ""
+  fi
+}
+
+for optional_arg in ROTATE_PROB FLIP_PROB ROT_SCALE_PROB COORD_SHIFT_PROB COORD_SHIFT_MAX_VOXELS; do
+  normalize_empty_literal "${optional_arg}"
+done
 
 if [[ -z "${resolution}" ]]; then
   resolution=160
@@ -63,6 +83,7 @@ cmd=(
   --weight_decay "${WEIGHT_DECAY}"
   --log_interval "${LOG_INTERVAL}"
   --eval_interval "${EVAL_INTERVAL}"
+  --checkpoint_interval "${CHECKPOINT_INTERVAL}"
   --normalize_density
   --log_to_file
   --batch_size "${BATCH_SIZE}"
@@ -132,6 +153,27 @@ if [[ -n "${PROBE_CURRICULUM_RGB_END_WEIGHT}" ]]; then
 fi
 if [[ -n "${PROBE_CURRICULUM_ALPHA_WEIGHT}" ]]; then
   cmd+=(--probe_curriculum_alpha_weight "${PROBE_CURRICULUM_ALPHA_WEIGHT}")
+fi
+if [[ "${DISABLE_ABS_POS_EMBED}" == "1" ]]; then
+  cmd+=(--disable_abs_pos_embed)
+fi
+if [[ "${DISABLE_RELATIVE_POSITION_BIAS}" == "1" ]]; then
+  cmd+=(--disable_relative_position_bias)
+fi
+if [[ -n "${ROTATE_PROB}" ]]; then
+  cmd+=(--rotate_prob "${ROTATE_PROB}")
+fi
+if [[ -n "${FLIP_PROB}" ]]; then
+  cmd+=(--flip_prob "${FLIP_PROB}")
+fi
+if [[ -n "${ROT_SCALE_PROB}" ]]; then
+  cmd+=(--rot_scale_prob "${ROT_SCALE_PROB}")
+fi
+if [[ -n "${COORD_SHIFT_PROB}" ]]; then
+  cmd+=(--coord_shift_prob "${COORD_SHIFT_PROB}")
+fi
+if [[ -n "${COORD_SHIFT_MAX_VOXELS}" ]]; then
+  cmd+=(--coord_shift_max_voxels "${COORD_SHIFT_MAX_VOXELS}")
 fi
 if [[ -n "${SEED}" ]]; then
   cmd+=(--seed "${SEED}")

@@ -306,6 +306,15 @@ def parse_args():
         "--eval_interval", default=1, type=int, help="The number of epochs to evaluate."
     )
     parser.add_argument(
+        "--checkpoint_interval",
+        default=0,
+        type=int,
+        help=(
+            "The number of epochs between checkpoint saves. "
+            "Set to 0 to save checkpoints only on eval epochs."
+        ),
+    )
+    parser.add_argument(
         "--keep_checkpoints",
         default=1,
         type=int,
@@ -332,6 +341,28 @@ def parse_args():
         default=0.5,
         type=float,
         help="The probability of extra scaling and rotation.",
+    )
+    parser.add_argument(
+        "--coord_shift_prob",
+        default=0.0,
+        type=float,
+        help="The probability of applying zero-fill horizontal coordinate shift augmentation.",
+    )
+    parser.add_argument(
+        "--coord_shift_max_voxels",
+        default=0,
+        type=int,
+        help="Maximum absolute voxel shift per horizontal axis for coordinate-jitter diagnostics.",
+    )
+    parser.add_argument(
+        "--disable_abs_pos_embed",
+        action="store_true",
+        help="Zero and freeze the absolute sinusoidal position embedding.",
+    )
+    parser.add_argument(
+        "--disable_relative_position_bias",
+        action="store_true",
+        help="Zero and freeze Swin relative position bias tables.",
     )
 
     # Distributed training parameters
@@ -583,6 +614,7 @@ class Trainer:
         self.logger.info("Constructing model...")
 
         self.build_model(args)
+        self.apply_position_knockouts()
 
         checkpoint_path = args.resume_checkpoint or args.checkpoint
         if checkpoint_path is not None:
@@ -671,6 +703,27 @@ class Trainer:
             probe_alpha_weight=args.probe_alpha_weight,
             probe_alpha_threshold=args.probe_alpha_threshold,
         )
+
+    def apply_position_knockouts(self):
+        if self.args.disable_abs_pos_embed and hasattr(self.model, "pos_embed"):
+            with torch.no_grad():
+                self.model.pos_embed.zero_()
+            self.model.pos_embed.requires_grad_(False)
+            if self.rank == 0:
+                self.logger.info("disabled absolute position embedding")
+
+        if self.args.disable_relative_position_bias:
+            disabled = 0
+            for module in self.model.modules():
+                table = getattr(module, "relative_position_bias_table", None)
+                if table is None:
+                    continue
+                with torch.no_grad():
+                    table.zero_()
+                table.requires_grad_(False)
+                disabled += 1
+            if self.rank == 0:
+                self.logger.info("disabled relative position bias tables count=%s", disabled)
 
     def _probe_model(self):
         return self.model.module if hasattr(self.model, "module") else self.model
@@ -913,6 +966,8 @@ class Trainer:
                 flip_prob=self.args.flip_prob,
                 rotate_prob=self.args.rotate_prob,
                 rot_scale_prob=self.args.rot_scale_prob,
+                coord_shift_prob=self.args.coord_shift_prob,
+                coord_shift_max_voxels=self.args.coord_shift_max_voxels,
                 preload=self.args.preload,
                 percent_train=self.args.percent_train,
             )
@@ -1005,7 +1060,16 @@ class Trainer:
             if self.rank != 0:
                 continue
 
-            if epoch % self.args.eval_interval == 0 or epoch == self.args.num_epochs:
+            eval_interval = max(1, int(self.args.eval_interval))
+            checkpoint_interval = int(getattr(self.args, "checkpoint_interval", 0))
+            should_eval = epoch % eval_interval == 0 or epoch == self.args.num_epochs
+            should_checkpoint = (
+                epoch == self.args.num_epochs
+                or (checkpoint_interval > 0 and epoch % checkpoint_interval == 0)
+                or (checkpoint_interval <= 0 and should_eval)
+            )
+
+            if should_eval:
                 psnr_mean, mse_mean = self.eval(self.val_set)
 
                 metric = psnr_mean
@@ -1022,12 +1086,14 @@ class Trainer:
                 #         epoch, os.path.join(self.args.save_path, "model_best.pt")
                 #     )
 
+            if should_checkpoint:
                 self.save_checkpoint(
                     epoch, os.path.join(self.args.save_path, f"epoch_{epoch}.pt")
                 )
-                # self.delete_old_checkpoints(
-                #     self.args.save_path, keep_latest=self.args.keep_checkpoints
-                # )
+                if int(self.args.keep_checkpoints) > 0:
+                    self.delete_old_checkpoints(
+                        self.args.save_path, keep_latest=int(self.args.keep_checkpoints)
+                    )
 
     def train_epoch(self, epoch):
         # torch.autograd.set_detect_anomaly(True)

@@ -14,8 +14,17 @@ PRETRAIN_SLOTS="${PRETRAIN_SLOTS:-3}"
 PRETRAIN_GPU_IDS="${PRETRAIN_GPU_IDS:-0-7}"
 PRETRAIN_BATCH_SIZE_PER_GPU="${PRETRAIN_BATCH_SIZE_PER_GPU:-}"
 PRETRAIN_EVAL_INTERVAL="${PRETRAIN_EVAL_INTERVAL:-300}"
+PRETRAIN_CHECKPOINT_INTERVAL="${PRETRAIN_CHECKPOINT_INTERVAL:-10}"
 PRETRAIN_LOG_INTERVAL="${PRETRAIN_LOG_INTERVAL:-30}"
 AUTO_RESUME_PRETRAIN="${AUTO_RESUME_PRETRAIN:-1}"
+FCOS_NUM_EPOCHS="${FCOS_NUM_EPOCHS:-1000}"
+DISABLE_ABS_POS_EMBED="${DISABLE_ABS_POS_EMBED:-0}"
+DISABLE_RELATIVE_POSITION_BIAS="${DISABLE_RELATIVE_POSITION_BIAS:-0}"
+ROTATE_PROB="${ROTATE_PROB:-}"
+FLIP_PROB="${FLIP_PROB:-}"
+ROT_SCALE_PROB="${ROT_SCALE_PROB:-}"
+COORD_SHIFT_PROB="${COORD_SHIFT_PROB:-}"
+COORD_SHIFT_MAX_VOXELS="${COORD_SHIFT_MAX_VOXELS:-}"
 if [[ -z "${PRETRAIN_BATCH_SIZE_PER_GPU}" ]]; then
   if (( PRETRAIN_NODES > 1 )); then
     PRETRAIN_BATCH_SIZE_PER_GPU=1
@@ -65,6 +74,12 @@ short_condition() {
     baseline) printf "base" ;;
     cosine_ramp) printf "cos" ;;
     cosine_ramp_alpha_shuffle) printf "shuf" ;;
+    alpha_target_only) printf "ato" ;;
+    alpha_target_only_no_pos) printf "atnopos" ;;
+    alpha_target_only_coord_jitter) printf "atjit" ;;
+    baseline_no_pos) printf "basenop" ;;
+    cosine_no_pos) printf "cosnop" ;;
+    cosine_coord_jitter) printf "cosjit" ;;
     *) printf "%s" "$1" | tr -cd '[:alnum:]_' | cut -c1-8 ;;
   esac
 }
@@ -85,6 +100,9 @@ pretrain_save_name() {
       ;;
     curriculum:cosine_ramp|curriculum:cosine_ramp_alpha_shuffle)
       printf "nerfmae_alpha_rgba_curr_%s_p1.0_e%s_seed%s%s\n" "${condition}" "${epochs}" "${seed}" "${suffix_part}"
+      ;;
+    diagnostic:alpha_target_only|diagnostic:alpha_target_only_no_pos|diagnostic:alpha_target_only_coord_jitter|diagnostic:baseline_no_pos|diagnostic:cosine_no_pos|diagnostic:cosine_coord_jitter)
+      printf "nerfmae_%s_p1.0_e%s_seed%s%s\n" "${condition}" "${epochs}" "${seed}" "${suffix_part}"
       ;;
     *)
       echo "[error] unknown KIND:CONDITION=${kind}:${condition}" >&2
@@ -132,7 +150,7 @@ submit_pretrain() {
   short="$(short_condition "${condition}")"
   pre_name="e${epochs}_${short}_s${seed}_pre"
   qsub_gpu_ids="${PRETRAIN_GPU_IDS//,/:}"
-  varlist="KIND=${kind},CONDITION=${condition},EPOCHS=${epochs},SEED=${seed},RUN_SUFFIX=${RUN_SUFFIX},PROBE_ENV_PREFIX=${PROBE_ENV_PREFIX},PRETRAIN_DATA_ROOT=${PRETRAIN_DATA_ROOT},FCOS_DATA_ROOT=${FCOS_DATA_ROOT},PRETRAIN_NODES=${PRETRAIN_NODES},PRETRAIN_GPU_IDS=${qsub_gpu_ids},PRETRAIN_BATCH_SIZE_PER_GPU=${PRETRAIN_BATCH_SIZE_PER_GPU},PRETRAIN_EVAL_INTERVAL=${PRETRAIN_EVAL_INTERVAL},PRETRAIN_LOG_INTERVAL=${PRETRAIN_LOG_INTERVAL},AUTO_RESUME_PRETRAIN=${AUTO_RESUME_PRETRAIN},SKIP_EXISTING=1"
+  varlist="KIND=${kind},CONDITION=${condition},EPOCHS=${epochs},SEED=${seed},RUN_SUFFIX=${RUN_SUFFIX},PROBE_ENV_PREFIX=${PROBE_ENV_PREFIX},PRETRAIN_DATA_ROOT=${PRETRAIN_DATA_ROOT},FCOS_DATA_ROOT=${FCOS_DATA_ROOT},PRETRAIN_NODES=${PRETRAIN_NODES},PRETRAIN_GPU_IDS=${qsub_gpu_ids},PRETRAIN_BATCH_SIZE_PER_GPU=${PRETRAIN_BATCH_SIZE_PER_GPU},PRETRAIN_EVAL_INTERVAL=${PRETRAIN_EVAL_INTERVAL},PRETRAIN_CHECKPOINT_INTERVAL=${PRETRAIN_CHECKPOINT_INTERVAL},PRETRAIN_LOG_INTERVAL=${PRETRAIN_LOG_INTERVAL},AUTO_RESUME_PRETRAIN=${AUTO_RESUME_PRETRAIN},DISABLE_ABS_POS_EMBED=${DISABLE_ABS_POS_EMBED},DISABLE_RELATIVE_POSITION_BIAS=${DISABLE_RELATIVE_POSITION_BIAS},ROTATE_PROB=${ROTATE_PROB},FLIP_PROB=${FLIP_PROB},ROT_SCALE_PROB=${ROT_SCALE_PROB},COORD_SHIFT_PROB=${COORD_SHIFT_PROB},COORD_SHIFT_MAX_VOXELS=${COORD_SHIFT_MAX_VOXELS},SKIP_EXISTING=1"
 
   local pre_cmd=(
     qsub
@@ -173,7 +191,7 @@ submit_fcos() {
   short="$(short_condition "${condition}")"
   fcos_name="e${epochs}_${short}_s${seed}_fcos"
   qsub_gpu_ids="${PRETRAIN_GPU_IDS//,/:}"
-  varlist="KIND=${kind},CONDITION=${condition},EPOCHS=${epochs},SEED=${seed},RUN_SUFFIX=${RUN_SUFFIX},PROBE_ENV_PREFIX=${PROBE_ENV_PREFIX},PRETRAIN_DATA_ROOT=${PRETRAIN_DATA_ROOT},FCOS_DATA_ROOT=${FCOS_DATA_ROOT},PRETRAIN_NODES=${PRETRAIN_NODES},PRETRAIN_GPU_IDS=${qsub_gpu_ids},PRETRAIN_BATCH_SIZE_PER_GPU=${PRETRAIN_BATCH_SIZE_PER_GPU},PRETRAIN_EVAL_INTERVAL=${PRETRAIN_EVAL_INTERVAL},PRETRAIN_LOG_INTERVAL=${PRETRAIN_LOG_INTERVAL},SKIP_EXISTING=1"
+  varlist="KIND=${kind},CONDITION=${condition},EPOCHS=${epochs},SEED=${seed},RUN_SUFFIX=${RUN_SUFFIX},PROBE_ENV_PREFIX=${PROBE_ENV_PREFIX},PRETRAIN_DATA_ROOT=${PRETRAIN_DATA_ROOT},FCOS_DATA_ROOT=${FCOS_DATA_ROOT},PRETRAIN_NODES=${PRETRAIN_NODES},PRETRAIN_GPU_IDS=${qsub_gpu_ids},PRETRAIN_BATCH_SIZE_PER_GPU=${PRETRAIN_BATCH_SIZE_PER_GPU},PRETRAIN_EVAL_INTERVAL=${PRETRAIN_EVAL_INTERVAL},PRETRAIN_CHECKPOINT_INTERVAL=${PRETRAIN_CHECKPOINT_INTERVAL},PRETRAIN_LOG_INTERVAL=${PRETRAIN_LOG_INTERVAL},FCOS_NUM_EPOCHS=${FCOS_NUM_EPOCHS},SKIP_EXISTING=1"
 
   local fcos_cmd=(
     qsub

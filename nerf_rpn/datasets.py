@@ -26,6 +26,8 @@ class BaseDataset(torch.utils.data.Dataset, ABC):
         flip_prob: float = 0.0,
         rotate_prob: float = 0.0,
         rot_scale_prob: float = 0.0,
+        coord_shift_prob: float = 0.0,
+        coord_shift_max_voxels: int = 0,
         z_up: bool = True,
     ) -> None:
         super().__init__()
@@ -45,6 +47,8 @@ class BaseDataset(torch.utils.data.Dataset, ABC):
         self.rot_scale_prob = (
             rot_scale_prob  # the probability of extra rotation and scaling
         )
+        self.coord_shift_prob = coord_shift_prob
+        self.coord_shift_max_voxels = coord_shift_max_voxels
         self.z_up = z_up  # whether the boxes are z-up
 
         self.scene_data = []
@@ -154,7 +158,12 @@ class BaseDataset(torch.utils.data.Dataset, ABC):
             scene = self.scene_list[index]
             _, rgbsigma, boxes = self.load_single_scene(scene)
 
-        if self.flip_prob > 0 or self.rotate_prob > 0 or self.rot_scale_prob > 0:
+        if (
+            self.flip_prob > 0
+            or self.rotate_prob > 0
+            or self.rot_scale_prob > 0
+            or (self.coord_shift_prob > 0 and self.coord_shift_max_voxels > 0)
+        ):
             rgbsigma, boxes = self.augment_rpn_inputs(
                 rgbsigma,
                 boxes,
@@ -162,6 +171,8 @@ class BaseDataset(torch.utils.data.Dataset, ABC):
                 self.rotate_prob,
                 self.rot_scale_prob,
                 self.z_up,
+                self.coord_shift_prob,
+                self.coord_shift_max_voxels,
             )
 
         return rgbsigma, boxes, scene
@@ -177,6 +188,8 @@ class BaseDataset(torch.utils.data.Dataset, ABC):
         rotate_prob: float,
         rot_scale_prob: float,
         z_up: bool = True,
+        coord_shift_prob: float = 0.0,
+        coord_shift_max_voxels: int = 0,
     ) -> Tuple[Tensor, Tensor]:
         if flip_prob < 0 or flip_prob > 1:
             raise ValueError(
@@ -189,6 +202,11 @@ class BaseDataset(torch.utils.data.Dataset, ABC):
         if rot_scale_prob < 0 or rot_scale_prob > 1:
             raise ValueError(
                 f"rotate_and_scale_prob must be between 0 and 1, but got {rot_scale_prob}"
+            )
+        if coord_shift_prob < 0 or coord_shift_prob > 1:
+            raise ValueError(
+                "coord_shift_prob must be between 0 and 1, "
+                f"but got {coord_shift_prob}"
             )
         if boxes is not None:
             assert (z_up and boxes.shape[1] == 7) or boxes.shape[
@@ -241,7 +259,43 @@ class BaseDataset(torch.utils.data.Dataset, ABC):
             scale = random.uniform(0.9, 1.1)
             rgbsigma, boxes = rotate_and_scale_scene(rgbsigma, boxes, angle, scale)
 
+        if coord_shift_max_voxels > 0 and random.random() < coord_shift_prob:
+            axes = [0, 1] if z_up else [0, 2]
+            shifts = [
+                random.randint(-coord_shift_max_voxels, coord_shift_max_voxels)
+                for _ in axes
+            ]
+            for axis, shift in zip(axes, shifts):
+                if shift == 0:
+                    continue
+                rgbsigma = BaseDataset.zero_fill_shift(rgbsigma, dim=axis + 1, shift=shift)
+                if boxes is not None:
+                    boxes = boxes.clone()
+                    spatial_size = rgbsigma.shape[axis + 1]
+                    if boxes.shape[1] == 6:
+                        boxes[:, axis] = (boxes[:, axis] + shift).clamp(0, spatial_size)
+                        boxes[:, axis + 3] = (boxes[:, axis + 3] + shift).clamp(0, spatial_size)
+                    elif boxes.shape[1] == 7:
+                        boxes[:, axis] = (boxes[:, axis] + shift).clamp(0, spatial_size)
+
         return rgbsigma, boxes
+
+    @staticmethod
+    def zero_fill_shift(x: Tensor, dim: int, shift: int) -> Tensor:
+        out = torch.zeros_like(x)
+        size = x.shape[dim]
+        if abs(shift) >= size:
+            return out
+        src = [slice(None)] * x.ndim
+        dst = [slice(None)] * x.ndim
+        if shift > 0:
+            src[dim] = slice(0, size - shift)
+            dst[dim] = slice(shift, size)
+        else:
+            src[dim] = slice(-shift, size)
+            dst[dim] = slice(0, size + shift)
+        out[tuple(dst)] = x[tuple(src)]
+        return out
 
     @staticmethod
     def density_to_alpha(density):
@@ -272,6 +326,8 @@ class Front3DRPNDataset(BaseDataset):
         flip_prob: float = 0.0,
         rotate_prob: float = 0.0,
         rot_scale_prob: float = 0.0,
+        coord_shift_prob: float = 0.0,
+        coord_shift_max_voxels: int = 0,
         preload: bool = False,
         percent_train=1.0,
     ):
@@ -286,6 +342,8 @@ class Front3DRPNDataset(BaseDataset):
             flip_prob,
             rotate_prob,
             rot_scale_prob,
+            coord_shift_prob,
+            coord_shift_max_voxels,
         )
         self.load_scene_data(preload=preload, percent_train=percent_train)
 
