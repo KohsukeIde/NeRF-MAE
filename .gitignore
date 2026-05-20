@@ -1,15 +1,33 @@
-# Data & pretrained weights (local / ABCI symlinks)
-checkpoints/
+# --- Generated data & weights ---
 dataset/
+checkpoints/
+nerfmae_data/
+# Staging dir when PBS passes LOCAL_STAGE_ROOT='' literally (empty-string path)
+''/
 
-# ABCI3 probe virtualenv (see nerf_mae/probe_scripts/setup_abci3_env.sh)
+# Preprocessed features & model checkpoints (repo-wide)
+*.npz
+*.npz.*
+*.npy
+*.pt
+*.pth
+*.pkl
+*.ckpt
+*.safetensors
+*.h5
+*.hdf5
+
+# --- Environments ---
+.venv*/
 .venv-abci3/
 
-# Training outputs, launcher logs, wandb (repo-root layout on ABCI3)
+# --- Training / experiment outputs ---
 output/
-
-# Job runtime: tmp, caches, torch extensions, multinode PBS artifacts
+wandb/
 runtime/
+
+# Staged data partial copies (rsync staging)
+*.partial/
 
 # Legacy per-package output path (pre-ABCI3 local runs)
 nerf_rpn/output/
@@ -17,8 +35,21 @@ nerf_rpn/output/
 # CUDA extension build artifacts (see nerf_rpn/build_rotated_iou.sh)
 nerf_rpn/model/rotated_iou/cuda_op/build/
 
-# Python bytecode
+# --- PBS / cluster spillover (repo root when -o/-e not redirected) ---
+*.e[0-9]*
+*.o[0-9]*
+
+# --- OS / editor ---
+.DS_Store
+.vscode/
+*.swp
+*~
+
+# --- Python ---
 **/__pycache__/
 **/*.pyc
 **/*.pyo
 **/*.pyd
+.pytest_cache/
+.mypy_cache/
+*.egg-info/

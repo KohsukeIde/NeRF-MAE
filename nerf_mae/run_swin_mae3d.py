@@ -8,6 +8,7 @@ import logging
 import importlib.util
 import math
 import socket
+import time
 from copy import deepcopy
 from functools import partial
 import random
@@ -301,6 +302,28 @@ def parse_args():
     )
     parser.add_argument(
         "--log_to_file", action="store_true", help="Whether to log to a file."
+    )
+    parser.add_argument(
+        "--profile_step_time",
+        action="store_true",
+        help="Log DataLoader wait and train-step timings for throughput diagnosis.",
+    )
+    parser.add_argument(
+        "--train_num_workers",
+        default=-1,
+        type=int,
+        help="Number of DataLoader workers for training. Negative keeps repo defaults.",
+    )
+    parser.add_argument(
+        "--eval_num_workers",
+        default=4,
+        type=int,
+        help="Number of DataLoader workers for evaluation.",
+    )
+    parser.add_argument(
+        "--persistent_workers",
+        action="store_true",
+        help="Keep DataLoader workers alive across epochs when num_workers > 0.",
     )
     parser.add_argument(
         "--eval_interval", default=1, type=int, help="The number of epochs to evaluate."
@@ -1002,14 +1025,23 @@ class Trainer:
                 f"{len(self.val_set)} validation scenes"
             )
 
+        if self.args.train_num_workers >= 0:
+            train_num_workers = int(self.args.train_num_workers)
+        elif self.world_size == 1:
+            train_num_workers = 4
+        else:
+            train_num_workers = 2
+        persistent_workers = self.args.persistent_workers and train_num_workers > 0
+
         if self.world_size == 1:
             self.train_loader = DataLoader(
                 self.train_set,
                 batch_size=self.args.batch_size,
                 collate_fn=collate_fn,
                 shuffle=True,
-                num_workers=4,
+                num_workers=train_num_workers,
                 pin_memory=True,
+                persistent_workers=persistent_workers,
                 worker_init_fn=self.worker_init_fn,
                 generator=self.train_generator,
             )
@@ -1021,8 +1053,9 @@ class Trainer:
                 batch_size=self.args.batch_size // self.world_size,
                 collate_fn=collate_fn,
                 sampler=self.train_sampler,
-                num_workers=2,
+                num_workers=train_num_workers,
                 pin_memory=True,
+                persistent_workers=persistent_workers,
                 worker_init_fn=self.worker_init_fn,
                 generator=self.train_generator,
             )
@@ -1098,12 +1131,15 @@ class Trainer:
     def train_epoch(self, epoch):
         # torch.autograd.set_detect_anomaly(True)
         self.apply_probe_curriculum(epoch)
+        iter_end_time = time.perf_counter()
         for i, batch in enumerate(self.train_loader):
+            data_wait_time = time.perf_counter() - iter_end_time
+            step_start_time = time.perf_counter()
             # self.logger.debug(f'GPU {self.device_id} Epoch {epoch} Iter {i} {batch[-1]} '
             #                   f'Grid size: {[x.shape for x in batch[0]]}, GT boxes: {[x.shape for x in batch[1]]}')
 
             self.model.train()
-            self.optimizer.zero_grad()
+            self.optimizer.zero_grad(set_to_none=True)
 
             rgbsigma, _, _ = batch
 
@@ -1128,38 +1164,57 @@ class Trainer:
             #     f"loss: {loss.item():.6f}"
             # )
 
-            if self.world_size > 1:
-                dist.barrier()
-                dist.all_reduce(loss)
-                loss /= self.world_size
+            if torch.cuda.is_available() and self.args.profile_step_time:
+                torch.cuda.synchronize(self.device_id)
+            step_time = time.perf_counter() - step_start_time
+            iter_end_time = time.perf_counter()
 
-                dist.all_reduce(loss_rgb)
-                loss_rgb /= self.world_size
+            should_report = i % self.args.log_interval == 0 or self.args.wandb
+            report_loss = loss.detach()
+            report_loss_rgb = loss_rgb.detach()
+            report_loss_alpha = loss_alpha.detach() if torch.is_tensor(loss_alpha) else None
 
-                if torch.is_tensor(loss_alpha):
-                    dist.all_reduce(loss_alpha)
-                    loss_alpha /= self.world_size
+            if should_report and self.world_size > 1:
+                report_loss = report_loss.clone()
+                dist.all_reduce(report_loss)
+                report_loss /= self.world_size
+
+                report_loss_rgb = report_loss_rgb.clone()
+                dist.all_reduce(report_loss_rgb)
+                report_loss_rgb /= self.world_size
+
+                if report_loss_alpha is not None:
+                    report_loss_alpha = report_loss_alpha.clone()
+                    dist.all_reduce(report_loss_alpha)
+                    report_loss_alpha /= self.world_size
 
             if i % self.args.log_interval == 0 and self.rank == 0:
+                profile_msg = ""
+                if self.args.profile_step_time:
+                    profile_msg = (
+                        f"  data_wait: {data_wait_time:.3f}s"
+                        f"  step_time: {step_time:.3f}s"
+                    )
                 self.logger.info(
                     f"epoch {epoch} [{i}/{len(self.train_loader)}]  "
                     f"lr: {self.scheduler.get_last_lr()[0]:.6f}  "
-                    f"loss: {loss.item():.4f}"
+                    f"loss: {report_loss.item():.4f}"
+                    f"{profile_msg}"
                 )
 
             if self.args.wandb and self.rank == 0:
                 wandb.log(
                     {
                         "lr": self.scheduler.get_last_lr()[0],
-                        "loss_recon": loss.item(),
-                        "loss_rgb": loss_rgb.item(),
+                        "loss_recon": report_loss.item(),
+                        "loss_rgb": report_loss_rgb.item(),
                         "epoch": epoch,
                         "iter": i,
                     }
                 )
 
-                if torch.is_tensor(loss_alpha):
-                    wandb.log({"loss_alpha": loss_alpha.item()})
+                if report_loss_alpha is not None:
+                    wandb.log({"loss_alpha": report_loss_alpha.item()})
                 else:
                     wandb.log({"loss_alpha": 0.0})
 
@@ -1167,12 +1222,16 @@ class Trainer:
     def eval(self, dataset):
         self.model.eval()
         collate_fn = dataset.collate_fn
+        eval_num_workers = max(0, int(self.args.eval_num_workers))
         dataloader = DataLoader(
             dataset,
             batch_size=self.args.batch_size // self.world_size,
             shuffle=False,
-            num_workers=4,
+            num_workers=eval_num_workers,
             collate_fn=collate_fn,
+            persistent_workers=(
+                self.args.persistent_workers and eval_num_workers > 0
+            ),
             worker_init_fn=self.eval_worker_init_fn,
             generator=self.eval_generator,
         )

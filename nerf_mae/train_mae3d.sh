@@ -15,6 +15,10 @@ WEIGHT_DECAY="${WEIGHT_DECAY:-1e-3}"
 LOG_INTERVAL="${LOG_INTERVAL:-30}"
 EVAL_INTERVAL="${EVAL_INTERVAL:-10}"
 CHECKPOINT_INTERVAL="${CHECKPOINT_INTERVAL:-0}"
+PROFILE_STEP_TIME="${PROFILE_STEP_TIME:-0}"
+TRAIN_NUM_WORKERS="${TRAIN_NUM_WORKERS:-}"
+EVAL_NUM_WORKERS="${EVAL_NUM_WORKERS:-}"
+PERSISTENT_WORKERS="${PERSISTENT_WORKERS:-0}"
 MASKING_PROB="${MASKING_PROB:-0.75}"
 PERCENT_TRAIN="${PERCENT_TRAIN:-1.0}"
 BATCH_SIZE_PER_GPU="${BATCH_SIZE_PER_GPU:-4}"
@@ -97,6 +101,18 @@ cmd=(
   --tags "${RUN_TAG}"
 )
 
+if [[ "${PROFILE_STEP_TIME}" == "1" ]]; then
+  cmd+=(--profile_step_time)
+fi
+if [[ -n "${TRAIN_NUM_WORKERS}" ]]; then
+  cmd+=(--train_num_workers "${TRAIN_NUM_WORKERS}")
+fi
+if [[ -n "${EVAL_NUM_WORKERS}" ]]; then
+  cmd+=(--eval_num_workers "${EVAL_NUM_WORKERS}")
+fi
+if [[ "${PERSISTENT_WORKERS}" == "1" ]]; then
+  cmd+=(--persistent_workers)
+fi
 if [[ -n "${CHECKPOINT}" ]]; then
   cmd+=(--checkpoint "${CHECKPOINT}")
 fi

@@ -1547,3 +1547,284 @@ Verification:
 - `bash -n nerf_mae/train_mae3d.sh`
 - `bash -n nerf_mae/probe_scripts/abci3_e300_gate_pretrain.pbs`
 - `bash -n nerf_mae/probe_scripts/submit_abci3_e300_gate_pipeline.sh`
+
+## Experiment 24: ABCI3 Speed Sanity Check vs Itachi/A100 Expectations
+
+Snapshot:
+- 2026-05-20 JST
+
+Observation:
+- The running 2-node/16GPU H200 global-batch-16 jobs are not faster than the
+  previous A100 4GPU expectation.
+- Parsed from `worker_0.log`:
+  - cosine seed2 current 16GPU: `2.066 sec/step`, projected e300 `35.1h`
+  - shuffle seed2 current 16GPU: `2.064 sec/step`, projected e300 `35.1h`
+  - 8GPU scout: `3.733 sec/step`, projected e300 `63.5h`
+  - 4GPU scout: `10.555 sec/step`, projected e300 `179.4h`
+
+Important caveat:
+- The 4GPU scout only logged steps `0 -> 10` and was terminated after a few
+  minutes. This includes cold-start, filesystem cache, and early DataLoader
+  behavior, so it is not a reliable steady-state benchmark by itself.
+- The 16GPU jobs have many epochs of steady-state logs and are reliable:
+  e300 is about `35h`.
+
+Known differences from the old/itachi-style execution:
+- Current ABCI3 jobs set `DETERMINISTIC=1`, which disables cuDNN benchmark and
+  enables deterministic CUDA behavior.
+- Current ABCI3 environment is Python `3.11.13`, PyTorch `2.7.0+cu118`,
+  CUDA `11.8`, cuDNN `9.1`.
+- ABCI3 HF jobs run on H200 nodes but the software stack is still CUDA 11.8.
+- Current data path is the group filesystem symlink:
+  `dataset/pretrain -> dataset/_downloads/pretrain_extract/NeRF-MAE/pretrain`.
+  Each sample is loaded from compressed `.npz` files via `np.load`; the
+  pretrain feature directory is about `61G`.
+- Current 16GPU global-batch-16 run uses per-GPU microbatch `1`, so it is
+  communication-heavy and does not exploit H200 compute well.
+- Current 16GPU run is multi-node DDP; the old 4GPU run was likely single-node.
+
+Current interpretation:
+- The current speed is consistent with a workload bottlenecked by I/O,
+  deterministic kernels, small per-GPU microbatch, and DDP communication, not
+  by raw H200 tensor throughput.
+- It is still suspicious that 16 H200 GPUs only match the old A100 4GPU
+  expectation. Before changing the main jobs, a fair steady-state speed
+  benchmark should compare:
+  - 4GPU / 8GPU / 16GPU
+  - deterministic on/off
+  - current shared `.npz` data path vs node-local staged data
+  - CUDA 11.8 stack vs an ABCI3 CUDA 12.x/PyTorch cu12x stack if available
+
+## Experiment 25: ABCI3 e1200 Scaling Hardening
+
+Snapshot:
+- 2026-05-20 JST
+
+Current running jobs:
+- `1777284.pbs1`: cosine e300 seed2, `2` HF nodes / `16` H200 GPUs,
+  global batch 16, suffix `abci3gb16_16g`.
+- `1777286.pbs1`: shuffle e300 seed2, same resource shape.
+- As of the latest log parse, both are around epoch `159/300` with
+  `~2.08 sec/step`, ETA around `2026-05-21 07:26 JST`.
+- These running jobs were launched before the speed fixes below, so they
+  should not be used as evidence for the fixed code path.
+
+Root-cause candidates closed in code:
+- Removed the unconditional per-iteration DDP `dist.barrier()` plus scalar
+  `all_reduce()` for losses in `Trainer.train_epoch`.
+  - DDP already synchronizes gradients during backward.
+  - Loss all-reduce is now log-only, at `log_interval`, unless W&B is enabled.
+- Added `--profile_step_time` to log DataLoader wait and train step time.
+- Added configurable `--train_num_workers`, `--eval_num_workers`, and
+  `--persistent_workers`.
+- Kept checkpoint/resume hardening from Experiment 23.
+- Added runtime logging in the PBS job for host, GPU list, NCCL interface/HCA,
+  torch version, CUDA version, and cuDNN version.
+
+Data staging hardening:
+- Added optional `STAGE_PRETRAIN_DATA=1` in
+  `abci3_e300_gate_pretrain.pbs`.
+- Staging copies `PRETRAIN_DATA_SRC` to node-local `PBS_LOCALDIR` or an
+  explicit `LOCAL_STAGE_ROOT`, then points `PRETRAIN_DATA_ROOT` there.
+- The stage marker now records source path, split checksum, source size, and
+  feature count, so stale staged copies are invalidated.
+- Free-space check now uses the larger of `STAGE_MIN_FREE_GB` and source size
+  plus headroom.
+
+Benchmark harness:
+- Added `nerf_mae/probe_scripts/submit_abci3_pretrain_speed_benchmark.sh`.
+- Added parser `nerf_mae/tools/parse_pretrain_speed_log.py`.
+- Added usage notes in
+  `nerf_mae/probe_scripts/README_ABCI3_PRETRAIN_SPEED_BENCH.md`.
+- Dry-run is the default. Example:
+  `SKIP_PREFLIGHT=1 bash nerf_mae/probe_scripts/submit_abci3_pretrain_speed_benchmark.sh`
+- Default benchmark grid:
+  - `1n4g`, `1n8g`, `2n16g`
+  - global batch `16` and throughput-oriented global batch `64`
+  - deterministic `1/0`
+  - node-local staging `0/1`
+  - profile step timing enabled
+
+Submitted benchmark:
+- Run id: `20260520_speed01`
+- Manifest:
+  `output/launcher/abci3_pretrain_speed_bench/20260520_speed01/manifest.tsv`
+- Submitted jobs: `1778738.pbs1` through `1778761.pbs1`.
+- Grid: `1n4g / 1n8g / 2n16g` × global batch `16/64` ×
+  deterministic `1/0` × staging `0/1`.
+- Dependency policy: `BENCH_SLOTS=1`, `afterany` chain, so only one benchmark
+  pretrain should run at a time and later rows can still run if an earlier row
+  fails.
+- First row `1778738.pbs1` started on `hnode158`.
+  - PBS allocation is `Resource_List.ngpus=8` even for `1n4g`; therefore
+    `1n4g` measures four used GPUs on a full HF node, not an efficient
+    four-GPU allocation.
+  - First logged step: `data_wait=12.542s`, `step_time=10.571s`; warmup should
+    be excluded in the parser.
+
+Benchmark results so far:
+- Parsed with `warmup_steps=10`.
+- Valid rows:
+  - `1n4g`, global batch 16, deterministic 1: `6.64-6.67 sec/step`,
+    projected e300 `~113h`.
+  - `1n4g`, global batch 16, deterministic 0: `0.83-0.85 sec/step`,
+    projected e300 `~14h`.
+  - `1n8g`, global batch 16, deterministic 1: `3.73 sec/step`,
+    projected e300 `~63h`.
+  - `1n8g`, global batch 16, deterministic 0: `0.61 sec/step`,
+    projected e300 `~10.4h`.
+  - `1n8g`, global batch 64, deterministic 1: `14.53-14.58 sec/step`,
+    projected e300 `~62h`.
+  - `1n8g`, global batch 64, deterministic 0: `2.22-2.23 sec/step`,
+    projected e300 `~9.4-9.5h`.
+- Staging `0/1` made no meaningful difference in valid 1-node rows.
+  Data wait after warmup was about `0.002s`, so shared filesystem I/O is not
+  the bottleneck for these runs.
+- The largest observed factor is deterministic kernels:
+  `DETERMINISTIC=1` is roughly `6x-8x` slower than `DETERMINISTIC=0`.
+- `1n4g` global batch 64 failed with CUDA OOM on H200 (`~136GB` in use), so
+  per-GPU batch 16 is too large for this model.
+- Original `2n16g` rows failed because empty optional env vars were serialized
+  as the literal string `''` in the multi-node node-entry script:
+  `--train_num_workers "''"`. Staging rows also attempted to use
+  `''/nerfmae_data/pretrain` as the local stage path.
+- Fixed the multi-node empty-string normalization for
+  `PRETRAIN_TRAIN_NUM_WORKERS`, `PRETRAIN_EVAL_NUM_WORKERS`, and
+  `LOCAL_STAGE_ROOT`.
+- Resubmitted only the `2n16g` benchmark rows:
+  - Run id: `20260520_speed02_2n16g`
+  - Jobs: `1779180.pbs1` through `1779187.pbs1`
+  - Manifest:
+    `output/launcher/abci3_pretrain_speed_bench/20260520_speed02_2n16g/manifest.tsv`
+
+Recommended decision rule before e1200:
+- Do not submit e1200 until the short benchmark identifies the fastest valid
+  ABCI3 configuration.
+- If `1n8g` is close to `2n16g` at global batch 16, prefer single-node for
+  production efficiency unless the throughput batch grid clearly favors
+  multi-node.
+- Treat larger global batches as a protocol change unless downstream parity is
+  checked; use them for speed diagnosis first, not for paper comparisons.
+- Benchmark CUDA 12.x/PyTorch cu12x only after the current cu118 grid is
+  measured, using a separate environment prefix.
+
+Verification:
+- `python -m py_compile nerf_mae/run_swin_mae3d.py nerf_mae/tools/parse_pretrain_speed_log.py`
+- `bash -n nerf_mae/train_mae3d.sh`
+- `bash -n nerf_mae/probe_scripts/abci3_e300_gate_pretrain.pbs`
+- `bash -n nerf_mae/probe_scripts/submit_abci3_e300_gate_pipeline.sh`
+- `bash -n nerf_mae/probe_scripts/submit_abci3_e300_gate.sh`
+- `bash -n nerf_mae/probe_scripts/submit_abci3_pretrain_speed_benchmark.sh`
+- Dry-run benchmark command generation.
+
+## Experiment 26: Current ABCI3 Decision After Speed Bench
+
+Snapshot:
+- 2026-05-20 JST
+
+Current queue cleanup:
+- Canceled obsolete held null-prior diagnostic jobs that were tied to the old
+  deterministic/slow submission path:
+  `1777288.pbs1` through `1777295.pbs1`.
+- Canceled remaining `2n16g` global-batch-64 speed benchmark jobs because this
+  is a protocol change and is not needed for the current paper gate.
+- Kept running:
+  - `1777284.pbs1`: `cosine_ramp`, seed 2, e300 pretrain.
+  - `1777286.pbs1`: `cosine_ramp_alpha_shuffle`, seed 2, e300 pretrain.
+  - `1777285.pbs1` / `1777287.pbs1`: dependent FCOS jobs for the above.
+
+Current e300 seed-2 pretrains:
+- Runtime configuration:
+  - `PRETRAIN_NODES=2`
+  - `PRETRAIN_GPU_IDS=0-7` per node
+  - world size `16`
+  - global batch `16`
+  - per-GPU microbatch `1`
+  - deterministic mode on by script default
+- This preserves the old global batch and deterministic flag, but it is not the
+  exact itachi/A100 execution geometry. The itachi-era scripts used 4 GPUs with
+  `BATCH_SIZE_PER_GPU=4`; these ABCI3 jobs use 16 GPUs with
+  `BATCH_SIZE_PER_GPU=1`.
+- Therefore, these runs should be treated as a useful gate/diagnostic for the
+  e300 seed-2 question, not as the final clean multi-seed protocol if a paper
+  table is needed.
+
+Multi-seed protocol decision:
+- Final multi-seed evidence should not mix execution protocols.
+- Two valid choices:
+  1. **Itachi-compatible protocol**:
+     `1n4g`, global batch `16`, `BATCH_SIZE_PER_GPU=4`, deterministic on.
+     This is closest to the old scripts but is slow on ABCI3 in the measured
+     cu118 environment.
+  2. **ABCI3-optimized protocol**:
+     global batch `16`, deterministic off, using either:
+     - `1n8g`: about `0.61 sec/step`, projected e300 `~10.4h`; better point
+       efficiency.
+     - `2n16g`: about `0.39-0.40 sec/step`, projected e300 `~6.6-6.8h`;
+       faster wall-clock but uses two HF nodes.
+- For paper-quality multi-seed tables, rerun all compared conditions under one
+  of these two protocols. Do not combine itachi-era results, current
+  deterministic 16GPU jobs, and future deterministic-off jobs as if they were
+  the same controlled multi-seed experiment.
+
+Recommended paper/time plan:
+- Let the already-running e300 seed-2 pretrains finish because they are past the
+  halfway point and answer the immediate gate:
+  whether `cosine_ramp` still beats baseline and alpha-shuffle on another seed.
+- Use the resulting FCOS numbers as a go/no-go diagnostic.
+- If the signal survives, choose the ABCI3-optimized protocol for any new
+  multi-seed or e600/e1200 work. The itachi-compatible path is too expensive on
+  the measured ABCI3 setup unless exact historical comparability becomes the
+  main requirement.
+- Re-submit null-prior diagnostics only as single-seed ABCI3-optimized scouts;
+  do not use the canceled old held jobs.
+
+Multi-node PBS note:
+- A multi-node PBS job is not expected to appear as `jobid[].pbs1`.
+- The `[]` notation indicates a PBS job array, e.g. `1779238[].pbs1`.
+- Multi-node pretrain jobs appear as a single job ID with `NDS=2` in `qstat`
+  and `Resource_List.select=2:ncpus=192:mem=1920gb:ngpus=8...`.
+- Current e300 pretrain jobs are therefore multi-node jobs:
+  `1777284.pbs1` and `1777286.pbs1` each show `NDS=2` and two execution hosts.
+
+## Experiment 27: Parallel Null-Prior Diagnostics, ABCI3 Optimized
+
+Snapshot:
+- 2026-05-20 JST
+
+Rationale:
+- These diagnostics are single-seed mechanism checks, not seed-variance claims.
+- They can run in parallel with the ongoing e300 seed-2 gate because each PBS
+  job receives its own HF node.
+- Use the ABCI3-optimized protocol for new diagnostic work rather than the old
+  deterministic multi-node path.
+
+Submitted configuration:
+- `1n8g`, single HF node per pretrain.
+- `PRETRAIN_GPU_IDS=0-7`.
+- `PRETRAIN_BATCH_SIZE_PER_GPU=2`, global batch `16`.
+- `DETERMINISTIC=0`.
+- `EPOCHS=100`, seed `1`.
+- `PRETRAIN_EVAL_INTERVAL=100`, `PRETRAIN_CHECKPOINT_INTERVAL=100`.
+- `RUN_SUFFIX=abci3diag_opt1n8g_det0`.
+- Submit log dir:
+  `output/launcher/abci3_null_prior_diag_opt1n8g_det0_e100`.
+
+Submitted jobs:
+- `1779500.pbs1`: `alpha_target_only_no_pos`, e100 seed1 pretrain.
+- `1779501.pbs1`: dependent FCOS for `alpha_target_only_no_pos`.
+- `1779502.pbs1`: `baseline_no_pos`, e100 seed1 pretrain.
+- `1779503.pbs1`: dependent FCOS for `baseline_no_pos`.
+- `1779504.pbs1`: `alpha_target_only_coord_jitter`, e100 seed1 pretrain.
+- `1779505.pbs1`: dependent FCOS for `alpha_target_only_coord_jitter`.
+- `1779506.pbs1`: `cosine_coord_jitter`, e100 seed1 pretrain.
+- `1779507.pbs1`: dependent FCOS for `cosine_coord_jitter`.
+
+Intended readout:
+- no-pos pair:
+  compare `alpha_target_only_no_pos` against `baseline_no_pos` to test whether
+  target-alpha shortcut strength depends on positional embeddings.
+- coord-jitter pair:
+  compare `alpha_target_only_coord_jitter` and `cosine_coord_jitter` against
+  their non-jitter references to test whether canonical layout memorization is
+  driving the effect.

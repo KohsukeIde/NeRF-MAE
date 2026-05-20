@@ -28,6 +28,15 @@ PRETRAIN_WEIGHT_DECAY="${PRETRAIN_WEIGHT_DECAY:-0.0}"
 PRETRAIN_EVAL_INTERVAL="${PRETRAIN_EVAL_INTERVAL:-10}"
 PRETRAIN_CHECKPOINT_INTERVAL="${PRETRAIN_CHECKPOINT_INTERVAL:-10}"
 PRETRAIN_LOG_INTERVAL="${PRETRAIN_LOG_INTERVAL:-30}"
+PRETRAIN_PROFILE_STEP_TIME="${PRETRAIN_PROFILE_STEP_TIME:-0}"
+PRETRAIN_TRAIN_NUM_WORKERS="${PRETRAIN_TRAIN_NUM_WORKERS:-}"
+PRETRAIN_EVAL_NUM_WORKERS="${PRETRAIN_EVAL_NUM_WORKERS:-}"
+PRETRAIN_PERSISTENT_WORKERS="${PRETRAIN_PERSISTENT_WORKERS:-0}"
+STAGE_PRETRAIN_DATA="${STAGE_PRETRAIN_DATA:-0}"
+PRETRAIN_DATA_SRC="${PRETRAIN_DATA_SRC:-${PRETRAIN_DATA_ROOT}}"
+LOCAL_STAGE_ROOT="${LOCAL_STAGE_ROOT:-}"
+STAGE_KEEP="${STAGE_KEEP:-0}"
+STAGE_MIN_FREE_GB="${STAGE_MIN_FREE_GB:-80}"
 DISABLE_ABS_POS_EMBED="${DISABLE_ABS_POS_EMBED:-0}"
 DISABLE_RELATIVE_POSITION_BIAS="${DISABLE_RELATIVE_POSITION_BIAS:-0}"
 ROTATE_PROB="${ROTATE_PROB:-}"
@@ -51,7 +60,16 @@ normalize_empty_literal() {
   fi
 }
 
-for optional_arg in ROTATE_PROB FLIP_PROB ROT_SCALE_PROB COORD_SHIFT_PROB COORD_SHIFT_MAX_VOXELS; do
+for optional_arg in \
+  ROTATE_PROB \
+  FLIP_PROB \
+  ROT_SCALE_PROB \
+  COORD_SHIFT_PROB \
+  COORD_SHIFT_MAX_VOXELS \
+  PRETRAIN_TRAIN_NUM_WORKERS \
+  PRETRAIN_EVAL_NUM_WORKERS \
+  LOCAL_STAGE_ROOT
+do
   normalize_empty_literal "${optional_arg}"
 done
 
@@ -231,6 +249,11 @@ export SEED="$(printf '%q' "${SEED}")"
 export RUN_SUFFIX="$(printf '%q' "${RUN_SUFFIX}")"
 export PROBE_ENV_PREFIX="$(printf '%q' "${PROBE_ENV_PREFIX}")"
 export PRETRAIN_DATA_ROOT="$(printf '%q' "${PRETRAIN_DATA_ROOT}")"
+export PRETRAIN_DATA_SRC="$(printf '%q' "${PRETRAIN_DATA_SRC}")"
+export STAGE_PRETRAIN_DATA="$(printf '%q' "${STAGE_PRETRAIN_DATA}")"
+export LOCAL_STAGE_ROOT="$(printf '%q' "${LOCAL_STAGE_ROOT}")"
+export STAGE_KEEP="$(printf '%q' "${STAGE_KEEP}")"
+export STAGE_MIN_FREE_GB="$(printf '%q' "${STAGE_MIN_FREE_GB}")"
 export ABCI3_CUDA_MODULE="$(printf '%q' "${ABCI3_CUDA_MODULE}")"
 export AUTO_RESUME_PRETRAIN="$(printf '%q' "${AUTO_RESUME_PRETRAIN}")"
 export RESUME_ALLOW_PARTIAL="$(printf '%q' "${RESUME_ALLOW_PARTIAL}")"
@@ -254,7 +277,15 @@ export PRETRAIN_NODES="$(printf '%q' "${PRETRAIN_NODES}")"
 export PRETRAIN_BATCH_SIZE="$(printf '%q' "${PRETRAIN_BATCH_SIZE}")"
 export PRETRAIN_BATCH_SIZE_PER_GPU="$(printf '%q' "${PRETRAIN_BATCH_SIZE_PER_GPU}")"
 export PRETRAIN_GPU_IDS="$(printf '%q' "${PRETRAIN_GPU_IDS}")"
+export PRETRAIN_LR="$(printf '%q' "${PRETRAIN_LR}")"
+export PRETRAIN_WEIGHT_DECAY="$(printf '%q' "${PRETRAIN_WEIGHT_DECAY}")"
+export PRETRAIN_EVAL_INTERVAL="$(printf '%q' "${PRETRAIN_EVAL_INTERVAL}")"
 export PRETRAIN_CHECKPOINT_INTERVAL="$(printf '%q' "${PRETRAIN_CHECKPOINT_INTERVAL}")"
+export PRETRAIN_LOG_INTERVAL="$(printf '%q' "${PRETRAIN_LOG_INTERVAL}")"
+export PRETRAIN_PROFILE_STEP_TIME="$(printf '%q' "${PRETRAIN_PROFILE_STEP_TIME}")"
+export PRETRAIN_TRAIN_NUM_WORKERS="$(printf '%q' "${PRETRAIN_TRAIN_NUM_WORKERS}")"
+export PRETRAIN_EVAL_NUM_WORKERS="$(printf '%q' "${PRETRAIN_EVAL_NUM_WORKERS}")"
+export PRETRAIN_PERSISTENT_WORKERS="$(printf '%q' "${PRETRAIN_PERSISTENT_WORKERS}")"
 export PRETRAIN_MASTER_PORT="$(printf '%q' "${PRETRAIN_MASTER_PORT}")"
 rank="\$(bash "\${ABCI3_PRETRAIN_SCRIPT}" --resolve-node-rank "\${ABCI3_PRETRAIN_HOSTS_FILE}")"
 export NERFMAE_DDP_NODE_RANK="\${rank}"
@@ -305,6 +336,15 @@ export WANDB_MODE
 export PYTHONPATH="${ROOT_DIR}"
 export PATH="${PROBE_ENV_PREFIX}/bin:${PATH}"
 
+echo "[info] runtime host=$(hostname) cuda_module=${ABCI3_CUDA_MODULE} python=$(command -v python3 || true)"
+echo "[info] runtime nccl_socket=${NCCL_SOCKET_IFNAME:-unset} nccl_hca=${NCCL_IB_HCA:-unset} nccl_debug=${NCCL_DEBUG:-unset}"
+echo "[info] runtime nodes=${PRETRAIN_NODES} world=${PRETRAIN_WORLD_SIZE} gpu_ids=${PRETRAIN_GPU_IDS} batch=${PRETRAIN_BATCH_SIZE} batch_per_gpu=${PRETRAIN_BATCH_SIZE_PER_GPU}"
+nvidia-smi -L 2>/dev/null | sed 's/^/[info] /' || true
+python3 - <<'PY' 2>/dev/null || true
+import torch
+print(f"[info] torch={torch.__version__} cuda={torch.version.cuda} cudnn={torch.backends.cudnn.version()}")
+PY
+
 if (( PRETRAIN_NODES > 1 )); then
   export NERFMAE_DDP_USE_ENV="${NERFMAE_DDP_USE_ENV:-1}"
   export NERFMAE_DDP_NUM_NODES="${NERFMAE_DDP_NUM_NODES:-${PRETRAIN_NODES}}"
@@ -313,6 +353,80 @@ if (( PRETRAIN_NODES > 1 )); then
 fi
 
 mkdir -p "${ROOT_DIR}/output/launcher" "${ROOT_DIR}/runtime"
+
+stage_pretrain_data_if_requested() {
+  if [[ "${STAGE_PRETRAIN_DATA}" != "1" ]]; then
+    return 0
+  fi
+
+  local src stage_base dest partial marker available_gb source_gb required_gb min_required_gb
+  local feature_count split_sig
+  src="$(readlink -f "${PRETRAIN_DATA_SRC}")"
+  if [[ ! -d "${src}/features" || ! -f "${src}/nerfmae_split.npz" ]]; then
+    echo "[error] invalid PRETRAIN_DATA_SRC=${src}" >&2
+    exit 1
+  fi
+  split_sig="$(cksum "${src}/nerfmae_split.npz" | awk '{ print $1 ":" $2 }')"
+
+  stage_base="${LOCAL_STAGE_ROOT:-${PBS_LOCALDIR:-}}"
+  if [[ -z "${stage_base}" ]]; then
+    echo "[error] STAGE_PRETRAIN_DATA=1 requires LOCAL_STAGE_ROOT or PBS_LOCALDIR" >&2
+    exit 1
+  fi
+  mkdir -p "${stage_base}"
+
+  available_gb="$(df -BG --output=avail "${stage_base}" | tail -n 1 | tr -dc '0-9')"
+  source_gb="$(du -sBG "${src}" | awk '{ gsub(/G/, "", $1); print $1 }')"
+  required_gb=$((source_gb + 10))
+  min_required_gb="${STAGE_MIN_FREE_GB}"
+  if [[ "${required_gb}" -gt "${min_required_gb}" ]]; then
+    min_required_gb="${required_gb}"
+  fi
+  if [[ -n "${available_gb}" && "${available_gb}" -lt "${min_required_gb}" ]]; then
+    echo "[error] local stage root has ${available_gb}GB free, need >=${min_required_gb}GB: ${stage_base}" >&2
+    exit 1
+  fi
+
+  dest="${stage_base}/nerfmae_data/pretrain"
+  partial="${dest}.partial"
+  marker="${dest}/.nerfmae_stage_done"
+  if [[ -f "${marker}" && -d "${dest}/features" && -f "${dest}/nerfmae_split.npz" ]] \
+      && grep -Fxq "source=${src}" "${marker}" \
+      && grep -Fxq "split_cksum=${split_sig}" "${marker}"; then
+    PRETRAIN_DATA_ROOT="${dest}"
+    echo "[info] using existing staged pretrain data: ${PRETRAIN_DATA_ROOT}"
+    return 0
+  elif [[ -e "${dest}" ]]; then
+    echo "[info] removing stale staged pretrain data: ${dest}"
+  fi
+
+  rm -rf "${partial}" "${dest}"
+  mkdir -p "$(dirname "${dest}")"
+  echo "[info] staging pretrain data src=${src} dest=${dest}"
+  rsync -a --delete "${src}/" "${partial}/"
+  test -f "${partial}/nerfmae_split.npz"
+  test -d "${partial}/features"
+  feature_count="$(find "${partial}/features" -maxdepth 1 -name '*.npz' | wc -l | tr -d '[:space:]')"
+  if [[ "${feature_count}" -lt 3000 ]]; then
+    echo "[error] staged feature count is unexpectedly low: ${feature_count}" >&2
+    exit 1
+  fi
+  {
+    echo "source=${src}"
+    echo "split_cksum=${split_sig}"
+    echo "source_gb=${source_gb}"
+    echo "feature_count=${feature_count}"
+  } > "${partial}/.nerfmae_stage_done"
+  mv "${partial}" "${dest}"
+  PRETRAIN_DATA_ROOT="${dest}"
+  echo "[info] staged pretrain data ready root=${PRETRAIN_DATA_ROOT} features=${feature_count}"
+
+  if [[ "${STAGE_KEEP}" != "1" ]]; then
+    echo "[info] staged data is job-local and may be removed by PBS after completion"
+  fi
+}
+
+stage_pretrain_data_if_requested
 
 common_env=(
   DATA_ROOT="${PRETRAIN_DATA_ROOT}"
@@ -329,6 +443,10 @@ common_env=(
   LOG_INTERVAL="${PRETRAIN_LOG_INTERVAL}"
   EVAL_INTERVAL="${PRETRAIN_EVAL_INTERVAL}"
   CHECKPOINT_INTERVAL="${PRETRAIN_CHECKPOINT_INTERVAL}"
+  PROFILE_STEP_TIME="${PRETRAIN_PROFILE_STEP_TIME}"
+  TRAIN_NUM_WORKERS="${PRETRAIN_TRAIN_NUM_WORKERS}"
+  EVAL_NUM_WORKERS="${PRETRAIN_EVAL_NUM_WORKERS}"
+  PERSISTENT_WORKERS="${PRETRAIN_PERSISTENT_WORKERS}"
   USE_WANDB="${USE_WANDB}"
   WANDB_MODE="${WANDB_MODE}"
   SEED="${SEED}"
