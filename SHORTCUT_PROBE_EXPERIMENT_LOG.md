@@ -1828,3 +1828,119 @@ Intended readout:
   compare `alpha_target_only_coord_jitter` and `cosine_coord_jitter` against
   their non-jitter references to test whether canonical layout memorization is
   driving the effect.
+
+Results:
+- All four optimized diagnostic pretrains completed successfully:
+  - `1779500.pbs1`, `alpha_target_only_no_pos`, walltime `03:51:07`.
+  - `1779502.pbs1`, `baseline_no_pos`, walltime `03:50:56`.
+  - `1779504.pbs1`, `alpha_target_only_coord_jitter`, walltime `03:52:31`.
+  - `1779506.pbs1`, `cosine_coord_jitter`, walltime `03:52:26`.
+- All four dependent FCOS jobs completed successfully:
+  - `1779501.pbs1`, `alpha_target_only_no_pos`, walltime `10:17:45`.
+  - `1779503.pbs1`, `baseline_no_pos`, walltime `09:05:08`.
+  - `1779505.pbs1`, `alpha_target_only_coord_jitter`, walltime `09:13:45`.
+  - `1779507.pbs1`, `cosine_coord_jitter`, walltime `10:08:33`.
+
+| condition | AP@50 | AP@25 | AP@75 | Recall@50 top300 | Recall@25 top300 |
+|---|---:|---:|---:|---:|---:|
+| `baseline_no_pos` | 0.5371 | 0.7832 | 0.0899 | 0.6912 | 0.9559 |
+| `alpha_target_only_no_pos` | 0.4015 | 0.7394 | 0.0725 | 0.5956 | 0.9338 |
+| `alpha_target_only_coord_jitter` | 0.4954 | 0.7888 | 0.0622 | 0.6324 | 0.9412 |
+| `cosine_coord_jitter` | 0.6219 | 0.8097 | 0.1031 | 0.7279 | 0.9485 |
+
+Reading:
+- The no-pos pair does not show a generic collapse: `baseline_no_pos` remains
+  strong at `0.5371` AP@50, while `alpha_target_only_no_pos` drops to `0.4015`.
+  This supports the hypothesis that the target-alpha-only prior relies on
+  position-like structure more than the full visible-input baseline does.
+- Coord-jitter does not kill the signal. `alpha_target_only_coord_jitter`
+  remains competitive at `0.4954` AP@50, and `cosine_coord_jitter` is very strong
+  at `0.6219` AP@50. This argues against a simple "canonical room layout
+  memorization only" explanation.
+- The combined read is that null/target-alpha behavior is not a pure bad
+  shortcut. It looks like a useful structural prior that is partly
+  position-dependent, while the cosine curriculum remains robust under
+  coordinate jitter in this single-seed scout.
+
+## Experiment 28: e300 Seed-2 Gate Status
+
+Snapshot:
+- 2026-05-21 JST
+
+Pretrain status:
+- `cosine_ramp e300 seed2` produced:
+  `output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed2_abci3gb16_16g/epoch_300.pt`.
+- `cosine_ramp_alpha_shuffle e300 seed2` produced:
+  `output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_alpha_shuffle_p1.0_e300_seed2_abci3gb16_16g/epoch_300.pt`.
+- Both jobs nevertheless exited with status `1` after training/eval because the
+  then-running `train_mae3d.sh` hit a shell syntax error in the optional
+  augmentation argument block during the multi-node tail. The checkpoints were
+  written before that error.
+- Because the pretrain PBS jobs exited nonzero, the original `afterok` FCOS jobs
+  did not run and no e300 seed-2 FCOS eval was produced automatically.
+
+Action taken:
+- Verified current shell scripts with:
+  - `bash -n nerf_mae/train_mae3d.sh`
+  - `bash -n nerf_mae/probe_scripts/abci3_e300_gate_fcos.pbs`
+  - `bash -n nerf_mae/probe_scripts/submit_abci3_e300_gate_pipeline.sh`
+- Submitted FCOS-only retry jobs using the existing checkpoints:
+  - `1783994.pbs1`: `cosine_ramp e300 seed2` FCOS.
+  - `1783995.pbs1`: `cosine_ramp_alpha_shuffle e300 seed2` FCOS.
+- Submit log dir:
+  `output/launcher/abci3_e300_gate_gb16_16g_s2_fcos_retry`.
+
+Pending:
+- The e300 seed-2 gate cannot be judged until `1783994.pbs1` and
+  `1783995.pbs1` finish and produce their FCOS `eval.json` files.
+
+Results:
+- FCOS retry jobs completed successfully:
+  - `1783994.pbs1`, `cosine_ramp e300 seed2`, walltime `08:29:54`.
+  - `1783995.pbs1`, `cosine_ramp_alpha_shuffle e300 seed2`, walltime `08:12:32`.
+
+Current ABCI eval table:
+
+| condition | seed | AP@50 | AP@25 | AP@75 | Recall@50 top300 | Recall@25 top300 |
+|---|---:|---:|---:|---:|---:|---:|
+| `baseline_e300` | 1 | 0.4695 | 0.7956 | 0.0869 | 0.6618 | 0.9559 |
+| `cosine_ramp_e300` | 1 | 0.5539 | 0.8249 | 0.1135 | 0.7059 | 0.9632 |
+| `shuffle_e300` | 1 | 0.4162 | 0.7613 | 0.0326 | 0.5956 | 0.9559 |
+| `baseline_e300` | 2 | 0.5038 | 0.8126 | 0.0780 | 0.6838 | 0.9559 |
+| `cosine_ramp_e300` | 2 | 0.5366 | 0.8291 | 0.0881 | 0.6912 | 0.9485 |
+| `shuffle_e300` | 2 | 0.3964 | 0.7111 | 0.0517 | 0.6176 | 0.9632 |
+
+Paired AP@50 differences:
+- Seed 1:
+  - `cosine - baseline`: `+0.0843`.
+  - `cosine - shuffle`: `+0.1377`.
+  - `shuffle - baseline`: `-0.0534`.
+- Seed 2:
+  - `cosine - baseline`: `+0.0328`.
+  - `cosine - shuffle`: `+0.1402`.
+  - `shuffle - baseline`: `-0.1074`.
+
+Two-seed AP@50 means:
+- `baseline_e300`: `0.4867`.
+- `cosine_ramp_e300`: `0.5452`.
+- `shuffle_e300`: `0.4063`.
+- Mean `cosine - baseline`: `+0.0586`.
+- Mean `cosine - shuffle`: `+0.1390`.
+
+Caveat:
+- The historical seed-1 artifact used in earlier notes has
+  `cosine_ramp_e300 AP@50=0.5987`, `baseline_e300 AP@50=0.4903`, and
+  `shuffle_e300 AP@50=0.4138`. The current ABCI clean seed-1 eval is lower for
+  cosine (`0.5539`) and baseline (`0.4695`) but preserves the same ordering.
+- For paper-quality multi-seed evidence, avoid mixing the old historical
+  artifact and current ABCI reruns as if they were one protocol.
+
+Reading:
+- The seed-2 result keeps the direction of the cosine curriculum signal:
+  `cosine_ramp_e300` beats same-seed `baseline_e300`, but the gain is modest
+  (`+0.0328` AP@50) compared with seed 1.
+- The mechanism control is more stable: `shuffle_e300` is far below cosine in
+  both seeds (`~+0.14` AP@50 gap for cosine over shuffle).
+- The current status is stronger than a single-seed candidate, but still not a
+  final paper claim. It supports continuing the cosine/prior path, with future
+  multi-seed or longer-budget runs done under one unified ABCI protocol.
