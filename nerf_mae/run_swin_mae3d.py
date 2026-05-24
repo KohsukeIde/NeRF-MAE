@@ -212,7 +212,14 @@ def parse_args():
     parser.add_argument(
         "--probe_rgb_loss",
         default="occupied",
-        choices=["occupied", "removed_occupied", "removed_all", "none"],
+        choices=[
+            "occupied",
+            "target_alpha",
+            "removed_target_alpha",
+            "removed_occupied",
+            "removed_all",
+            "none",
+        ],
         help="Which voxels contribute to RGB reconstruction loss.",
     )
     parser.add_argument(
@@ -276,6 +283,17 @@ def parse_args():
         default=1.0,
         type=float,
         help="Alpha loss weight used throughout a probe curriculum.",
+    )
+    parser.add_argument(
+        "--probe_decomp_mode",
+        default="none",
+        choices=[
+            "none",
+            "target_alpha_gated_rgb",
+            "hierarchical_concat",
+            "hierarchical_film",
+        ],
+        help="Optional decomposed MAE scout head for alpha/RGB structure diagnostics.",
     )
     parser.add_argument("--lr", default=5e-3, type=float, help="The learning rate.")
     parser.add_argument(
@@ -725,6 +743,7 @@ class Trainer:
             probe_rgb_weight=args.probe_rgb_weight,
             probe_alpha_weight=args.probe_alpha_weight,
             probe_alpha_threshold=args.probe_alpha_threshold,
+            probe_decomp_mode=args.probe_decomp_mode,
         )
 
     def apply_position_knockouts(self):

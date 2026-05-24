@@ -14,6 +14,7 @@ KIND="${KIND:?KIND is required}"
 CONDITION="${CONDITION:?CONDITION is required}"
 EPOCHS="${EPOCHS:?EPOCHS is required}"
 SEED="${SEED:?SEED is required}"
+FINETUNE_SEED="${FINETUNE_SEED:-${SEED}}"
 RUN_SUFFIX="${RUN_SUFFIX:-abci3clean}"
 
 PROBE_ENV_PREFIX="${PROBE_ENV_PREFIX:-${ROOT_DIR}/.venv-abci3}"
@@ -44,7 +45,7 @@ case "${KIND}:${CONDITION}" in
     PRETRAIN_SAVE_NAME="nerfmae_alpha_rgba_curr_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     VARIANT_NAME="${CONDITION}"
     ;;
-  diagnostic:alpha_target_only|diagnostic:alpha_target_only_no_pos|diagnostic:alpha_target_only_coord_jitter|diagnostic:baseline_no_pos|diagnostic:cosine_no_pos|diagnostic:cosine_coord_jitter)
+  diagnostic:alpha_target_only|diagnostic:alpha_target_only_no_pos|diagnostic:alpha_target_only_coord_jitter|diagnostic:baseline_no_pos|diagnostic:baseline_coord_jitter|diagnostic:cosine_no_pos|diagnostic:cosine_coord_jitter|diagnostic:dmae_target_alpha_gated_rgb|diagnostic:dmae_hier_concat|diagnostic:dmae_hier_film)
     PRETRAIN_SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     VARIANT_NAME="${CONDITION}"
     ;;
@@ -55,7 +56,11 @@ case "${KIND}:${CONDITION}" in
 esac
 
 PRETRAIN_CHECKPOINT="${ROOT_DIR}/output/nerf_mae/results/${PRETRAIN_SAVE_NAME}/epoch_${EPOCHS}.pt"
-SAVE_NAME="${PRETRAIN_SAVE_NAME}_epoch${EPOCHS}_sched_epoch_seed${SEED}_fcos${FCOS_NUM_EPOCHS}"
+if [[ "${FINETUNE_SEED}" == "${SEED}" ]]; then
+  SAVE_NAME="${PRETRAIN_SAVE_NAME}_epoch${EPOCHS}_sched_epoch_seed${SEED}_fcos${FCOS_NUM_EPOCHS}"
+else
+  SAVE_NAME="${PRETRAIN_SAVE_NAME}_epoch${EPOCHS}_sched_epoch_preseed${SEED}_ftseed${FINETUNE_SEED}_fcos${FCOS_NUM_EPOCHS}"
+fi
 EVAL_JSON="${ROOT_DIR}/output/nerf_rpn/results/${SAVE_NAME}_eval/eval.json"
 
 if [[ "${SKIP_EXISTING}" == "1" && -f "${EVAL_JSON}" ]]; then
@@ -116,7 +121,7 @@ USE_WANDB="${USE_WANDB}" \
 WANDB_MODE="${WANDB_MODE}" \
 SAVE_NAME="${SAVE_NAME}" \
 RUN_TAG="${SAVE_NAME}" \
-SEED="${SEED}" \
+SEED="${FINETUNE_SEED}" \
 DETERMINISTIC="${DETERMINISTIC}" \
 LR_SCHEDULER="${FCOS_LR_SCHEDULER}" \
 bash "${ROOT_DIR}/nerf_rpn/run_fcos_probe_variant.sh"

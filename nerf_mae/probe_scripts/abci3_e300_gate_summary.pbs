@@ -15,7 +15,9 @@ SUMMARY_DIR="${SUMMARY_DIR:-${ROOT_DIR}/output/launcher/abci3_e300_gate_2seed_re
 EPOCHS="${EPOCHS:-300}"
 FCOS_NUM_EPOCHS="${FCOS_NUM_EPOCHS:-1000}"
 RUN_SUFFIX="${RUN_SUFFIX:-abci3clean}"
-SEEDS="${SEEDS:-1 2}"
+SEEDS="${SEEDS:-1 2 3}"
+PRETRAIN_SEEDS="${PRETRAIN_SEEDS:-}"
+FINETUNE_SEEDS="${FINETUNE_SEEDS:-}"
 
 export PATH="${PROBE_ENV_PREFIX}/bin:${PATH}"
 
@@ -27,6 +29,8 @@ mkdir -p "${SUMMARY_DIR}"
   --fcos-epochs "${FCOS_NUM_EPOCHS}" \
   --run-suffix "${RUN_SUFFIX}" \
   --seeds ${SEEDS} \
+  ${PRETRAIN_SEEDS:+--pretrain-seeds ${PRETRAIN_SEEDS}} \
+  ${FINETUNE_SEEDS:+--finetune-seeds ${FINETUNE_SEEDS}} \
   --csv-out "${SUMMARY_DIR}/summary.csv" \
   --md-out "${SUMMARY_DIR}/summary.md" \
   --json-out "${SUMMARY_DIR}/summary.json"

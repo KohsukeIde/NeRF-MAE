@@ -34,6 +34,11 @@ STAGE_MIN_FREE_GB="${STAGE_MIN_FREE_GB:-80}"
 AUTO_RESUME_PRETRAIN="${AUTO_RESUME_PRETRAIN:-1}"
 RESUME_ALLOW_PARTIAL="${RESUME_ALLOW_PARTIAL:-1}"
 FCOS_NUM_EPOCHS="${FCOS_NUM_EPOCHS:-1000}"
+FCOS_GPU_IDS="${FCOS_GPU_IDS:-0}"
+FCOS_BATCH_SIZE_PER_GPU="${FCOS_BATCH_SIZE_PER_GPU:-2}"
+FCOS_LR="${FCOS_LR:-1e-4}"
+FCOS_WEIGHT_DECAY="${FCOS_WEIGHT_DECAY:-1e-3}"
+FCOS_LR_SCHEDULER="${FCOS_LR_SCHEDULER:-onecycle_epoch}"
 USE_WANDB="${USE_WANDB:-0}"
 WANDB_MODE="${WANDB_MODE:-offline}"
 DETERMINISTIC="${DETERMINISTIC:-1}"
@@ -95,8 +100,12 @@ short_condition() {
     alpha_target_only_no_pos) printf "atnopos" ;;
     alpha_target_only_coord_jitter) printf "atjit" ;;
     baseline_no_pos) printf "basenop" ;;
+    baseline_coord_jitter) printf "basejit" ;;
     cosine_no_pos) printf "cosnop" ;;
     cosine_coord_jitter) printf "cosjit" ;;
+    dmae_target_alpha_gated_rgb) printf "dmaegate" ;;
+    dmae_hier_concat) printf "dmaecat" ;;
+    dmae_hier_film) printf "dmaefilm" ;;
     *) printf "%s" "$1" | tr -cd '[:alnum:]_' | cut -c1-8 ;;
   esac
 }
@@ -118,7 +127,7 @@ pretrain_save_name() {
     curriculum:cosine_ramp|curriculum:cosine_ramp_alpha_shuffle)
       printf "nerfmae_alpha_rgba_curr_%s_p1.0_e%s_seed%s%s\n" "${condition}" "${epochs}" "${seed}" "${suffix_part}"
       ;;
-    diagnostic:alpha_target_only|diagnostic:alpha_target_only_no_pos|diagnostic:alpha_target_only_coord_jitter|diagnostic:baseline_no_pos|diagnostic:cosine_no_pos|diagnostic:cosine_coord_jitter)
+    diagnostic:alpha_target_only|diagnostic:alpha_target_only_no_pos|diagnostic:alpha_target_only_coord_jitter|diagnostic:baseline_no_pos|diagnostic:baseline_coord_jitter|diagnostic:cosine_no_pos|diagnostic:cosine_coord_jitter|diagnostic:dmae_target_alpha_gated_rgb|diagnostic:dmae_hier_concat|diagnostic:dmae_hier_film)
       printf "nerfmae_%s_p1.0_e%s_seed%s%s\n" "${condition}" "${epochs}" "${seed}" "${suffix_part}"
       ;;
     *)
@@ -203,12 +212,18 @@ submit_fcos() {
   local condition="$4"
   local epochs="$5"
   local seed="$6"
+  local finetune_seed="$7"
   local short fcos_name qsub_gpu_ids varlist cmd_output
 
   short="$(short_condition "${condition}")"
-  fcos_name="e${epochs}_${short}_s${seed}_fcos"
+  if [[ "${finetune_seed}" == "${seed}" ]]; then
+    fcos_name="e${epochs}_${short}_s${seed}_fcos"
+  else
+    fcos_name="e${epochs}_${short}_pre${seed}_ft${finetune_seed}_fcos"
+  fi
   qsub_gpu_ids="${PRETRAIN_GPU_IDS//,/:}"
-  varlist="KIND=${kind},CONDITION=${condition},EPOCHS=${epochs},SEED=${seed},RUN_SUFFIX=${RUN_SUFFIX},PROBE_ENV_PREFIX=${PROBE_ENV_PREFIX},PRETRAIN_DATA_ROOT=${PRETRAIN_DATA_ROOT},FCOS_DATA_ROOT=${FCOS_DATA_ROOT},PRETRAIN_NODES=${PRETRAIN_NODES},PRETRAIN_GPU_IDS=${qsub_gpu_ids},PRETRAIN_BATCH_SIZE_PER_GPU=${PRETRAIN_BATCH_SIZE_PER_GPU},PRETRAIN_EVAL_INTERVAL=${PRETRAIN_EVAL_INTERVAL},PRETRAIN_CHECKPOINT_INTERVAL=${PRETRAIN_CHECKPOINT_INTERVAL},PRETRAIN_LOG_INTERVAL=${PRETRAIN_LOG_INTERVAL},PRETRAIN_PROFILE_STEP_TIME=${PRETRAIN_PROFILE_STEP_TIME},FCOS_NUM_EPOCHS=${FCOS_NUM_EPOCHS},SKIP_EXISTING=1"
+  fcos_gpu_ids="${FCOS_GPU_IDS:-0}"
+  varlist="KIND=${kind},CONDITION=${condition},EPOCHS=${epochs},SEED=${seed},FINETUNE_SEED=${finetune_seed},RUN_SUFFIX=${RUN_SUFFIX},PROBE_ENV_PREFIX=${PROBE_ENV_PREFIX},PRETRAIN_DATA_ROOT=${PRETRAIN_DATA_ROOT},FCOS_DATA_ROOT=${FCOS_DATA_ROOT},ABCI3_CUDA_MODULE=${ABCI3_CUDA_MODULE},PRETRAIN_NODES=${PRETRAIN_NODES},PRETRAIN_GPU_IDS=${qsub_gpu_ids},PRETRAIN_BATCH_SIZE_PER_GPU=${PRETRAIN_BATCH_SIZE_PER_GPU},PRETRAIN_EVAL_INTERVAL=${PRETRAIN_EVAL_INTERVAL},PRETRAIN_CHECKPOINT_INTERVAL=${PRETRAIN_CHECKPOINT_INTERVAL},PRETRAIN_LOG_INTERVAL=${PRETRAIN_LOG_INTERVAL},PRETRAIN_PROFILE_STEP_TIME=${PRETRAIN_PROFILE_STEP_TIME},FCOS_GPU_IDS=${fcos_gpu_ids},FCOS_NUM_EPOCHS=${FCOS_NUM_EPOCHS},FCOS_BATCH_SIZE_PER_GPU=${FCOS_BATCH_SIZE_PER_GPU},FCOS_LR=${FCOS_LR},FCOS_WEIGHT_DECAY=${FCOS_WEIGHT_DECAY},FCOS_LR_SCHEDULER=${FCOS_LR_SCHEDULER},USE_WANDB=${USE_WANDB},WANDB_MODE=${WANDB_MODE},DETERMINISTIC=${DETERMINISTIC},SKIP_EXISTING=1"
 
   local fcos_cmd=(
     qsub
@@ -232,14 +247,14 @@ submit_fcos() {
   else
     cmd_output="$("${fcos_cmd[@]}")"
     cmd_output="${cmd_output%% *}"
-    echo "[submitted] fcos ${kind}:${condition}:e${epochs}:seed${seed} job=${cmd_output} dep=${pre_jobid:-none}" >&2
+    echo "[submitted] fcos ${kind}:${condition}:e${epochs}:preseed${seed}:ftseed${finetune_seed} job=${cmd_output} dep=${pre_jobid:-none}" >&2
     printf "%s\n" "${cmd_output}"
   fi
 }
 
 cd "${ROOT_DIR}"
 if [[ "${DRY_RUN}" != "1" ]]; then
-  printf "idx\tslot\tkind\tcondition\tepochs\tseed\tpretrain_job\tfcos_job\n" > "${SUBMIT_LOG_DIR}/submitted.tsv"
+  printf "idx\tslot\tkind\tcondition\tepochs\tpretrain_seed\tfinetune_seed\tpretrain_job\tfcos_job\n" > "${SUBMIT_LOG_DIR}/submitted.tsv"
 fi
 
 declare -a slot_tail
@@ -250,7 +265,8 @@ done
 idx=0
 pre_idx=0
 for job in ${GATE_JOBS}; do
-  IFS=':' read -r kind condition epochs seed <<< "${job}"
+  IFS=':' read -r kind condition epochs seed finetune_seed <<< "${job}"
+  finetune_seed="${finetune_seed:-${seed}}"
   slot=""
   pre_jobid=""
   fcos_jobid=""
@@ -274,12 +290,12 @@ for job in ${GATE_JOBS}; do
     if [[ -z "${fcos_dependency}" ]]; then
       fcos_dependency="${GLOBAL_DEPENDENCY}"
     fi
-    fcos_jobid="$(submit_fcos "${idx}" "${fcos_dependency}" "${kind}" "${condition}" "${epochs}" "${seed}")"
+    fcos_jobid="$(submit_fcos "${idx}" "${fcos_dependency}" "${kind}" "${condition}" "${epochs}" "${seed}" "${finetune_seed}")"
   fi
 
   if [[ "${DRY_RUN}" != "1" ]]; then
-    printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
-      "${idx}" "${slot}" "${kind}" "${condition}" "${epochs}" "${seed}" \
+    printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
+      "${idx}" "${slot}" "${kind}" "${condition}" "${epochs}" "${seed}" "${finetune_seed}" \
       "${pre_jobid:-none}" "${fcos_jobid:-none}" >> "${SUBMIT_LOG_DIR}/submitted.tsv"
   fi
   idx=$((idx + 1))

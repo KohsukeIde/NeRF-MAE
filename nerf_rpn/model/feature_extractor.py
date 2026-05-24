@@ -1160,7 +1160,12 @@ class SwinTransformer_FPN_Pretrained_Skip(nn.Module):  # TODO: change to 3D
 
             # print(f"Loading checkpoint from {checkpoint_path}.")
             checkpoint = _torch_load_trusted_checkpoint(checkpoint_path, map_location="cpu")
-            model.load_state_dict(checkpoint["state_dict"])
+            missing, unexpected = model.load_state_dict(checkpoint["state_dict"], strict=False)
+            if missing or unexpected:
+                print(
+                    "[info] MAE checkpoint loaded with non-strict keys "
+                    f"missing={len(missing)} unexpected={len(unexpected)}"
+                )
 
         del model.decoder4
         del model.decoder3

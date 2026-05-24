@@ -85,15 +85,7 @@ class CoordMLP(nn.Module):
         return self.net(x)
 
 
-def evaluate(model: nn.Module, x: torch.Tensor, y: torch.Tensor, batch_size: int, threshold: float) -> dict[str, float]:
-    model.eval()
-    preds = []
-    with torch.no_grad():
-        for start in range(0, x.shape[0], batch_size):
-            preds.append(model(x[start : start + batch_size]).cpu())
-    pred = torch.cat(preds, dim=0)
-    target = y.cpu()
-    mse = torch.mean((pred - target) ** 2).item()
+def binary_stats(pred: torch.Tensor, target: torch.Tensor, threshold: float) -> dict[str, float]:
     pred_occ = pred >= threshold
     target_occ = target >= threshold
     tp = torch.logical_and(pred_occ, target_occ).sum().item()
@@ -102,15 +94,60 @@ def evaluate(model: nn.Module, x: torch.Tensor, y: torch.Tensor, batch_size: int
     precision = tp / max(tp + fp, 1)
     recall = tp / max(tp + fn, 1)
     iou = tp / max(tp + fp + fn, 1)
-    pos_rate = target_occ.float().mean().item()
-    pred_pos_rate = pred_occ.float().mean().item()
     return {
-        "mse": mse,
+        "threshold": float(threshold),
         "precision": precision,
         "recall": recall,
         "iou": iou,
+        "pred_pos_rate": pred_occ.float().mean().item(),
+    }
+
+
+def average_precision(pred: torch.Tensor, target_occ: torch.Tensor) -> float:
+    scores = pred.flatten()
+    labels = target_occ.flatten().to(torch.float32)
+    if labels.sum().item() == 0:
+        return 0.0
+    order = torch.argsort(scores, descending=True)
+    sorted_labels = labels[order]
+    tp = torch.cumsum(sorted_labels, dim=0)
+    precision = tp / torch.arange(1, sorted_labels.numel() + 1, dtype=torch.float32)
+    return (precision * sorted_labels).sum().item() / labels.sum().item()
+
+
+def evaluate(model: nn.Module, x: torch.Tensor, y: torch.Tensor, batch_size: int, threshold: float) -> dict[str, object]:
+    model.eval()
+    preds = []
+    with torch.no_grad():
+        for start in range(0, x.shape[0], batch_size):
+            preds.append(model(x[start : start + batch_size]).cpu())
+    pred = torch.cat(preds, dim=0)
+    target = y.cpu()
+    mse = torch.mean((pred - target) ** 2).item()
+    target_occ = target >= threshold
+    pred_clamped = pred.clamp(min=1e-6, max=1.0 - 1e-6)
+    bce = torch.nn.functional.binary_cross_entropy(pred_clamped, target_occ.to(torch.float32)).item()
+    mae = torch.mean(torch.abs(pred - target)).item()
+    pos_rate = target_occ.float().mean().item()
+    thresholds = [0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
+    threshold_sweep = [binary_stats(pred, target, t) for t in thresholds]
+    primary_stats = binary_stats(pred, target, threshold)
+    best_iou = max(threshold_sweep, key=lambda item: item["iou"])
+    return {
+        "mse": mse,
+        "mae": mae,
+        "binary_bce": bce,
+        "average_precision_occ": average_precision(pred, target_occ),
+        "precision": primary_stats["precision"],
+        "recall": primary_stats["recall"],
+        "iou": primary_stats["iou"],
         "target_pos_rate": pos_rate,
-        "pred_pos_rate": pred_pos_rate,
+        "pred_pos_rate": primary_stats["pred_pos_rate"],
+        "pred_mean": pred.mean().item(),
+        "target_mean": target.mean().item(),
+        "best_iou_threshold": best_iou["threshold"],
+        "best_iou": best_iou["iou"],
+        "threshold_sweep": threshold_sweep,
     }
 
 
@@ -180,9 +217,14 @@ def main() -> None:
         f"- Val samples: `{result['val_samples']}`",
         f"- Final train MSE: `{result['final_train_mse']:.6f}`",
         f"- Val MSE: `{val['mse']:.6f}`",
+        f"- Val MAE: `{val['mae']:.6f}`",
+        f"- Val binary BCE: `{val['binary_bce']:.6f}`",
+        f"- Val occupied AP: `{val['average_precision_occ']:.4f}`",
         f"- Val occupied IoU: `{val['iou']:.4f}`",
+        f"- Best threshold / IoU: `{val['best_iou_threshold']:.3f}` / `{val['best_iou']:.4f}`",
         f"- Val precision / recall: `{val['precision']:.4f}` / `{val['recall']:.4f}`",
         f"- Target / predicted occupied rate: `{val['target_pos_rate']:.4f}` / `{val['pred_pos_rate']:.4f}`",
+        f"- Target / predicted mean alpha: `{val['target_mean']:.6f}` / `{val['pred_mean']:.6f}`",
     ]
     args.out_md.write_text("\n".join(lines) + "\n")
 

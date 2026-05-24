@@ -157,7 +157,7 @@ case "${KIND}:${CONDITION}" in
   curriculum:cosine_ramp|curriculum:cosine_ramp_alpha_shuffle)
     SAVE_NAME="nerfmae_alpha_rgba_curr_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
-  diagnostic:alpha_target_only|diagnostic:alpha_target_only_no_pos|diagnostic:alpha_target_only_coord_jitter|diagnostic:baseline_no_pos|diagnostic:cosine_no_pos|diagnostic:cosine_coord_jitter)
+  diagnostic:alpha_target_only|diagnostic:alpha_target_only_no_pos|diagnostic:alpha_target_only_coord_jitter|diagnostic:baseline_no_pos|diagnostic:baseline_coord_jitter|diagnostic:cosine_no_pos|diagnostic:cosine_coord_jitter|diagnostic:dmae_target_alpha_gated_rgb|diagnostic:dmae_hier_concat|diagnostic:dmae_hier_film)
     SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
   *)
@@ -543,6 +543,16 @@ case "${KIND}:${CONDITION}" in
       PROBE_MODE=baseline \
       bash train_mae3d.sh
     ;;
+  diagnostic:baseline_coord_jitter)
+    env "${common_env[@]}" "${resume_env[@]}" \
+      ROTATE_PROB="${ROTATE_PROB:-1.0}" \
+      FLIP_PROB="${FLIP_PROB:-0.5}" \
+      ROT_SCALE_PROB="${ROT_SCALE_PROB:-0.0}" \
+      COORD_SHIFT_PROB="${COORD_SHIFT_PROB:-1.0}" \
+      COORD_SHIFT_MAX_VOXELS="${COORD_SHIFT_MAX_VOXELS:-8}" \
+      PROBE_MODE=baseline \
+      bash train_mae3d.sh
+    ;;
   diagnostic:cosine_no_pos|diagnostic:cosine_coord_jitter)
     extra_env=()
     if [[ "${CONDITION}" == "cosine_no_pos" ]]; then
@@ -570,6 +580,33 @@ case "${KIND}:${CONDITION}" in
       PROBE_CURRICULUM_RGB_START_WEIGHT=0.0 \
       PROBE_CURRICULUM_RGB_END_WEIGHT=1.0 \
       PROBE_CURRICULUM_ALPHA_WEIGHT=1.0 \
+      bash train_mae3d.sh
+    ;;
+  diagnostic:dmae_target_alpha_gated_rgb|diagnostic:dmae_hier_concat|diagnostic:dmae_hier_film)
+    decomp_mode=""
+    rgb_loss="occupied"
+    case "${CONDITION}" in
+      dmae_target_alpha_gated_rgb)
+        decomp_mode="target_alpha_gated_rgb"
+        rgb_loss="target_alpha"
+        ;;
+      dmae_hier_concat)
+        decomp_mode="hierarchical_concat"
+        ;;
+      dmae_hier_film)
+        decomp_mode="hierarchical_film"
+        ;;
+    esac
+    env "${common_env[@]}" "${resume_env[@]}" \
+      PROBE_MODE=custom \
+      PROBE_RGB_INPUT=keep \
+      PROBE_ALPHA_INPUT=keep \
+      PROBE_ALPHA_TARGET=keep \
+      PROBE_RGB_LOSS="${rgb_loss}" \
+      PROBE_ALPHA_LOSS=removed \
+      PROBE_RGB_WEIGHT=1.0 \
+      PROBE_ALPHA_WEIGHT=1.0 \
+      PROBE_DECOMP_MODE="${decomp_mode}" \
       bash train_mae3d.sh
     ;;
 esac

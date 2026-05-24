@@ -25,6 +25,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--epochs", type=int, default=300)
     parser.add_argument("--fcos-epochs", type=int, default=1000)
     parser.add_argument("--seeds", type=int, nargs="+", default=[1, 2])
+    parser.add_argument("--pretrain-seeds", type=int, nargs="+", default=None)
+    parser.add_argument("--finetune-seeds", type=int, nargs="+", default=None)
     parser.add_argument("--run-suffix", default="abci3clean")
     parser.add_argument("--csv-out", type=Path, required=True)
     parser.add_argument("--md-out", type=Path, required=True)
@@ -39,9 +41,23 @@ def pretrain_name(condition: str, epochs: int, seed: int, suffix: str) -> str:
     return f"nerfmae_alpha_rgba_curr_{condition}_p1.0_e{epochs}_seed{seed}{suffix_part}"
 
 
-def eval_path(root: Path, condition: str, epochs: int, seed: int, suffix: str, fcos_epochs: int) -> Path:
-    pre = pretrain_name(condition, epochs, seed, suffix)
-    save = f"{pre}_epoch{epochs}_sched_epoch_seed{seed}_fcos{fcos_epochs}_eval"
+def eval_path(
+    root: Path,
+    condition: str,
+    epochs: int,
+    pretrain_seed: int,
+    finetune_seed: int,
+    suffix: str,
+    fcos_epochs: int,
+) -> Path:
+    pre = pretrain_name(condition, epochs, pretrain_seed, suffix)
+    if pretrain_seed == finetune_seed:
+        save = f"{pre}_epoch{epochs}_sched_epoch_seed{finetune_seed}_fcos{fcos_epochs}_eval"
+    else:
+        save = (
+            f"{pre}_epoch{epochs}_sched_epoch_preseed{pretrain_seed}"
+            f"_ftseed{finetune_seed}_fcos{fcos_epochs}_eval"
+        )
     return root / "output" / "nerf_rpn" / "results" / save / "eval.json"
 
 
@@ -72,36 +88,63 @@ def load_eval(path: Path) -> dict[str, Any] | None:
 def main() -> None:
     args = parse_args()
     rows: list[dict[str, Any]] = []
-    by_key: dict[tuple[str, int], dict[str, Any]] = {}
+    by_key: dict[tuple[str, int, int], dict[str, Any]] = {}
+    pretrain_seeds = args.pretrain_seeds or args.seeds
+    finetune_seeds = args.finetune_seeds or args.seeds
 
-    for seed in args.seeds:
-        for condition in CONDITIONS:
-            path = eval_path(args.root, condition, args.epochs, seed, args.run_suffix, args.fcos_epochs)
-            data = load_eval(path)
-            row = {
-                "condition": LABELS[condition],
-                "condition_key": condition,
-                "seed": seed,
-                "status": "done" if data is not None else "missing",
-                "ap25": metric(data, "ap_25"),
-                "ap50": metric(data, "ap_50"),
-                "ap75": metric(data, "ap_75"),
-                "recall50_top300": metric(data, "recall_50_top_300", "ar"),
-                "recall50_top1000": metric(data, "recall_50_top_1000", "ar"),
-                "eval_json": str(path),
-            }
-            rows.append(row)
-            by_key[(condition, seed)] = row
+    for pretrain_seed in pretrain_seeds:
+        for finetune_seed in finetune_seeds:
+            for condition in CONDITIONS:
+                path = eval_path(
+                    args.root,
+                    condition,
+                    args.epochs,
+                    pretrain_seed,
+                    finetune_seed,
+                    args.run_suffix,
+                    args.fcos_epochs,
+                )
+                data = load_eval(path)
+                row = {
+                    "condition": LABELS[condition],
+                    "condition_key": condition,
+                    "pretrain_seed": pretrain_seed,
+                    "finetune_seed": finetune_seed,
+                    "status": "done" if data is not None else "missing",
+                    "ap25": metric(data, "ap_25"),
+                    "ap50": metric(data, "ap_50"),
+                    "ap75": metric(data, "ap_75"),
+                    "recall50_top300": metric(data, "recall_50_top_300", "ar"),
+                    "recall50_top1000": metric(data, "recall_50_top_1000", "ar"),
+                    "eval_json": str(path),
+                }
+                rows.append(row)
+                by_key[(condition, pretrain_seed, finetune_seed)] = row
 
     diffs: list[dict[str, Any]] = []
-    for seed in args.seeds:
-        base = by_key[("baseline", seed)]["ap50"]
-        cos = by_key[("cosine_ramp", seed)]["ap50"]
-        shuf = by_key[("cosine_ramp_alpha_shuffle", seed)]["ap50"]
-        if cos is not None and base is not None:
-            diffs.append({"seed": seed, "comparison": "cosine-baseline", "ap50_diff": cos - base})
-        if cos is not None and shuf is not None:
-            diffs.append({"seed": seed, "comparison": "cosine-shuffle", "ap50_diff": cos - shuf})
+    for pretrain_seed in pretrain_seeds:
+        for finetune_seed in finetune_seeds:
+            base = by_key[("baseline", pretrain_seed, finetune_seed)]["ap50"]
+            cos = by_key[("cosine_ramp", pretrain_seed, finetune_seed)]["ap50"]
+            shuf = by_key[("cosine_ramp_alpha_shuffle", pretrain_seed, finetune_seed)]["ap50"]
+            if cos is not None and base is not None:
+                diffs.append(
+                    {
+                        "pretrain_seed": pretrain_seed,
+                        "finetune_seed": finetune_seed,
+                        "comparison": "cosine-baseline",
+                        "ap50_diff": cos - base,
+                    }
+                )
+            if cos is not None and shuf is not None:
+                diffs.append(
+                    {
+                        "pretrain_seed": pretrain_seed,
+                        "finetune_seed": finetune_seed,
+                        "comparison": "cosine-shuffle",
+                        "ap50_diff": cos - shuf,
+                    }
+                )
 
     args.csv_out.parent.mkdir(parents=True, exist_ok=True)
     with args.csv_out.open("w", newline="") as f:
@@ -109,7 +152,8 @@ def main() -> None:
             f,
             fieldnames=[
                 "condition",
-                "seed",
+                "pretrain_seed",
+                "finetune_seed",
                 "status",
                 "ap25",
                 "ap50",
@@ -147,13 +191,14 @@ def main() -> None:
         "# ABCI3 e300 Gate Summary",
         "",
         "| condition | seed | status | AP@50 | AP@25 | AP@75 | Recall@50 top300 |",
-        "|---|---:|---|---:|---:|---:|---:|",
+        "|---|---:|---:|---|---:|---:|---:|---:|",
     ]
     for row in rows:
         lines.append(
-            "| {condition} | {seed} | {status} | {ap50} | {ap25} | {ap75} | {recall} |".format(
+            "| {condition} | {pretrain_seed} | {finetune_seed} | {status} | {ap50} | {ap25} | {ap75} | {recall} |".format(
                 condition=row["condition"],
-                seed=row["seed"],
+                pretrain_seed=row["pretrain_seed"],
+                finetune_seed=row["finetune_seed"],
                 status=row["status"],
                 ap50=fmt(row["ap50"]),
                 ap25=fmt(row["ap25"]),
@@ -162,9 +207,21 @@ def main() -> None:
             )
         )
 
-    lines.extend(["", "## Paired AP@50 Diffs", "", "| seed | comparison | diff |", "|---:|---|---:|"])
+    lines[2] = "| condition | pretrain seed | finetune seed | status | AP@50 | AP@25 | AP@75 | Recall@50 top300 |"
+    lines.extend(
+        [
+            "",
+            "## Paired AP@50 Diffs",
+            "",
+            "| pretrain seed | finetune seed | comparison | diff |",
+            "|---:|---:|---|---:|",
+        ]
+    )
     for row in diffs:
-        lines.append(f"| {row['seed']} | {row['comparison']} | {row['ap50_diff']:.4f} |")
+        lines.append(
+            f"| {row['pretrain_seed']} | {row['finetune_seed']} | "
+            f"{row['comparison']} | {row['ap50_diff']:.4f} |"
+        )
 
     lines.extend(["", "## Gate Readout", ""])
     lines.append(f"- Completed metric rows: {len(complete_ap50)}/{len(rows)}")

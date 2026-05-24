@@ -22,6 +22,17 @@ def parse_args() -> argparse.Namespace:
         default="baseline",
         choices=["baseline", "masked_only_rgb_loss", "alpha_only", "radiance_only", "custom"],
     )
+    parser.add_argument(
+        "--probe_decomp_mode",
+        default="none",
+        choices=[
+            "none",
+            "target_alpha_gated_rgb",
+            "hierarchical_concat",
+            "hierarchical_film",
+        ],
+    )
+    parser.add_argument("--full_forward", action="store_true")
     parser.add_argument("--resolution", type=int, default=16)
     return parser.parse_args()
 
@@ -41,6 +52,7 @@ def main() -> None:
         masking_prob=0.5,
         resolution=args.resolution,
         probe_mode=args.probe_mode,
+        probe_decomp_mode=args.probe_decomp_mode,
     )
     model.eval()
 
@@ -68,6 +80,7 @@ def main() -> None:
     )
 
     print(f"probe_mode      : {model.probe_mode}")
+    print(f"decomp_mode     : {model.probe_decomp_mode}")
     print(f"rgb_input_mode  : {model.probe_rgb_input}")
     print(f"alpha_input_mode: {model.probe_alpha_input}")
     print(f"rgb_loss_mode   : {model.probe_rgb_loss}")
@@ -79,6 +92,12 @@ def main() -> None:
     print(f"loss            : {loss.item():.6f}")
     print(f"loss_rgb        : {loss_rgb.item():.6f}")
     print(f"loss_alpha      : {loss_alpha.item():.6f}")
+    if args.full_forward:
+        with torch.no_grad():
+            loss, loss_rgb, loss_alpha = model([x_target[0]])
+        print(f"full_forward_loss      : {loss.item():.6f}")
+        print(f"full_forward_loss_rgb  : {loss_rgb.item():.6f}")
+        print(f"full_forward_loss_alpha: {loss_alpha.item():.6f}")
 
 
 if __name__ == "__main__":

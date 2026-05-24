@@ -21,6 +21,7 @@ from __future__ import annotations
 from typing import Dict, Iterable, Optional
 
 import torch
+from torch import nn
 
 try:  # Training entrypoint when executed from `nerf_mae/`
     from model.mae.swin_mae3d import SwinTransformer_MAE3D_New
@@ -40,8 +41,21 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
     )
     INPUT_MODES = ("keep", "zero", "shuffle")
     TARGET_ALPHA_MODES = ("keep", "zero", "shuffle")
-    RGB_LOSS_MODES = ("occupied", "removed_occupied", "removed_all", "none")
+    RGB_LOSS_MODES = (
+        "occupied",
+        "target_alpha",
+        "removed_target_alpha",
+        "removed_occupied",
+        "removed_all",
+        "none",
+    )
     ALPHA_LOSS_MODES = ("removed", "all", "none")
+    DECOMP_MODES = (
+        "none",
+        "target_alpha_gated_rgb",
+        "hierarchical_concat",
+        "hierarchical_film",
+    )
 
     def __init__(
         self,
@@ -55,11 +69,14 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
         probe_rgb_weight: float = 1.0,
         probe_alpha_weight: float = 1.0,
         probe_alpha_threshold: float = 0.01,
+        probe_decomp_mode: str = "none",
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self._validate_choice("probe_mode", probe_mode, self.PROBE_MODES)
+        self._validate_choice("probe_decomp_mode", probe_decomp_mode, self.DECOMP_MODES)
         self.probe_mode = probe_mode
+        self.probe_decomp_mode = probe_decomp_mode
         self.probe_alpha_threshold = float(probe_alpha_threshold)
 
         resolved = self._resolve_probe_defaults(
@@ -75,8 +92,42 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
         self.probe_alpha_target = resolved["probe_alpha_target"]
         self.probe_rgb_loss = resolved["probe_rgb_loss"]
         self.probe_alpha_loss = resolved["probe_alpha_loss"]
+        if self.probe_decomp_mode == "target_alpha_gated_rgb" and self.probe_rgb_loss == "occupied":
+            self.probe_rgb_loss = "target_alpha"
         self.probe_rgb_weight = float(probe_rgb_weight)
         self.probe_alpha_weight = float(probe_alpha_weight)
+        self._init_decomp_modules()
+
+    def _init_decomp_modules(self) -> None:
+        if self.probe_decomp_mode not in {"hierarchical_concat", "hierarchical_film"}:
+            return
+
+        low_channels = self.embed_dim
+        decoder_channels = self.embed_dim // 2
+        self.out = nn.Identity()
+        self.decomp_structure_head = nn.Sequential(
+            nn.Conv3d(low_channels, decoder_channels, kernel_size=3, padding=1),
+            nn.InstanceNorm3d(decoder_channels),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.ConvTranspose3d(
+                decoder_channels,
+                decoder_channels,
+                kernel_size=self.patch_size[0],
+                stride=self.patch_size[0],
+            ),
+            nn.InstanceNorm3d(decoder_channels),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Conv3d(decoder_channels, 1, kernel_size=1),
+        )
+        if self.probe_decomp_mode == "hierarchical_concat":
+            self.decomp_rgb_head = nn.Conv3d(decoder_channels + 1, 3, kernel_size=1)
+        else:
+            self.decomp_film = nn.Sequential(
+                nn.Conv3d(1, decoder_channels, kernel_size=3, padding=1),
+                nn.LeakyReLU(0.2, inplace=True),
+                nn.Conv3d(decoder_channels, decoder_channels * 2, kernel_size=1),
+            )
+            self.decomp_rgb_head = nn.Conv3d(decoder_channels, 3, kernel_size=1)
 
     def set_probe_loss_weights(
         self,
@@ -194,6 +245,10 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
         occupied_mask = (target_alpha > self.probe_alpha_threshold).to(target_alpha.dtype)
         if self.probe_rgb_loss == "occupied":
             return occupied_mask
+        if self.probe_rgb_loss == "target_alpha":
+            return target_alpha.clamp(min=0.0)
+        if self.probe_rgb_loss == "removed_target_alpha":
+            return target_alpha.clamp(min=0.0) * removed_mask
         if self.probe_rgb_loss == "removed_occupied":
             return occupied_mask * removed_mask
         if self.probe_rgb_loss == "removed_all":
@@ -295,3 +350,36 @@ class SwinTransformer_MAE3D_Probe(SwinTransformer_MAE3D_New):
                 target_patches,
             )
         return self.forward_loss(x_target, pred, mask, mask_patches, is_eval=False)
+
+    def forward_encoder_ecoder(self, x):
+        if self.probe_decomp_mode not in {"hierarchical_concat", "hierarchical_film"}:
+            return super().forward_encoder_ecoder(x)
+
+        x = self.patch_partition(x)
+        x = x + self.pos_embed.type_as(x).to(x.device).clone().detach()
+        x, mask_patches = self.window_masking_3d(
+            x,
+            p_remove=self.masking_prob,
+            mask_token=self.mask_token,
+        )
+
+        features = []
+        for stage in self.stages:
+            x = stage(x)
+            features.append(torch.permute(x, [0, 4, 1, 2, 3]).contiguous())
+
+        dec3 = self.decoder4(features[3], features[2])
+        dec2 = self.decoder3(dec3, features[1])
+        dec1 = self.decoder2(dec2, features[0])
+        dec0 = self.decoder1(dec1)
+
+        alpha_logits = self.decomp_structure_head(features[0])
+        alpha_prob = self.alpha_activation(alpha_logits)
+        if self.probe_decomp_mode == "hierarchical_concat":
+            rgb = self.decomp_rgb_head(torch.cat([dec0, alpha_prob], dim=1))
+        else:
+            gamma, beta = self.decomp_film(alpha_prob).chunk(2, dim=1)
+            rgb = self.decomp_rgb_head(dec0 * (1.0 + torch.tanh(gamma)) + beta)
+
+        out = torch.cat([rgb, alpha_logits], dim=1)
+        return out, mask_patches

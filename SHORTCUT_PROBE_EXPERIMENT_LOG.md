@@ -1944,3 +1944,177 @@ Reading:
 - The current status is stronger than a single-seed candidate, but still not a
   final paper claim. It supports continuing the cosine/prior path, with future
   multi-seed or longer-budget runs done under one unified ABCI protocol.
+
+## Experiment 29: Finetune-Seed Protocol and Phase-1 Relaunch
+
+Snapshot:
+- 2026-05-24 JST
+
+Strategy update:
+- Scout / diagnosis runs should remain `1 pretrain seed x 1 finetune seed`.
+- Paper-scale comparisons should use `1 pretrain seed x 3 finetune seeds` as
+  the default unit.
+- Pretrain-seed replication is reserved for final flagship comparisons only,
+  e.g. `baseline` versus the final selected method.
+- `cosine_coord_jitter` is treated as a strong empirical upper bound /
+  competitor, not as the main architectural method.
+- Coordinate-only alpha prior remains the first architecture decision
+  diagnostic. D-MAE scouts should wait for this readout and should be
+  asymmetric/hierarchical rather than a full target-alpha bypass.
+
+Code changes:
+- Added `FINETUNE_SEED` support to
+  `nerf_mae/probe_scripts/abci3_e300_gate_fcos.pbs`.
+  - `SEED` continues to identify the pretrain checkpoint.
+  - `FINETUNE_SEED` controls the FCOS seed.
+  - When the seeds differ, FCOS outputs use
+    `_preseed{p}_ftseed{f}_fcos...` naming.
+- Updated `nerf_mae/probe_scripts/submit_abci3_e300_gate_pipeline.sh` so
+  `GATE_JOBS` accepts either:
+  - `kind:condition:epochs:pretrain_seed`
+  - `kind:condition:epochs:pretrain_seed:finetune_seed`
+- Added `baseline_coord_jitter` as a diagnostic pretrain/FCOS condition.
+- Added `nerf_mae/tools/build_results_table.py`, which writes:
+  `results/shortcut_probe_artifacts/results_table.csv`.
+- Extended `nerf_mae/tools/coord_prior_alpha_probe.py` to report MAE, binary
+  BCE, occupied AP, threshold sweep, and best IoU threshold in addition to MSE
+  and fixed-threshold occupancy metrics.
+
+Validation:
+- Passed:
+  - `bash -n nerf_mae/probe_scripts/abci3_e300_gate_fcos.pbs`
+  - `bash -n nerf_mae/probe_scripts/abci3_e300_gate_pretrain.pbs`
+  - `bash -n nerf_mae/probe_scripts/submit_abci3_e300_gate_pipeline.sh`
+  - `python -m py_compile nerf_mae/tools/build_results_table.py nerf_mae/tools/coord_prior_alpha_probe.py`
+- Generated `results_table.csv` with 93 existing eval rows.
+
+Submitted jobs:
+- FCOS-only finetune seed grid using existing e300 pretrain seed-1 ABCI3 clean
+  checkpoints:
+
+| job | condition | pretrain seed | finetune seed | notes |
+|---|---|---:|---:|---|
+| `1794884.pbs1` | `baseline_e300` | 1 | 2 | FCOS only |
+| `1794885.pbs1` | `baseline_e300` | 1 | 3 | FCOS only |
+| `1794886.pbs1` | `cosine_ramp_e300` | 1 | 2 | FCOS only |
+| `1794887.pbs1` | `cosine_ramp_e300` | 1 | 3 | FCOS only |
+| `1794888.pbs1` | `shuffle_e300` | 1 | 2 | FCOS only |
+| `1794889.pbs1` | `shuffle_e300` | 1 | 3 | FCOS only |
+
+- Baseline coordinate-jitter control:
+
+| job | condition | setting |
+|---|---|---|
+| `1794890.pbs1` | `baseline_coord_jitter e100 seed1` | 1n8g, global batch 16, deterministic off |
+| `1794891.pbs1` | `baseline_coord_jitter` FCOS | depends on `1794890.pbs1` |
+
+- Coordinate-only tiny prior rerun with expanded metrics:
+
+| job | output |
+|---|---|
+| `1794892.pbs1` | `output/coord_prior_alpha_probe_metrics_20260524` |
+
+Immediate readout once jobs finish:
+- e300 paper-scale gate should use the unified pretrain-seed-1 / finetune
+  seeds 1,2,3 table:
+  - `cosine_ramp_e300 - baseline_e300`
+  - `cosine_ramp_e300 - shuffle_e300`
+- `baseline_coord_jitter` should be compared against `cosine_coord_jitter`
+  and non-jitter `baseline_no_pos` / `baseline_e300` style controls.
+- Coordinate-only prior should be judged by occupied AP, best-IoU threshold,
+  and whether it is doing more than an almost-all-occupied high-recall prior.
+
+Pending:
+- D-MAE v1/v2/v3 implementation should begin after the updated
+  coordinate-only prior metrics are available, unless the metric rerun simply
+  confirms the earlier weak/trivial coordinate-only result.
+
+Coordinate-only rerun result:
+- Job `1794892.pbs1` completed and wrote:
+  `output/coord_prior_alpha_probe_metrics_20260524/coord_prior_alpha_probe.md`.
+
+| metric | value |
+|---|---:|
+| Val MSE | 0.052610 |
+| Val MAE | 0.141836 |
+| Binary BCE | 0.707545 |
+| Occupied AP | 0.4892 |
+| Fixed-threshold occupied IoU | 0.3056 |
+| Best threshold / IoU | 0.050 / 0.3184 |
+| Precision / recall at threshold 0.01 | 0.3058 / 0.9981 |
+| Target / predicted occupied rate | 0.3022 / 0.9864 |
+
+Reading:
+- The coordinate-only prior is not a strong enough standalone explanation of
+  the downstream signal. It largely behaves like a high-recall, broadly
+  occupied predictor at the default alpha threshold.
+- This supports moving to D-MAE scouts rather than reducing the story to a
+  coordinate-only Front3D prior.
+
+## Experiment 30: D-MAE Scout Implementation and Launch
+
+Snapshot:
+- 2026-05-24 JST
+
+Implementation:
+- Added D-MAE scout controls to `SwinTransformer_MAE3D_Probe`:
+  - `probe_decomp_mode=target_alpha_gated_rgb`
+  - `probe_decomp_mode=hierarchical_concat`
+  - `probe_decomp_mode=hierarchical_film`
+- `target_alpha_gated_rgb` is a loss-only scout that uses continuous
+  target-alpha weighting for RGB loss.
+- `hierarchical_concat` adds a low-level alpha structure head from stage-0 Swin
+  features and concatenates the predicted alpha structure into the appearance
+  head.
+- `hierarchical_film` uses the same predicted alpha structure but conditions
+  appearance features with FiLM.
+- Existing baseline/curriculum modes remain unchanged unless
+  `probe_decomp_mode` is explicitly set.
+- FCOS checkpoint loading for pretrained Swin is now non-strict so D-MAE-only
+  decoder/head keys do not block transfer to the downstream backbone.
+
+Validation:
+- Passed:
+  - `python -m py_compile nerf_mae/model/mae/shortcut_probe.py nerf_mae/run_swin_mae3d.py`
+  - `python -m py_compile nerf_rpn/model/feature_extractor.py`
+  - `bash -n nerf_mae/train_mae3d.sh`
+  - `bash -n nerf_mae/probe_scripts/abci3_e300_gate_pretrain.pbs`
+  - `bash -n nerf_mae/probe_scripts/submit_abci3_e300_gate_pipeline.sh`
+- Synthetic smoke tests passed for:
+  - `target_alpha_gated_rgb`
+  - `hierarchical_concat`
+  - `hierarchical_film`
+
+Initial launch:
+- Submitted first D-MAE scout wave:
+  - `1795027.pbs1` / `1795028.pbs1`: `dmae_target_alpha_gated_rgb`
+  - `1795029.pbs1` / `1795030.pbs1`: `dmae_hier_concat`
+  - `1795031.pbs1` / `1795032.pbs1`: `dmae_hier_film`
+
+Early failures and fixes:
+- `dmae_target_alpha_gated_rgb` failed immediately because the CLI choices for
+  `--probe_rgb_loss` had not been extended to include `target_alpha`.
+  Fixed in `nerf_mae/run_swin_mae3d.py`.
+- `dmae_hier_concat` and `dmae_hier_film` failed under DDP because the base
+  decoder `self.out` was no longer used by the overridden decomposed output
+  path. Fixed by replacing `self.out` with `nn.Identity()` for hierarchical
+  D-MAE modes, so no unused parameters remain registered.
+
+Rerun jobs:
+
+| job | condition | notes |
+|---|---|---|
+| `1795034.pbs1` | `dmae_target_alpha_gated_rgb e100 seed1` | pretrain rerun |
+| `1795035.pbs1` | `dmae_target_alpha_gated_rgb` FCOS | depends on `1795034.pbs1` |
+| `1795036.pbs1` | `dmae_hier_concat e100 seed1` | pretrain rerun |
+| `1795037.pbs1` | `dmae_hier_concat` FCOS | depends on `1795036.pbs1` |
+| `1795038.pbs1` | `dmae_hier_film e100 seed1` | pretrain rerun |
+| `1795039.pbs1` | `dmae_hier_film` FCOS | depends on `1795038.pbs1` |
+
+Run setting:
+- `1n8g`, global batch `16`, deterministic off, e100 scout, single seed.
+
+Reading target:
+- D-MAE should only be promoted if it is competitive with the strong
+  `cosine_coord_jitter`/cosine controls while offering a cleaner
+  structure-appearance decomposition story.
