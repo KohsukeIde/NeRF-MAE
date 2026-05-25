@@ -1,5 +1,5 @@
 {
-  "git_hash": "94f8486a005c3bae31539547b48f6776ab7fcf75",
+  "git_hash": "6dff2390a647c6f1762ba8288466951b5beb1b9a",
   "checkpoint_path": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_dmae_hier_concat_p1.0_e100_seed1_abci3dmae_e100_det0_1n8g/epoch_100.pt",
   "resolution": 160,
   "checkpoint_key_count": 389,

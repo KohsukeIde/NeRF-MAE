@@ -2265,8 +2265,9 @@ Git / compile integrity:
 Aggregation update:
 - `results/shortcut_probe_artifacts/results_table.csv` now includes
   `git_hash`.
-- Regenerated table has `102` rows and git hash
-  `94f8486a005c3bae31539547b48f6776ab7fcf75`.
+- Regenerated table has `102` rows. It was first generated at
+  `94f8486a005c3bae31539547b48f6776ab7fcf75`, then regenerated after the
+  integrity commit at `6dff2390a647c6f1762ba8288466951b5beb1b9a`.
 
 FCOS checkpoint-load sanity:
 - Added `nerf_mae/tools/check_fcos_checkpoint_load.py`.
@@ -2377,3 +2378,36 @@ Clean e300 proposal-quality readout:
 - Proposal IoU coverage is again similar across baseline/cosine/shuffle,
   consistent with the earlier reading that the main e300 gain is not simply
   more top300 geometric coverage.
+
+Integrity report and public commit status:
+- Added:
+  `results/shortcut_probe_artifacts/integrity_report.md`
+- Pushed commit `6dff2390a647c6f1762ba8288466951b5beb1b9a` to `origin/main`.
+- `git ls-remote origin main` reports:
+  `6dff2390a647c6f1762ba8288466951b5beb1b9a refs/heads/main`.
+- Regenerated:
+  - `results/shortcut_probe_artifacts/results_table.csv`
+  - `results/shortcut_probe_artifacts/load_sanity/dmae_hier_concat_e100_seed1_fcos_load_sanity.json`
+  - `results/shortcut_probe_artifacts/load_sanity/dmae_hier_concat_e100_seed1_fcos_load_sanity.md`
+  with git hash `6dff2390a647c6f1762ba8288466951b5beb1b9a`.
+
+Decision criterion update:
+- Do not use a flat "2 of 3" rule for D-MAE continuation.
+- Use the tiered criterion recorded in
+  `results/shortcut_probe_artifacts/integrity_report.md`:
+  - Tier 1: D-MAE coord-jitter is AP@50-equal-or-better than
+    `cosine_coord_jitter` and improves AP@75 or AP75/AP50.
+  - Tier 2: D-MAE coord-jitter is within `0.02` AP@50 of
+    `cosine_coord_jitter` and clearly improves localization/AP75 ratio.
+  - Tier 3: D-MAE trails by at least `0.03` AP@50 and does not win on AP@75 or
+    AP75/AP50; in this case D-MAE drops to appendix/ablation.
+
+Proposal figure outputs:
+- Added `nerf_rpn/tools/plot_proposal_quality.py`.
+- Generated:
+  - `results/shortcut_probe_artifacts/proposal_quality/e100_dmae_coord_controls.png`
+  - `results/shortcut_probe_artifacts/proposal_quality/e300_gate_pre1_ft123.png`
+- These are compact summary figures for AP@50/AP@75, AP75/AP50, proposal IoU
+  coverage, and center/size error. Full histogram/scatter figures should be
+  generated after `dmae_hier_concat_coord_jitter` finishes so the final
+  candidate is included.
