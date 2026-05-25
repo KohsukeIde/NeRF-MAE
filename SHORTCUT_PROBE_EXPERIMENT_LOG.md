@@ -2383,8 +2383,10 @@ Integrity report and public commit status:
 - Added:
   `results/shortcut_probe_artifacts/integrity_report.md`
 - Pushed commit `6dff2390a647c6f1762ba8288466951b5beb1b9a` to `origin/main`.
-- `git ls-remote origin main` reports:
+- At that check, `git ls-remote origin main` reported:
   `6dff2390a647c6f1762ba8288466951b5beb1b9a refs/heads/main`.
+- A later report/figure commit advances `origin/main`; use `git ls-remote
+  origin main` for the current public head.
 - Regenerated:
   - `results/shortcut_probe_artifacts/results_table.csv`
   - `results/shortcut_probe_artifacts/load_sanity/dmae_hier_concat_e100_seed1_fcos_load_sanity.json`

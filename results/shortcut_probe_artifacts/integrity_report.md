@@ -4,17 +4,21 @@ Generated: 2026-05-25 JST
 
 ## Public Git State
 
-Local HEAD:
+Checked D-MAE integrity commit:
 
 ```text
 6dff2390a647c6f1762ba8288466951b5beb1b9a
 ```
 
-Origin main:
+Origin main immediately after publishing that commit:
 
 ```text
 6dff2390a647c6f1762ba8288466951b5beb1b9a	refs/heads/main
 ```
+
+This report itself is committed after the checked D-MAE integrity commit, so
+`origin/main` may be newer than the checked commit. The checked commit remains
+the code/artifact commit whose stat is recorded below.
 
 Commit stat:
 
