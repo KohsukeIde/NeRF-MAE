@@ -1,6 +1,6 @@
 # NeRF-MAE Shortcut Probe Experiment Log
 
-Last updated: 2026-05-19 JST
+Last updated: 2026-05-25 JST
 
 This file is the running log for the NeRF-MAE shortcut probe experiments.
 Primary result root: `/mnt/urashima/users/minesawa/nerfmae_shortcut_probe/output`
@@ -27,10 +27,21 @@ Because of that, the more reliable e30 comparison is the follow-up run that fixe
 
 ## Current Best Reading
 
-- The early shortcut-probe result was useful, but the strongest current paper direction is now the alpha-to-RGBA curriculum rather than the original `alpha_only` claim.
-- Single-seed Experiment 16 shows `cosine_ramp e300` beating same-budget `baseline e300` by `+0.1085` AP@50 (`0.5987` vs `0.4903`), while matching/slightly exceeding the single-seed `baseline e1200` AP@50 reference (`0.5892`) at one quarter of the pretraining epochs.
-- The `cosine_ramp_alpha_shuffle e300` control is much weaker (`0.4138` AP@50), which supports the interpretation that meaningful target-alpha structure matters rather than the schedule alone.
-- For the immediate AAAI/ICLR submission path, a clean single-seed ABCI3 rerun/eval of the key comparison is sufficient if it reproduces the current margin; the 3-seed gate is optional robustness work rather than the default plan.
+- The early shortcut-probe result was useful, but the strongest current paper
+  direction is now the alpha-to-RGBA curriculum and structure/appearance
+  decomposition rather than the original `alpha_only` claim.
+- The clean ABCI3 e300 gate now has `1` pretrain seed and `3` downstream
+  finetune seeds. `cosine_ramp e300` beats same-budget `baseline e300` in all
+  three paired finetune seeds, with mean AP@50 `0.5723` vs `0.4938`
+  (`+0.0785`). It also beats `cosine_ramp_alpha_shuffle e300` in all three
+  paired finetune seeds, with mean AP@50 `0.5723` vs `0.4294` (`+0.1430`).
+- This is no longer just a single-downstream-seed candidate, but it is still
+  only one pretrain seed. Use it as a strong Phase-1 signal, not a final
+  paper-scale claim about pretrain-seed robustness.
+- Coordinate-only alpha prior is not strong enough to explain the downstream
+  gain by itself. D-MAE scouts are active; `hierarchical_concat` is the current
+  best D-MAE scout but must still beat or match the strong
+  `cosine_coord_jitter` empirical control to become the main method.
 
 ## Experiment 1: Quick Pretraining Only
 
@@ -2118,3 +2129,120 @@ Reading target:
 - D-MAE should only be promoted if it is competitive with the strong
   `cosine_coord_jitter`/cosine controls while offering a cleaner
   structure-appearance decomposition story.
+
+## Experiment 31: ABCI3 e300 Finetune-Seed Gate and D-MAE Scout Readout
+
+Snapshot:
+- 2026-05-25 JST
+
+Generated summaries:
+- `results/shortcut_probe_artifacts/results_table.csv`
+  - regenerated with `102` eval rows.
+- `output/launcher/abci3_e300_preseed1_ftseed_grid_20260524/summary_final.md`
+- `output/launcher/abci3_e300_preseed1_ftseed_grid_20260524/summary_final.csv`
+- `output/launcher/abci3_e300_preseed1_ftseed_grid_20260524/summary_final.json`
+
+Clean ABCI3 e300 gate:
+
+| condition | pretrain seed | finetune seed | AP@50 | AP@25 | AP@75 | Recall@50 top300 |
+|---|---:|---:|---:|---:|---:|---:|
+| `baseline_e300` | 1 | 1 | 0.4695 | 0.7956 | 0.0869 | 0.6618 |
+| `baseline_e300` | 1 | 2 | 0.4862 | 0.7903 | 0.0916 | 0.6250 |
+| `baseline_e300` | 1 | 3 | 0.5258 | 0.8121 | 0.0947 | 0.6985 |
+| `cosine_ramp_e300` | 1 | 1 | 0.5539 | 0.8249 | 0.1135 | 0.7059 |
+| `cosine_ramp_e300` | 1 | 2 | 0.5704 | 0.8379 | 0.1176 | 0.6838 |
+| `cosine_ramp_e300` | 1 | 3 | 0.5928 | 0.8255 | 0.0891 | 0.7132 |
+| `shuffle_e300` | 1 | 1 | 0.4162 | 0.7613 | 0.0326 | 0.5956 |
+| `shuffle_e300` | 1 | 2 | 0.4187 | 0.7396 | 0.0750 | 0.5956 |
+| `shuffle_e300` | 1 | 3 | 0.4532 | 0.7306 | 0.0282 | 0.6397 |
+
+Mean AP@50 over finetune seeds:
+
+| condition | mean AP@50 | sample std |
+|---|---:|---:|
+| `baseline_e300` | 0.4938 | 0.0289 |
+| `cosine_ramp_e300` | 0.5723 | 0.0195 |
+| `shuffle_e300` | 0.4294 | 0.0207 |
+
+Paired AP@50 differences:
+
+| pretrain seed | finetune seed | comparison | AP@50 diff |
+|---:|---:|---|---:|
+| 1 | 1 | `cosine - baseline` | +0.0843 |
+| 1 | 2 | `cosine - baseline` | +0.0842 |
+| 1 | 3 | `cosine - baseline` | +0.0670 |
+| 1 | 1 | `cosine - shuffle` | +0.1377 |
+| 1 | 2 | `cosine - shuffle` | +0.1517 |
+| 1 | 3 | `cosine - shuffle` | +0.1396 |
+
+Reading:
+- The e300 gate passes under the current finetune-seed protocol:
+  `cosine_ramp_e300` beats `baseline_e300` in `3/3` paired finetune seeds and
+  beats `shuffle_e300` in `3/3` paired finetune seeds.
+- The mean same-budget gain is substantial for this protocol:
+  `+0.0785` AP@50 over baseline.
+- The mechanism/control gap is even larger:
+  `+0.1430` AP@50 over shuffled target-alpha.
+- This supports continuing the alpha-to-RGBA curriculum / structural prior
+  path. It should still be described as `1` pretrain seed with `3` finetune
+  seeds, not as pretrain-seed-robust evidence.
+
+Coordinate-only prior:
+
+| metric | value |
+|---|---:|
+| Val MSE | 0.052610 |
+| Val MAE | 0.141836 |
+| Binary BCE | 0.707545 |
+| Occupied AP | 0.4892 |
+| Fixed-threshold occupied IoU | 0.3056 |
+| Best threshold / IoU | 0.050 / 0.3184 |
+| Precision / recall at threshold 0.01 | 0.3058 / 0.9981 |
+| Target / predicted occupied rate | 0.3022 / 0.9864 |
+
+Reading:
+- Coordinate-only is a weak, high-recall prior rather than a strong standalone
+  solution. This supports D-MAE / hierarchical structure modeling over a pure
+  coordinate-only explanation.
+
+D-MAE e100 scout results:
+
+| condition | pretrain seed | finetune seed | AP@50 | AP@25 | AP@75 | Recall@50 top300 |
+|---|---:|---:|---:|---:|---:|---:|
+| `dmae_target_alpha_gated_rgb` | 1 | 1 | 0.5045 | 0.8074 | 0.0832 | 0.6544 |
+| `dmae_hier_concat` | 1 | 1 | 0.5778 | 0.8312 | 0.1055 | 0.6912 |
+| `dmae_hier_film` | 1 | 1 | 0.5443 | 0.8062 | 0.0709 | 0.7059 |
+| `cosine_coord_jitter` | 1 | 1 | 0.6219 | 0.8097 | 0.1031 | 0.7279 |
+| `alpha_target_only_coord_jitter` | 1 | 1 | 0.4954 | 0.7888 | 0.0622 | 0.6324 |
+| `baseline_no_pos` | 1 | 1 | 0.5371 | 0.7832 | 0.0899 | 0.6912 |
+| `alpha_target_only_no_pos` | 1 | 1 | 0.4015 | 0.7394 | 0.0725 | 0.5956 |
+
+Reading:
+- `dmae_hier_concat` is the best D-MAE scout so far and is meaningfully better
+  than the loss-only `target_alpha_gated_rgb` scout.
+- `dmae_hier_concat` is also better than `baseline_no_pos`, but it is still
+  below `cosine_coord_jitter` on AP@50 (`0.5778` vs `0.6219`).
+- Therefore D-MAE is promising but not yet promoted to the main method.
+  The next method step should either improve the hierarchical concat design or
+  treat `cosine_coord_jitter` as the empirical upper-bound competitor.
+
+Missing / retried control:
+- `baseline_coord_jitter e100 seed1` produced:
+  `output/nerf_mae/results/nerfmae_baseline_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0/epoch_100.pt`
+- The original pretrain job wrote the checkpoint and reconstruction eval, but
+  then exited nonzero due to an old shell quoting error after the eval block.
+  Because the FCOS job depended on `afterok`, it did not run.
+- Current `nerf_mae/train_mae3d.sh` passes `bash -n`.
+- Submitted an FCOS-only retry from the existing checkpoint:
+  `1796104.pbs1`
+  - log dir:
+    `output/launcher/abci3_baseline_coord_jitter_fcos_retry_20260525`
+  - setting: `FCOS_NUM_EPOCHS=1000`, pretrain disabled, existing checkpoint
+    reused.
+
+Current decision:
+- Gate 1 is positive under the intended finetune-seed protocol.
+- Coordinate-only prior does not explain the result away.
+- D-MAE hierarchical concat deserves another focused iteration, but the current
+  strongest empirical method/control pair remains `cosine_ramp` versus
+  `shuffle`, with `cosine_coord_jitter` as a strong scout/upper-bound control.
