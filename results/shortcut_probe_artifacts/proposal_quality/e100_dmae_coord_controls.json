@@ -1,0 +1,272 @@
+{
+  "baseline_no_pos": {
+    "label": "baseline_no_pos",
+    "eval_dir": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/nerfmae_baseline_no_pos_p1.0_e100_seed1_abci3diag_opt1n8g_det0_epoch100_sched_epoch_seed1_fcos1000_eval",
+    "scene_count": 17,
+    "eval": {
+      "ap25": 0.7831976413726807,
+      "ap50": 0.5371413826942444,
+      "ap75": 0.08993423730134964,
+      "ap75_over_ap50": 0.16743122052940515,
+      "recall50_top300": 0.6911764740943909,
+      "recall25_top300": 0.9558823704719543
+    },
+    "proposal": {
+      "top_k": 300,
+      "mean_iou": 0.06700810746126148,
+      "median_iou": 0.006584456888958812,
+      "p90_iou": 0.2127091139554978,
+      "frac_iou_ge_025": 0.07490196078431373,
+      "frac_iou_ge_050": 0.018627450980392157,
+      "frac_iou_ge_075": 0.004901960784313725,
+      "score_mean": 0.06698897208507154,
+      "tp50_score_mean": 0.5565478437433117,
+      "fp50_score_mean": 0.057696645849800256,
+      "first_tp50_rank_mean": 3.0,
+      "top50_tp50_rate": 0.10705882352941176,
+      "top100_tp50_rate": 0.054117647058823534,
+      "top300_tp50_rate": 0.01862745098039216,
+      "center_error_norm_iou_ge_025": 0.17107052488145247,
+      "center_error_norm_iou_ge_050": 0.051218861596364726,
+      "size_rel_error_iou_ge_025": 0.3245461438221769,
+      "size_rel_error_iou_ge_050": 0.31127835614116567,
+      "level_share": {
+        "level_0": 0.4852941176470588,
+        "level_1": 0.31980392156862747,
+        "level_2": 0.156078431372549,
+        "level_3": 0.03882352941176471
+      },
+      "tp50_level_share": {
+        "level_0": 0.24210526315789474,
+        "level_1": 0.49473684210526314,
+        "level_2": 0.25263157894736843,
+        "level_3": 0.010526315789473684
+      }
+    }
+  },
+  "alpha_coord_jitter": {
+    "label": "alpha_coord_jitter",
+    "eval_dir": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_only_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0_epoch100_sched_epoch_seed1_fcos1000_eval",
+    "scene_count": 17,
+    "eval": {
+      "ap25": 0.7887663245201111,
+      "ap50": 0.49535784125328064,
+      "ap75": 0.06215588375926018,
+      "ap75_over_ap50": 0.12547673334897175,
+      "recall50_top300": 0.6323529481887817,
+      "recall25_top300": 0.9411764740943909
+    },
+    "proposal": {
+      "top_k": 300,
+      "mean_iou": 0.06340135849241729,
+      "median_iou": 0.0036152220563963056,
+      "p90_iou": 0.19963789582252509,
+      "frac_iou_ge_025": 0.06666666666666667,
+      "frac_iou_ge_050": 0.016862745098039214,
+      "frac_iou_ge_075": 0.0035294117647058825,
+      "score_mean": 0.052404380161315205,
+      "tp50_score_mean": 0.5935976120838246,
+      "fp50_score_mean": 0.043121847663242646,
+      "first_tp50_rank_mean": 1.6875,
+      "top50_tp50_rate": 0.09882352941176471,
+      "top100_tp50_rate": 0.05,
+      "top300_tp50_rate": 0.01686274509803922,
+      "center_error_norm_iou_ge_025": 0.16143330167979003,
+      "center_error_norm_iou_ge_050": 0.057781270466918166,
+      "size_rel_error_iou_ge_025": 0.24354010116966332,
+      "size_rel_error_iou_ge_050": 0.1715902858088876,
+      "level_share": {
+        "level_0": 0.5023529411764706,
+        "level_1": 0.36,
+        "level_2": 0.10705882352941176,
+        "level_3": 0.03058823529411765
+      },
+      "tp50_level_share": {
+        "level_0": 0.26744186046511625,
+        "level_1": 0.45348837209302323,
+        "level_2": 0.27906976744186046,
+        "level_3": 0.0
+      }
+    }
+  },
+  "cosine_coord_jitter": {
+    "label": "cosine_coord_jitter",
+    "eval_dir": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/nerfmae_cosine_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0_epoch100_sched_epoch_seed1_fcos1000_eval",
+    "scene_count": 17,
+    "eval": {
+      "ap25": 0.8097126483917236,
+      "ap50": 0.6218649744987488,
+      "ap75": 0.10306841135025024,
+      "ap75_over_ap50": 0.16574082088049424,
+      "recall50_top300": 0.7279411554336548,
+      "recall25_top300": 0.9485294222831726
+    },
+    "proposal": {
+      "top_k": 300,
+      "mean_iou": 0.06346980782342232,
+      "median_iou": 0.004662728635594249,
+      "p90_iou": 0.20106370449066166,
+      "frac_iou_ge_025": 0.06411764705882353,
+      "frac_iou_ge_050": 0.0196078431372549,
+      "frac_iou_ge_075": 0.004901960784313725,
+      "score_mean": 0.05421944197431645,
+      "tp50_score_mean": 0.6005875456705689,
+      "fp50_score_mean": 0.0432920799003914,
+      "first_tp50_rank_mean": 1.0588235294117647,
+      "top50_tp50_rate": 0.11529411764705882,
+      "top100_tp50_rate": 0.058823529411764705,
+      "top300_tp50_rate": 0.019607843137254905,
+      "center_error_norm_iou_ge_025": 0.15978187742993372,
+      "center_error_norm_iou_ge_050": 0.049774738624691964,
+      "size_rel_error_iou_ge_025": 0.2468677785130793,
+      "size_rel_error_iou_ge_050": 0.18182719965931027,
+      "level_share": {
+        "level_0": 0.5662745098039216,
+        "level_1": 0.30254901960784314,
+        "level_2": 0.10137254901960785,
+        "level_3": 0.02980392156862745
+      },
+      "tp50_level_share": {
+        "level_0": 0.22,
+        "level_1": 0.47,
+        "level_2": 0.31,
+        "level_3": 0.0
+      }
+    }
+  },
+  "dmae_gate": {
+    "label": "dmae_gate",
+    "eval_dir": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/nerfmae_dmae_target_alpha_gated_rgb_p1.0_e100_seed1_abci3dmae_e100_det0_1n8g_epoch100_sched_epoch_seed1_fcos1000_eval",
+    "scene_count": 17,
+    "eval": {
+      "ap25": 0.8074092268943787,
+      "ap50": 0.5045067667961121,
+      "ap75": 0.08323469758033752,
+      "ap75_over_ap50": 0.16498232146403585,
+      "recall50_top300": 0.654411792755127,
+      "recall25_top300": 0.9632353186607361
+    },
+    "proposal": {
+      "top_k": 300,
+      "mean_iou": 0.06131415712149798,
+      "median_iou": 0.0006651977018918842,
+      "p90_iou": 0.2025410741567612,
+      "frac_iou_ge_025": 0.06764705882352941,
+      "frac_iou_ge_050": 0.017450980392156864,
+      "frac_iou_ge_075": 0.005294117647058823,
+      "score_mean": 0.07447570275953587,
+      "tp50_score_mean": 0.5842610543614692,
+      "fp50_score_mean": 0.06542144287277234,
+      "first_tp50_rank_mean": 2.588235294117647,
+      "top50_tp50_rate": 0.1023529411764706,
+      "top100_tp50_rate": 0.05176470588235295,
+      "top300_tp50_rate": 0.017450980392156864,
+      "center_error_norm_iou_ge_025": 0.16469619829423618,
+      "center_error_norm_iou_ge_050": 0.049081756000857006,
+      "size_rel_error_iou_ge_025": 0.33279170508401984,
+      "size_rel_error_iou_ge_050": 0.29879540104544566,
+      "level_share": {
+        "level_0": 0.5825490196078431,
+        "level_1": 0.2807843137254902,
+        "level_2": 0.10627450980392157,
+        "level_3": 0.030392156862745098
+      },
+      "tp50_level_share": {
+        "level_0": 0.2696629213483146,
+        "level_1": 0.43820224719101125,
+        "level_2": 0.29213483146067415,
+        "level_3": 0.0
+      }
+    }
+  },
+  "dmae_concat": {
+    "label": "dmae_concat",
+    "eval_dir": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/nerfmae_dmae_hier_concat_p1.0_e100_seed1_abci3dmae_e100_det0_1n8g_epoch100_sched_epoch_seed1_fcos1000_eval",
+    "scene_count": 17,
+    "eval": {
+      "ap25": 0.8311929702758789,
+      "ap50": 0.5777786374092102,
+      "ap75": 0.1055305004119873,
+      "ap75_over_ap50": 0.1826486712717376,
+      "recall50_top300": 0.6911764740943909,
+      "recall25_top300": 0.9558823704719543
+    },
+    "proposal": {
+      "top_k": 300,
+      "mean_iou": 0.06488794094033723,
+      "median_iou": 0.004946421133354306,
+      "p90_iou": 0.20514075756072997,
+      "frac_iou_ge_025": 0.06647058823529411,
+      "frac_iou_ge_050": 0.01843137254901961,
+      "frac_iou_ge_075": 0.005686274509803921,
+      "score_mean": 0.055815651625321774,
+      "tp50_score_mean": 0.6052614047013699,
+      "fp50_score_mean": 0.04549845210691416,
+      "first_tp50_rank_mean": 1.3529411764705883,
+      "top50_tp50_rate": 0.10941176470588238,
+      "top100_tp50_rate": 0.05470588235294119,
+      "top300_tp50_rate": 0.01843137254901961,
+      "center_error_norm_iou_ge_025": 0.15997127256600685,
+      "center_error_norm_iou_ge_050": 0.05007897122723467,
+      "size_rel_error_iou_ge_025": 0.3132629949918187,
+      "size_rel_error_iou_ge_050": 0.2607269177332203,
+      "level_share": {
+        "level_0": 0.513921568627451,
+        "level_1": 0.3407843137254902,
+        "level_2": 0.11372549019607843,
+        "level_3": 0.031568627450980394
+      },
+      "tp50_level_share": {
+        "level_0": 0.23404255319148937,
+        "level_1": 0.5212765957446809,
+        "level_2": 0.24468085106382978,
+        "level_3": 0.0
+      }
+    }
+  },
+  "dmae_film": {
+    "label": "dmae_film",
+    "eval_dir": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/nerfmae_dmae_hier_film_p1.0_e100_seed1_abci3dmae_e100_det0_1n8g_epoch100_sched_epoch_seed1_fcos1000_eval",
+    "scene_count": 17,
+    "eval": {
+      "ap25": 0.8061657547950745,
+      "ap50": 0.544252336025238,
+      "ap75": 0.07087484747171402,
+      "ap75_over_ap50": 0.1302242411843822,
+      "recall50_top300": 0.7058823704719543,
+      "recall25_top300": 0.970588207244873
+    },
+    "proposal": {
+      "top_k": 300,
+      "mean_iou": 0.06861139319432469,
+      "median_iou": 0.010260527487844229,
+      "p90_iou": 0.2115490853786469,
+      "frac_iou_ge_025": 0.0688235294117647,
+      "frac_iou_ge_050": 0.018823529411764704,
+      "frac_iou_ge_075": 0.0045098039215686276,
+      "score_mean": 0.06095183071662106,
+      "tp50_score_mean": 0.5730853557276229,
+      "fp50_score_mean": 0.05112672711928769,
+      "first_tp50_rank_mean": 1.4705882352941178,
+      "top50_tp50_rate": 0.10941176470588235,
+      "top100_tp50_rate": 0.05529411764705882,
+      "top300_tp50_rate": 0.018823529411764704,
+      "center_error_norm_iou_ge_025": 0.16788625834971413,
+      "center_error_norm_iou_ge_050": 0.052470176674736045,
+      "size_rel_error_iou_ge_025": 0.31963167560321315,
+      "size_rel_error_iou_ge_050": 0.25634031506100047,
+      "level_share": {
+        "level_0": 0.4496078431372549,
+        "level_1": 0.3656862745098039,
+        "level_2": 0.14490196078431372,
+        "level_3": 0.03980392156862745
+      },
+      "tp50_level_share": {
+        "level_0": 0.21875,
+        "level_1": 0.53125,
+        "level_2": 0.25,
+        "level_3": 0.0
+      }
+    }
+  }
+}

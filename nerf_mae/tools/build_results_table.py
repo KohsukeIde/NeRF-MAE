@@ -7,6 +7,7 @@ import argparse
 import csv
 import json
 import re
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +30,18 @@ def parse_args() -> argparse.Namespace:
         default=Path("results/shortcut_probe_artifacts/results_table.csv"),
     )
     return parser.parse_args()
+
+
+def git_head(root: Path) -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=root,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        return ""
 
 
 def strip_eval_suffix(name: str) -> str:
@@ -79,7 +92,7 @@ def find_checkpoint(root: Path, pretrain_save_name: str, epoch: str) -> str:
     return str(path.resolve()) if path.exists() else ""
 
 
-def parse_run(root: Path, eval_json: Path) -> dict[str, str]:
+def parse_run(root: Path, eval_json: Path, git_hash: str) -> dict[str, str]:
     run_name = eval_json.parent.name
     stem = strip_eval_suffix(run_name)
     source = (
@@ -158,6 +171,7 @@ def parse_run(root: Path, eval_json: Path) -> dict[str, str]:
         "pretrain_save_name": pretrain_save_name,
         "run_name": run_name,
         "source": source,
+        "git_hash": git_hash,
     }
 
 
@@ -170,7 +184,8 @@ def main() -> None:
         if base.exists():
             eval_jsons.extend(sorted(base.glob("**/eval.json")))
 
-    rows = [parse_run(root, path) for path in eval_jsons]
+    current_git_hash = git_head(root)
+    rows = [parse_run(root, path, current_git_hash) for path in eval_jsons]
     rows.sort(
         key=lambda row: (
             row["dataset"],
@@ -202,6 +217,7 @@ def main() -> None:
         "pretrain_save_name",
         "run_name",
         "source",
+        "git_hash",
     ]
     out_csv = args.out_csv if args.out_csv.is_absolute() else root / args.out_csv
     out_csv.parent.mkdir(parents=True, exist_ok=True)

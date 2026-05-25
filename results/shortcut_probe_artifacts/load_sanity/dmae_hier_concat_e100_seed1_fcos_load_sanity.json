@@ -1,0 +1,88 @@
+{
+  "git_hash": "94f8486a005c3bae31539547b48f6776ab7fcf75",
+  "checkpoint_path": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_dmae_hier_concat_p1.0_e100_seed1_abci3dmae_e100_det0_1n8g/epoch_100.pt",
+  "resolution": 160,
+  "checkpoint_key_count": 389,
+  "missing_count": 2,
+  "unexpected_count": 8,
+  "missing": [
+    "out.conv.weight",
+    "out.conv.bias"
+  ],
+  "unexpected": [
+    "decomp_structure_head.0.weight",
+    "decomp_structure_head.0.bias",
+    "decomp_structure_head.3.weight",
+    "decomp_structure_head.3.bias",
+    "decomp_structure_head.6.weight",
+    "decomp_structure_head.6.bias",
+    "decomp_rgb_head.weight",
+    "decomp_rgb_head.bias"
+  ],
+  "encoder_missing": [],
+  "encoder_unexpected": [],
+  "unexpected_diagnostic_head_keys": [
+    "decomp_structure_head.0.weight",
+    "decomp_structure_head.0.bias",
+    "decomp_structure_head.3.weight",
+    "decomp_structure_head.3.bias",
+    "decomp_structure_head.6.weight",
+    "decomp_structure_head.6.bias",
+    "decomp_rgb_head.weight",
+    "decomp_rgb_head.bias"
+  ],
+  "encoder_exact_loaded_tensor_ratio": 1.0,
+  "encoder_exact_loaded_numel_ratio": 1.0,
+  "prefix_summaries": [
+    {
+      "prefix": "pos_embed",
+      "total_tensors": 1,
+      "matched_shape_tensors": 1,
+      "exact_loaded_tensors": 1,
+      "total_numel": 6144000,
+      "matched_shape_numel": 6144000,
+      "exact_loaded_numel": 6144000,
+      "matched_shape_tensor_ratio": 1.0,
+      "exact_loaded_tensor_ratio": 1.0,
+      "matched_shape_numel_ratio": 1.0,
+      "exact_loaded_numel_ratio": 1.0,
+      "model_digest": "09b5c09ed1b319ca690c92563ee6ac1e0de00e219d4885cfda47f122336e1198",
+      "checkpoint_digest": "09b5c09ed1b319ca690c92563ee6ac1e0de00e219d4885cfda47f122336e1198",
+      "unmatched_keys": []
+    },
+    {
+      "prefix": "patch_partition",
+      "total_tensors": 4,
+      "matched_shape_tensors": 4,
+      "exact_loaded_tensors": 4,
+      "total_numel": 24864,
+      "matched_shape_numel": 24864,
+      "exact_loaded_numel": 24864,
+      "matched_shape_tensor_ratio": 1.0,
+      "exact_loaded_tensor_ratio": 1.0,
+      "matched_shape_numel_ratio": 1.0,
+      "exact_loaded_numel_ratio": 1.0,
+      "model_digest": "ac8640accf561ae14fc84f8b9d66023e5109806663d8fd235e5f63bc552f3feb",
+      "checkpoint_digest": "ac8640accf561ae14fc84f8b9d66023e5109806663d8fd235e5f63bc552f3feb",
+      "unmatched_keys": []
+    },
+    {
+      "prefix": "stages.",
+      "total_tensors": 345,
+      "matched_shape_tensors": 345,
+      "exact_loaded_tensors": 345,
+      "total_numel": 50531862,
+      "matched_shape_numel": 50531862,
+      "exact_loaded_numel": 50531862,
+      "matched_shape_tensor_ratio": 1.0,
+      "exact_loaded_tensor_ratio": 1.0,
+      "matched_shape_numel_ratio": 1.0,
+      "exact_loaded_numel_ratio": 1.0,
+      "model_digest": "7978ff335cee05d87056a0f23221efe82f0d530611a6dfbe45e3d1294f423f28",
+      "checkpoint_digest": "7978ff335cee05d87056a0f23221efe82f0d530611a6dfbe45e3d1294f423f28",
+      "unmatched_keys": []
+    }
+  ],
+  "fcos_instantiated": true,
+  "pass": true
+}

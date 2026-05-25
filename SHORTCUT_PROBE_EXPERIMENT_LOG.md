@@ -2246,3 +2246,134 @@ Current decision:
 - D-MAE hierarchical concat deserves another focused iteration, but the current
   strongest empirical method/control pair remains `cosine_ramp` versus
   `shuffle`, with `cosine_coord_jitter` as a strong scout/upper-bound control.
+
+## Experiment 32: D-MAE Code Integrity and Coord-Jitter Scout Launch
+
+Snapshot:
+- 2026-05-25 JST
+
+Git / compile integrity:
+- Current HEAD:
+  `94f8486a005c3bae31539547b48f6776ab7fcf75`
+- Passed:
+  - `python -m py_compile nerf_mae/model/mae/shortcut_probe.py nerf_mae/run_swin_mae3d.py nerf_rpn/model/feature_extractor.py`
+  - `python -m py_compile nerf_mae/tools/check_fcos_checkpoint_load.py nerf_mae/tools/build_results_table.py`
+  - `bash -n nerf_mae/probe_scripts/abci3_e300_gate_pretrain.pbs`
+  - `bash -n nerf_mae/probe_scripts/abci3_e300_gate_fcos.pbs`
+  - `bash -n nerf_mae/probe_scripts/submit_abci3_e300_gate_pipeline.sh`
+
+Aggregation update:
+- `results/shortcut_probe_artifacts/results_table.csv` now includes
+  `git_hash`.
+- Regenerated table has `102` rows and git hash
+  `94f8486a005c3bae31539547b48f6776ab7fcf75`.
+
+FCOS checkpoint-load sanity:
+- Added `nerf_mae/tools/check_fcos_checkpoint_load.py`.
+- Ran it on:
+  `output/nerf_mae/results/nerfmae_dmae_hier_concat_p1.0_e100_seed1_abci3dmae_e100_det0_1n8g/epoch_100.pt`
+- Outputs:
+  - `results/shortcut_probe_artifacts/load_sanity/dmae_hier_concat_e100_seed1_fcos_load_sanity.json`
+  - `results/shortcut_probe_artifacts/load_sanity/dmae_hier_concat_e100_seed1_fcos_load_sanity.md`
+
+Load sanity result:
+
+| check | value |
+|---|---:|
+| FCOS instantiated | true |
+| pass | true |
+| encoder missing keys | 0 |
+| encoder unexpected keys | 0 |
+| encoder exact tensor ratio | 1.000000 |
+| encoder exact numel ratio | 1.000000 |
+| `pos_embed` exact | 1 / 1 |
+| `patch_partition` exact | 4 / 4 |
+| `stages.*` exact | 345 / 345 |
+
+Expected non-strict load keys:
+- Missing:
+  - `out.conv.weight`
+  - `out.conv.bias`
+- Unexpected:
+  - D-MAE-specific `decomp_structure_head.*`
+  - D-MAE-specific `decomp_rgb_head.*`
+
+Reading:
+- FCOS is using the D-MAE pretrained encoder exactly for
+  `pos_embed`, `patch_partition`, and all `stages.*` tensors.
+- D-MAE-only heads are discarded as expected. The existing D-MAE downstream AP
+  is therefore a valid pretrained-backbone transfer result rather than an
+  artifact of failed checkpoint loading.
+
+Code changes for next scout:
+- Added `dmae_hier_concat_coord_jitter` as a diagnostic condition in:
+  - `nerf_mae/probe_scripts/abci3_e300_gate_pretrain.pbs`
+  - `nerf_mae/probe_scripts/abci3_e300_gate_fcos.pbs`
+  - `nerf_mae/probe_scripts/submit_abci3_e300_gate_pipeline.sh`
+- This condition uses `probe_decomp_mode=hierarchical_concat` plus the same
+  coordinate-jitter defaults as the existing coord-jitter scouts:
+  - `ROTATE_PROB=1.0`
+  - `FLIP_PROB=0.5`
+  - `ROT_SCALE_PROB=0.0`
+  - `COORD_SHIFT_PROB=1.0`
+  - `COORD_SHIFT_MAX_VOXELS=8`
+
+Submitted critical scout:
+
+| job | condition | setting |
+|---|---|---|
+| `1797098.pbs1` | `dmae_hier_concat_coord_jitter e100 seed1` | pretrain, 1n8g, global batch 16, deterministic off |
+| `1797099.pbs1` | `dmae_hier_concat_coord_jitter` FCOS | depends on `1797098.pbs1` |
+
+Current queue status:
+- `1796104.pbs1`: `baseline_coord_jitter` FCOS retry is running.
+- `1797098.pbs1`: `dmae_hier_concat_coord_jitter` pretrain is running.
+- `1797099.pbs1`: dependent FCOS is held until pretrain succeeds.
+
+Next readout:
+- Compare `baseline_coord_jitter`, `cosine_coord_jitter`, and
+  `dmae_hier_concat_coord_jitter` on AP@50, AP@75, AP@75/AP@50, and proposal
+  IoU diagnostics before deciding whether D-MAE remains the main method path.
+
+Proposal-quality diagnostics:
+- Added `nerf_rpn/tools/summarize_proposal_quality.py`.
+- Added GPU runner:
+  `nerf_rpn/tools/abci3_proposal_quality_summary.pbs`.
+- Login-node execution is not sufficient because the existing rotated-IoU
+  implementation forces CUDA internally. The summary was therefore run as
+  `1797124.pbs1` on `rt_HG`.
+- Outputs:
+  - `results/shortcut_probe_artifacts/proposal_quality/e100_dmae_coord_controls.json`
+  - `results/shortcut_probe_artifacts/proposal_quality/e100_dmae_coord_controls.md`
+  - `results/shortcut_probe_artifacts/proposal_quality/e300_gate_pre1_ft123.json`
+  - `results/shortcut_probe_artifacts/proposal_quality/e300_gate_pre1_ft123.md`
+
+Existing e100 proposal-quality readout:
+
+| condition | AP@50 | AP@75 | AP75/AP50 | mean IoU | frac IoU>=0.5 | center err >=0.5 | size err >=0.5 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `baseline_no_pos` | 0.5371 | 0.0899 | 0.1674 | 0.0670 | 0.0186 | 0.0512 | 0.3113 |
+| `alpha_coord_jitter` | 0.4954 | 0.0622 | 0.1255 | 0.0634 | 0.0169 | 0.0578 | 0.1716 |
+| `cosine_coord_jitter` | 0.6219 | 0.1031 | 0.1657 | 0.0635 | 0.0196 | 0.0498 | 0.1818 |
+| `dmae_gate` | 0.5045 | 0.0832 | 0.1650 | 0.0613 | 0.0175 | 0.0491 | 0.2988 |
+| `dmae_concat` | 0.5778 | 0.1055 | 0.1826 | 0.0649 | 0.0184 | 0.0501 | 0.2607 |
+| `dmae_film` | 0.5443 | 0.0709 | 0.1302 | 0.0686 | 0.0188 | 0.0525 | 0.2563 |
+
+Reading:
+- AP@50 alone under-rates `dmae_concat`. It is below
+  `cosine_coord_jitter` on AP@50, but slightly above it on AP@75 and has the
+  best AP75/AP50 ratio among the listed e100 scouts.
+- Proposal mean IoU and frac-IoU>=0.5 are very close across these runs, so the
+  D-MAE/cosine difference is not just a large shift in raw proposal IoU
+  coverage.
+- `dmae_film` has the highest mean proposal IoU but weak AP@75/AP@50. This
+  supports keeping `hierarchical_concat` as the D-MAE variant to develop.
+
+Clean e300 proposal-quality readout:
+- `cosine_e300` improves AP@50 in all three finetune seeds.
+- AP75/AP50 is higher than baseline in finetune seeds 1/2, but seed 3 is lower
+  (`0.1502`), so AP@75 should be treated as a localization diagnostic rather
+  than the primary e300 sample-efficiency claim.
+- Proposal IoU coverage is again similar across baseline/cosine/shuffle,
+  consistent with the earlier reading that the main e300 gain is not simply
+  more top300 geometric coverage.

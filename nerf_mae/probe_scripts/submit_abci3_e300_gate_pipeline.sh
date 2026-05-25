@@ -105,6 +105,7 @@ short_condition() {
     cosine_coord_jitter) printf "cosjit" ;;
     dmae_target_alpha_gated_rgb) printf "dmaegate" ;;
     dmae_hier_concat) printf "dmaecat" ;;
+    dmae_hier_concat_coord_jitter) printf "dmaecj" ;;
     dmae_hier_film) printf "dmaefilm" ;;
     *) printf "%s" "$1" | tr -cd '[:alnum:]_' | cut -c1-8 ;;
   esac
@@ -127,7 +128,7 @@ pretrain_save_name() {
     curriculum:cosine_ramp|curriculum:cosine_ramp_alpha_shuffle)
       printf "nerfmae_alpha_rgba_curr_%s_p1.0_e%s_seed%s%s\n" "${condition}" "${epochs}" "${seed}" "${suffix_part}"
       ;;
-    diagnostic:alpha_target_only|diagnostic:alpha_target_only_no_pos|diagnostic:alpha_target_only_coord_jitter|diagnostic:baseline_no_pos|diagnostic:baseline_coord_jitter|diagnostic:cosine_no_pos|diagnostic:cosine_coord_jitter|diagnostic:dmae_target_alpha_gated_rgb|diagnostic:dmae_hier_concat|diagnostic:dmae_hier_film)
+    diagnostic:alpha_target_only|diagnostic:alpha_target_only_no_pos|diagnostic:alpha_target_only_coord_jitter|diagnostic:baseline_no_pos|diagnostic:baseline_coord_jitter|diagnostic:cosine_no_pos|diagnostic:cosine_coord_jitter|diagnostic:dmae_target_alpha_gated_rgb|diagnostic:dmae_hier_concat|diagnostic:dmae_hier_concat_coord_jitter|diagnostic:dmae_hier_film)
       printf "nerfmae_%s_p1.0_e%s_seed%s%s\n" "${condition}" "${epochs}" "${seed}" "${suffix_part}"
       ;;
     *)
