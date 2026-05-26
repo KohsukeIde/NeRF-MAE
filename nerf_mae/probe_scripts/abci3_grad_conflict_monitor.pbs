@@ -43,12 +43,26 @@ source /etc/profile.d/modules.sh
 module load "${ABCI3_CUDA_MODULE}"
 
 export PROBE_ENV_PREFIX
+export PROBE_RUNTIME_ROOT="${PROBE_RUNTIME_ROOT:-${ROOT_DIR}/runtime}"
+export PROBE_LOG_ROOT_DEFAULT="${PROBE_LOG_ROOT_DEFAULT:-${ROOT_DIR}/output/launcher}"
+export WANDB_DIR="${WANDB_DIR:-${ROOT_DIR}/output/wandb}"
+export TMPDIR="${TMPDIR:-${ROOT_DIR}/runtime/tmp}"
+export TORCH_EXTENSIONS_DIR="${TORCH_EXTENSIONS_DIR:-${ROOT_DIR}/runtime/torch_extensions}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-${ROOT_DIR}/runtime/cache}"
+export TORCH_HOME="${TORCH_HOME:-${ROOT_DIR}/runtime/torch_home}"
 export WANDB_MODE
 export PYTHONPATH="${ROOT_DIR}"
 export PATH="${PROBE_ENV_PREFIX}/bin:${PATH}"
 export GM_INTERVAL GM_MAX_BATCHES GM_PARAM_FILTER
 
-mkdir -p "${ROOT_DIR}/output/launcher" "${ROOT_DIR}/runtime"
+mkdir -p \
+  "${ROOT_DIR}/output/launcher" \
+  "${ROOT_DIR}/runtime" \
+  "${TMPDIR}" \
+  "${TORCH_EXTENSIONS_DIR}" \
+  "${XDG_CACHE_HOME}" \
+  "${TORCH_HOME}" \
+  "${WANDB_DIR}"
 
 case "${GM_CONDITION}" in
   baseline)
