@@ -49,6 +49,10 @@ case "${KIND}:${CONDITION}" in
     PRETRAIN_SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     VARIANT_NAME="${CONDITION}"
     ;;
+  surface_maturation:surface_maturation_tau0p3_k10_w0p05|surface_maturation:surface_maturation_tau0p5_k20_w0p05|surface_maturation:surface_maturation_tau0p7_k30_w0p05|surface_maturation:input_alpha_curriculum)
+    PRETRAIN_SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
+    VARIANT_NAME="${CONDITION}"
+    ;;
   *)
     echo "[error] unknown KIND:CONDITION=${KIND}:${CONDITION}" >&2
     exit 1

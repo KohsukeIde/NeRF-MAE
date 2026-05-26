@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+#PBS -q rt_HF
+#PBS -l select=1
+#PBS -l walltime=72:00:00
+#PBS -P gag51404
+#PBS -j oe
+#PBS -N sm_mae_pretrain
+
+set -euo pipefail
+
+WORK_DIR="${PBS_O_WORKDIR:?PBS_O_WORKDIR is not set}"
+if [[ -d "${WORK_DIR}/nerf_mae" ]]; then
+  ROOT_DIR="${ROOT_DIR:-${WORK_DIR}}"
+else
+  ROOT_DIR="${ROOT_DIR:-$(cd "${WORK_DIR}/.." && pwd)}"
+fi
+
+CONDITION="${CONDITION:-surface_maturation_tau0p5_k20_w0p05}"
+EPOCHS="${EPOCHS:-${NUM_EPOCHS:-300}}"
+SEED="${SEED:-1}"
+RUN_SUFFIX="${RUN_SUFFIX:-abci3sm_cj_det0_1n8g}"
+
+ROOT_DIR="${ROOT_DIR}" \
+KIND=surface_maturation \
+CONDITION="${CONDITION}" \
+EPOCHS="${EPOCHS}" \
+SEED="${SEED}" \
+RUN_SUFFIX="${RUN_SUFFIX}" \
+PRETRAIN_NODES="${PRETRAIN_NODES:-1}" \
+PRETRAIN_GPU_IDS="${PRETRAIN_GPU_IDS:-${GPUS:-0,1,2,3,4,5,6,7}}" \
+PRETRAIN_BATCH_SIZE_PER_GPU="${PRETRAIN_BATCH_SIZE_PER_GPU:-2}" \
+PRETRAIN_LR="${PRETRAIN_LR:-1e-3}" \
+PRETRAIN_WEIGHT_DECAY="${PRETRAIN_WEIGHT_DECAY:-0.0}" \
+PRETRAIN_EVAL_INTERVAL="${PRETRAIN_EVAL_INTERVAL:-300}" \
+PRETRAIN_CHECKPOINT_INTERVAL="${PRETRAIN_CHECKPOINT_INTERVAL:-10}" \
+PRETRAIN_LOG_INTERVAL="${PRETRAIN_LOG_INTERVAL:-30}" \
+PRETRAIN_DATA_ROOT="${PRETRAIN_DATA_ROOT:-${DATA_ROOT:-${ROOT_DIR}/dataset/pretrain}}" \
+PROBE_ENV_PREFIX="${PROBE_ENV_PREFIX:-${ROOT_DIR}/.venv-abci3}" \
+ABCI3_CUDA_MODULE="${ABCI3_CUDA_MODULE:-cuda/11.8/11.8.0}" \
+USE_WANDB="${USE_WANDB:-0}" \
+WANDB_MODE="${WANDB_MODE:-offline}" \
+DETERMINISTIC="${DETERMINISTIC:-0}" \
+SM_TAU="${SM_TAU:-}" \
+SM_K="${SM_K:-}" \
+SM_W_MIN="${SM_W_MIN:-}" \
+SM_CONFIDENCE="${SM_CONFIDENCE:-raw_alpha}" \
+SM_RGB_MASK="${SM_RGB_MASK:-removed_occupied}" \
+SM_STOP_GATE_GRAD="${SM_STOP_GATE_GRAD:-1}" \
+SM_LOG_STATS="${SM_LOG_STATS:-1}" \
+bash "${ROOT_DIR}/nerf_mae/probe_scripts/abci3_e300_gate_pretrain.pbs"

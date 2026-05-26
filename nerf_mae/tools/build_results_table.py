@@ -71,11 +71,55 @@ def infer_protocol(pretrain_save_name: str, source: str) -> tuple[str, str]:
         return "16", "ABCI3_2n16g_gb16"
     if "abci3diag_opt1n8g_det0" in pretrain_save_name:
         return "16", "ABCI3_1n8g_gb16_det0"
+    if "abci3sm_cj_det0_1n8g" in pretrain_save_name:
+        return "16", "ABCI3_1n8g_gb16_det0_surface_maturation_coord_jitter"
+    if "abci3input_cj_det0_1n8g" in pretrain_save_name:
+        return "16", "ABCI3_1n8g_gb16_det0_input_alpha_coord_jitter"
     if "abci3clean" in pretrain_save_name:
         return "", "ABCI3_clean"
     if source == "shortcut_probe_artifacts":
         return "", "historical"
     return "", "unknown"
+
+
+def infer_surface_env(condition: str) -> dict[str, str]:
+    fields = {
+        "SM_MODE": "",
+        "SM_CONFIDENCE": "",
+        "SM_W_MIN": "",
+        "SM_TAU": "",
+        "SM_K": "",
+        "SM_STOP_GATE_GRAD": "",
+        "SM_RGB_MASK": "",
+        "SM_INPUT_RGB_CURRICULUM": "",
+    }
+    if condition.startswith("surface_maturation_tau") or condition == "input_alpha_curriculum":
+        fields.update(
+            {
+                "SM_MODE": "surface_maturation",
+                "SM_CONFIDENCE": "raw_alpha",
+                "SM_W_MIN": "0.05",
+                "SM_STOP_GATE_GRAD": "1",
+                "SM_RGB_MASK": "removed_occupied",
+                "SM_INPUT_RGB_CURRICULUM": "none",
+            }
+        )
+    if condition == "surface_maturation_tau0p3_k10_w0p05":
+        fields.update({"SM_TAU": "0.3", "SM_K": "10", "SM_W_MIN": "0.05"})
+    elif condition == "surface_maturation_tau0p5_k20_w0p05":
+        fields.update({"SM_TAU": "0.5", "SM_K": "20", "SM_W_MIN": "0.05"})
+    elif condition == "surface_maturation_tau0p7_k30_w0p05":
+        fields.update({"SM_TAU": "0.7", "SM_K": "30", "SM_W_MIN": "0.05"})
+    elif condition == "input_alpha_curriculum":
+        fields.update(
+            {
+                "SM_TAU": "0.5",
+                "SM_K": "20",
+                "SM_W_MIN": "0.05",
+                "SM_INPUT_RGB_CURRICULUM": "cosine_release",
+            }
+        )
+    return fields
 
 
 def extract_metric(data: dict[str, Any], key: str, subkey: str) -> str:
@@ -148,10 +192,11 @@ def parse_run(root: Path, eval_json: Path, git_hash: str) -> dict[str, str]:
 
     condition = infer_condition(pretrain_save_name, run_name)
     global_batch, gpu_env = infer_protocol(pretrain_save_name, source)
+    surface_env = infer_surface_env(condition)
     with eval_json.open() as f:
         data = json.load(f)
 
-    return {
+    row = {
         "condition": condition,
         "pretrain_seed": pretrain_seed,
         "finetune_seed": finetune_seed,
@@ -173,6 +218,8 @@ def parse_run(root: Path, eval_json: Path, git_hash: str) -> dict[str, str]:
         "source": source,
         "git_hash": git_hash,
     }
+    row.update(surface_env)
+    return row
 
 
 def main() -> None:
@@ -218,6 +265,14 @@ def main() -> None:
         "run_name",
         "source",
         "git_hash",
+        "SM_MODE",
+        "SM_CONFIDENCE",
+        "SM_W_MIN",
+        "SM_TAU",
+        "SM_K",
+        "SM_STOP_GATE_GRAD",
+        "SM_RGB_MASK",
+        "SM_INPUT_RGB_CURRICULUM",
     ]
     out_csv = args.out_csv if args.out_csv.is_absolute() else root / args.out_csv
     out_csv.parent.mkdir(parents=True, exist_ok=True)

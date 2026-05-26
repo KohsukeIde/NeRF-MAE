@@ -44,6 +44,18 @@ FLIP_PROB="${FLIP_PROB:-}"
 ROT_SCALE_PROB="${ROT_SCALE_PROB:-}"
 COORD_SHIFT_PROB="${COORD_SHIFT_PROB:-}"
 COORD_SHIFT_MAX_VOXELS="${COORD_SHIFT_MAX_VOXELS:-}"
+SM_MODE="${SM_MODE:-}"
+SM_CONFIDENCE="${SM_CONFIDENCE:-}"
+SM_W_MIN="${SM_W_MIN:-}"
+SM_TAU="${SM_TAU:-}"
+SM_K="${SM_K:-}"
+SM_STOP_GATE_GRAD="${SM_STOP_GATE_GRAD:-}"
+SM_RGB_MASK="${SM_RGB_MASK:-}"
+SM_INPUT_RGB_CURRICULUM="${SM_INPUT_RGB_CURRICULUM:-}"
+SM_INPUT_RGB_START="${SM_INPUT_RGB_START:-}"
+SM_INPUT_RGB_END="${SM_INPUT_RGB_END:-}"
+SM_INPUT_RGB_EPOCHS="${SM_INPUT_RGB_EPOCHS:-}"
+SM_LOG_STATS="${SM_LOG_STATS:-}"
 AUTO_RESUME_PRETRAIN="${AUTO_RESUME_PRETRAIN:-1}"
 RESUME_ALLOW_PARTIAL="${RESUME_ALLOW_PARTIAL:-1}"
 SKIP_EXISTING="${SKIP_EXISTING:-1}"
@@ -160,6 +172,9 @@ case "${KIND}:${CONDITION}" in
   diagnostic:alpha_target_only|diagnostic:alpha_target_only_no_pos|diagnostic:alpha_target_only_coord_jitter|diagnostic:baseline_no_pos|diagnostic:baseline_coord_jitter|diagnostic:cosine_no_pos|diagnostic:cosine_coord_jitter|diagnostic:dmae_target_alpha_gated_rgb|diagnostic:dmae_hier_concat|diagnostic:dmae_hier_concat_coord_jitter|diagnostic:dmae_hier_film)
     SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
+  surface_maturation:surface_maturation_tau0p3_k10_w0p05|surface_maturation:surface_maturation_tau0p5_k20_w0p05|surface_maturation:surface_maturation_tau0p7_k30_w0p05|surface_maturation:input_alpha_curriculum)
+    SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
+    ;;
   *)
     echo "[error] unknown KIND:CONDITION=${KIND}:${CONDITION}" >&2
     exit 1
@@ -268,6 +283,18 @@ export FLIP_PROB="$(printf '%q' "${FLIP_PROB}")"
 export ROT_SCALE_PROB="$(printf '%q' "${ROT_SCALE_PROB}")"
 export COORD_SHIFT_PROB="$(printf '%q' "${COORD_SHIFT_PROB}")"
 export COORD_SHIFT_MAX_VOXELS="$(printf '%q' "${COORD_SHIFT_MAX_VOXELS}")"
+export SM_MODE="$(printf '%q' "${SM_MODE}")"
+export SM_CONFIDENCE="$(printf '%q' "${SM_CONFIDENCE}")"
+export SM_W_MIN="$(printf '%q' "${SM_W_MIN}")"
+export SM_TAU="$(printf '%q' "${SM_TAU}")"
+export SM_K="$(printf '%q' "${SM_K}")"
+export SM_STOP_GATE_GRAD="$(printf '%q' "${SM_STOP_GATE_GRAD}")"
+export SM_RGB_MASK="$(printf '%q' "${SM_RGB_MASK}")"
+export SM_INPUT_RGB_CURRICULUM="$(printf '%q' "${SM_INPUT_RGB_CURRICULUM}")"
+export SM_INPUT_RGB_START="$(printf '%q' "${SM_INPUT_RGB_START}")"
+export SM_INPUT_RGB_END="$(printf '%q' "${SM_INPUT_RGB_END}")"
+export SM_INPUT_RGB_EPOCHS="$(printf '%q' "${SM_INPUT_RGB_EPOCHS}")"
+export SM_LOG_STATS="$(printf '%q' "${SM_LOG_STATS}")"
 export NERFMAE_DDP_USE_ENV=1
 export NERFMAE_DDP_NUM_NODES="$(printf '%q' "${PRETRAIN_NODES}")"
 export NERFMAE_DDP_WORLD_SIZE="$(printf '%q' "${PRETRAIN_WORLD_SIZE}")"
@@ -618,6 +645,69 @@ case "${KIND}:${CONDITION}" in
       PROBE_RGB_WEIGHT=1.0 \
       PROBE_ALPHA_WEIGHT=1.0 \
       PROBE_DECOMP_MODE="${decomp_mode}" \
+      bash train_mae3d.sh
+    ;;
+  surface_maturation:surface_maturation_tau0p3_k10_w0p05|surface_maturation:surface_maturation_tau0p5_k20_w0p05|surface_maturation:surface_maturation_tau0p7_k30_w0p05|surface_maturation:input_alpha_curriculum)
+    sm_tau="${SM_TAU:-0.5}"
+    sm_k="${SM_K:-20}"
+    sm_w_min="${SM_W_MIN:-0.05}"
+    sm_input_curriculum="${SM_INPUT_RGB_CURRICULUM:-none}"
+    sm_input_start="${SM_INPUT_RGB_START:-0.0}"
+    sm_input_end="${SM_INPUT_RGB_END:-1.0}"
+    sm_input_epochs="${SM_INPUT_RGB_EPOCHS:-${EPOCHS}}"
+    case "${CONDITION}" in
+      surface_maturation_tau0p3_k10_w0p05)
+        sm_tau="${SM_TAU:-0.3}"
+        sm_k="${SM_K:-10}"
+        sm_w_min="${SM_W_MIN:-0.05}"
+        ;;
+      surface_maturation_tau0p5_k20_w0p05)
+        sm_tau="${SM_TAU:-0.5}"
+        sm_k="${SM_K:-20}"
+        sm_w_min="${SM_W_MIN:-0.05}"
+        ;;
+      surface_maturation_tau0p7_k30_w0p05)
+        sm_tau="${SM_TAU:-0.7}"
+        sm_k="${SM_K:-30}"
+        sm_w_min="${SM_W_MIN:-0.05}"
+        ;;
+      input_alpha_curriculum)
+        sm_tau="${SM_TAU:-0.5}"
+        sm_k="${SM_K:-20}"
+        sm_w_min="${SM_W_MIN:-0.05}"
+        sm_input_curriculum="${SM_INPUT_RGB_CURRICULUM:-cosine_release}"
+        sm_input_start="${SM_INPUT_RGB_START:-0.0}"
+        sm_input_end="${SM_INPUT_RGB_END:-1.0}"
+        sm_input_epochs="${SM_INPUT_RGB_EPOCHS:-${EPOCHS}}"
+        ;;
+    esac
+    env "${common_env[@]}" "${resume_env[@]}" \
+      TRAIN_ENTRYPOINT=run_swin_surface_maturation.py \
+      ROTATE_PROB="${ROTATE_PROB:-1.0}" \
+      FLIP_PROB="${FLIP_PROB:-0.5}" \
+      ROT_SCALE_PROB="${ROT_SCALE_PROB:-0.0}" \
+      COORD_SHIFT_PROB="${COORD_SHIFT_PROB:-1.0}" \
+      COORD_SHIFT_MAX_VOXELS="${COORD_SHIFT_MAX_VOXELS:-8}" \
+      SM_MODE="${SM_MODE:-surface_maturation}" \
+      SM_CONFIDENCE="${SM_CONFIDENCE:-raw_alpha}" \
+      SM_W_MIN="${sm_w_min}" \
+      SM_TAU="${sm_tau}" \
+      SM_K="${sm_k}" \
+      SM_STOP_GATE_GRAD="${SM_STOP_GATE_GRAD:-1}" \
+      SM_RGB_MASK="${SM_RGB_MASK:-removed_occupied}" \
+      SM_INPUT_RGB_CURRICULUM="${sm_input_curriculum}" \
+      SM_INPUT_RGB_START="${sm_input_start}" \
+      SM_INPUT_RGB_END="${sm_input_end}" \
+      SM_INPUT_RGB_EPOCHS="${sm_input_epochs}" \
+      SM_LOG_STATS="${SM_LOG_STATS:-1}" \
+      PROBE_MODE=custom \
+      PROBE_RGB_INPUT=keep \
+      PROBE_ALPHA_INPUT=keep \
+      PROBE_ALPHA_TARGET=keep \
+      PROBE_RGB_LOSS=removed_occupied \
+      PROBE_ALPHA_LOSS=removed \
+      PROBE_RGB_WEIGHT=1.0 \
+      PROBE_ALPHA_WEIGHT=1.0 \
       bash train_mae3d.sh
     ;;
 esac

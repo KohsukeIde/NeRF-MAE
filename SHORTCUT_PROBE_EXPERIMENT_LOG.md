@@ -2503,3 +2503,84 @@ Proposal-quality reading:
 - Therefore the D-MAE coord-jitter failure is not rescued by the proposal
   diagnostic. The current D-MAE design should remain an ablation rather than
   the main method.
+
+## Experiment 34: Surface-Maturation MVP Implementation and Launch Plan
+
+Snapshot:
+- 2026-05-26 JST
+
+Motivation:
+- Current D-MAE coord-jitter is Tier 3 and should not be the main path.
+- `cosine_coord_jitter` remains the strongest scout, but it is still an
+  empirical curriculum rather than a mechanistic method.
+- The next low-risk method scout is Surface-Maturation: use predicted alpha
+  confidence as a stop-gradient gate for RGB reconstruction, with a nonzero
+  floor to avoid eliminating RGB loss early.
+
+Implementation source:
+- Applied the provided overlay from:
+  `surface_maturation_mvp.zip`
+
+Added entrypoints and scripts:
+- `nerf_mae/model/mae/surface_maturation_probe.py`
+- `nerf_mae/run_swin_surface_maturation.py`
+- `nerf_mae/run_swin_grad_monitor.py`
+- `nerf_mae/probe_scripts/abci3_surface_maturation_pretrain.pbs`
+- `nerf_mae/probe_scripts/abci3_input_alpha_curriculum_pretrain.pbs`
+- `nerf_mae/probe_scripts/abci3_grad_conflict_monitor.pbs`
+- `nerf_mae/probe_scripts/submit_surface_maturation_sweep.sh`
+
+Integration changes:
+- `nerf_mae/train_mae3d.sh` now supports `TRAIN_ENTRYPOINT`, defaulting to
+  `run_swin_mae3d.py`. This lets the new wrappers reuse the existing optimized
+  ABCI3 train script.
+- `abci3_e300_gate_pretrain.pbs` and `abci3_e300_gate_fcos.pbs` now support
+  `KIND=surface_maturation` conditions and dependent FCOS evaluation.
+- `build_results_table.py` now records Surface-Maturation env columns:
+  `SM_MODE`, `SM_CONFIDENCE`, `SM_W_MIN`, `SM_TAU`, `SM_K`,
+  `SM_STOP_GATE_GRAD`, `SM_RGB_MASK`, and `SM_INPUT_RGB_CURRICULUM`.
+
+Important implementation correction:
+- The overlay originally used `_masked_mean(loss, mask * gate)`, which divides
+  by the gated mass and makes the gate mostly a spatial reweighting.
+- This was changed to normalize by the ungated base mask support:
+  `(loss * mask * gate).sum() / mask.sum()`.
+- This matches the intended Surface-Maturation behavior: the predicted-alpha
+  gate controls RGB-loss strength while `SM_W_MIN` preserves a floor.
+
+Default scout protocol:
+- Pretrain: ABCI3 `1n8g`, global batch `16`, deterministic off.
+- Coord-jitter is enabled for all Surface-Maturation scouts so the comparison
+  is against the current relevant controls:
+  - `baseline_coord_jitter`
+  - `cosine_coord_jitter`
+  - `dmae_hier_concat_coord_jitter`
+- Dependent FCOS is submitted automatically after each pretrain.
+
+Planned jobs:
+
+| condition | setting |
+|---|---|
+| `surface_maturation_tau0p3_k10_w0p05` | `tau=0.3`, `k=10`, `w_min=0.05` |
+| `surface_maturation_tau0p5_k20_w0p05` | `tau=0.5`, `k=20`, `w_min=0.05` |
+| `surface_maturation_tau0p7_k30_w0p05` | `tau=0.7`, `k=30`, `w_min=0.05` |
+| `input_alpha_curriculum` | `tau=0.5`, `k=20`, `w_min=0.05`, `SM_INPUT_RGB_CURRICULUM=cosine_release` |
+
+Verification before launch:
+- Passed:
+  - `python -m py_compile nerf_mae/model/mae/surface_maturation_probe.py`
+  - `python -m py_compile nerf_mae/run_swin_surface_maturation.py`
+  - `python -m py_compile nerf_mae/run_swin_grad_monitor.py`
+  - `python -m py_compile nerf_mae/tools/build_results_table.py`
+  - `bash -n` for the modified train/PBS/submit scripts.
+- Import smoke passed:
+  `run_swin_surface_maturation` installs
+  `SwinTransformer_MAE3D_SurfaceMaturation` as the training model.
+
+Decision criteria:
+- Promote Surface-Maturation only if it gets close to `cosine_coord_jitter` on
+  AP@50 or improves AP@75/AP75-over-AP50 while retaining reasonable AP@50.
+- If all Surface-Maturation settings and the input-alpha scout are clearly
+  below `cosine_coord_jitter`, stop new method scouts and treat
+  `cosine_coord_jitter` as the empirical best direction for the next paper
+  framing pass.

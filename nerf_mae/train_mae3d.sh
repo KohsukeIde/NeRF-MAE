@@ -77,9 +77,10 @@ CHECKPOINT="${CHECKPOINT:-}"
 RESUME_CHECKPOINT="${RESUME_CHECKPOINT:-}"
 RESUME_ALLOW_PARTIAL="${RESUME_ALLOW_PARTIAL:-0}"
 RESUME_START_EPOCH="${RESUME_START_EPOCH:-}"
+TRAIN_ENTRYPOINT="${TRAIN_ENTRYPOINT:-run_swin_mae3d.py}"
 
 cmd=(
-  python3 -u run_swin_mae3d.py
+  python3 -u "${TRAIN_ENTRYPOINT}"
   --mode train
   --backbone_type swin_s
   --features_path "${DATA_ROOT}/features"
