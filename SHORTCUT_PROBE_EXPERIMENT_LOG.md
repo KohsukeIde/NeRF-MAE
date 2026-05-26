@@ -2584,3 +2584,72 @@ Decision criteria:
   below `cosine_coord_jitter`, stop new method scouts and treat
   `cosine_coord_jitter` as the empirical best direction for the next paper
   framing pass.
+
+Launch status:
+- Implementation pushed in commit:
+  `d73c259` (`Add surface maturation scout wrappers`).
+- Runtime-path fix for the gradient monitor pushed in commit:
+  `c788718` (`Fix grad monitor ABCI runtime paths`).
+
+Gradient monitor:
+- Initial monitor jobs `1800726.pbs1` and `1800727.pbs1` failed immediately
+  because `_probe_common.sh` fell back to an old `/mnt/urashima/...` runtime
+  path. The PBS was fixed to set repo-local runtime/cache/wandb paths.
+- Resubmitted:
+
+| job | condition | run name |
+|---|---|---|
+| `1800742.pbs1` | baseline | `grad_conflict_baseline_seed1_retry2` |
+| `1800743.pbs1` | cosine coord-jitter | `grad_conflict_cosine_coord_jitter_seed1_retry2` |
+
+Early gradient-conflict readout:
+
+| condition | samples | mean cosine | negative samples | min | max |
+|---|---:|---:|---:|---:|---:|
+| baseline | 10 | -0.0199 | 6 / 10 | -0.7618 | +0.2863 |
+| cosine coord-jitter | 10 | -0.0558 | 3 / 10 | -0.9177 | +0.5467 |
+
+Representative samples:
+
+| condition | epoch | iter | grad cosine RGB/alpha |
+|---|---:|---:|---:|
+| baseline | 1 | 0 | -0.0320 |
+| baseline | 1 | 20 | -0.7618 |
+| baseline | 5 | 0 | -0.1475 |
+| baseline | 5 | 20 | -0.0176 |
+| cosine coord-jitter | 1 | 0 | +0.0058 |
+| cosine coord-jitter | 1 | 20 | -0.9177 |
+| cosine coord-jitter | 5 | 0 | +0.0044 |
+| cosine coord-jitter | 5 | 20 | -0.1698 |
+
+Reading:
+- There is clear early negative RGB/alpha gradient alignment in the encoder
+  stages. This supports monitoring the Surface-Maturation branch rather than
+  jumping directly to PCGrad.
+- The cosine monitor is also negative at iter 20, so the conflict is not
+  trivially removed by the short 5-epoch cosine-ramp setting.
+- The sign is not uniformly negative across epochs, so this is evidence for an
+  intermittent conflict regime rather than a simple "always conflicting"
+  objective.
+
+Submitted Surface-Maturation / input-alpha jobs:
+
+| pretrain job | dependent FCOS job | condition |
+|---|---|---|
+| `1800728.pbs1` | `1800729.pbs1` | `surface_maturation_tau0p3_k10_w0p05` |
+| `1800730.pbs1` | `1800731.pbs1` | `surface_maturation_tau0p5_k20_w0p05` |
+| `1800732.pbs1` | `1800733.pbs1` | `surface_maturation_tau0p7_k30_w0p05` |
+| `1800734.pbs1` | `1800735.pbs1` | `input_alpha_curriculum` |
+
+Current startup check:
+- All four pretrain jobs reached dataset loading with 8 workers/logs.
+- Surface-Maturation logs show the expected settings:
+  - `tau=0.3`, `k=10`, `rgb_scale=1.0`
+  - `tau=0.5`, `k=20`, `rgb_scale=1.0`
+  - `tau=0.7`, `k=30`, `rgb_scale=1.0`
+  - input-alpha curriculum starts with `rgb_scale=0.0`
+- Dependent FCOS jobs are held with `afterok` and will run only if the matching
+  pretrain finishes successfully.
+- At the latest check, all four pretrains were around epoch 8. The observed
+  wall-clock rate is roughly `2.3-2.5 min/epoch`, implying about `12-13 h` for
+  e300 pretrain before the dependent FCOS jobs start.
