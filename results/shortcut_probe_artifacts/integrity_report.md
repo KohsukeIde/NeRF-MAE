@@ -156,8 +156,64 @@ Tier 3, drop D-MAE as main method:
 - It does not win on AP@75 or AP75/AP50.
 - It does not improve over `baseline_coord_jitter`.
 
-Pending jobs:
+## Coord-Jitter Decision Results
+
+Checked on 2026-05-26 JST. The previously pending jobs completed:
 
 - `baseline_coord_jitter` FCOS retry: `1796104.pbs1`
 - `dmae_hier_concat_coord_jitter` pretrain: `1797098.pbs1`
 - dependent `dmae_hier_concat_coord_jitter` FCOS: `1797099.pbs1`
+
+Results table:
+
+| condition | AP@50 | AP@75 | AP75/AP50 | R50@300 |
+|---|---:|---:|---:|---:|
+| `baseline_coord_jitter` | 0.5564 | 0.1015 | 0.1824 | 0.6765 |
+| `cosine_coord_jitter` | 0.6219 | 0.1031 | 0.1657 | 0.7279 |
+| `dmae_hier_concat` | 0.5778 | 0.1055 | 0.1826 | 0.6912 |
+| `dmae_hier_concat_coord_jitter` | 0.5212 | 0.0858 | 0.1646 | 0.6838 |
+
+Key deltas:
+
+- `cosine_coord_jitter - baseline_coord_jitter`: AP@50 `+0.0655`, AP@75 `+0.0016`, R50@300 `+0.0515`.
+- `dmae_hier_concat_coord_jitter - cosine_coord_jitter`: AP@50 `-0.1007`, AP@75 `-0.0173`, AP75/AP50 `-0.0011`, R50@300 `-0.0441`.
+- `dmae_hier_concat_coord_jitter - baseline_coord_jitter`: AP@50 `-0.0352`, AP@75 `-0.0157`, AP75/AP50 `-0.0178`, R50@300 `+0.0074`.
+
+Decision:
+
+- `baseline_coord_jitter` does not explain away `cosine_coord_jitter`. The
+  cosine target-alpha-to-RGBA curriculum still provides a large AP@50 gain under
+  coord-jitter.
+- `dmae_hier_concat_coord_jitter` lands in Tier 3: it trails
+  `cosine_coord_jitter` by more than `0.03` AP@50 and does not win on AP@75 or
+  AP75/AP50.
+- D-MAE should not be promoted as the main method path from this scout. Keep
+  `dmae_hier_concat` as an ablation/localization diagnostic, but move the main
+  paper direction toward cosine/coord-jitter curriculum analysis unless a
+  substantially different D-MAE design is proposed.
+
+Additional proposal-quality summary:
+
+- Ran `1800305.pbs1` with
+  `nerf_rpn/tools/abci3_proposal_quality_coord_jitter_decision.pbs`.
+- Outputs:
+  - `results/shortcut_probe_artifacts/proposal_quality/e100_coord_jitter_decision.json`
+  - `results/shortcut_probe_artifacts/proposal_quality/e100_coord_jitter_decision.md`
+  - `results/shortcut_probe_artifacts/proposal_quality/e100_coord_jitter_decision.png`
+
+Proposal-quality table:
+
+| condition | AP@50 | AP@75 | AP75/AP50 | R50@300 | mean IoU | frac IoU>=0.5 | first TP rank |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `baseline_coord_jitter` | 0.5564 | 0.1015 | 0.1824 | 0.6765 | 0.0632 | 0.0180 | 1.2941 |
+| `cosine_coord_jitter` | 0.6219 | 0.1031 | 0.1657 | 0.7279 | 0.0635 | 0.0196 | 1.0588 |
+| `dmae_hier_concat` | 0.5778 | 0.1055 | 0.1826 | 0.6912 | 0.0649 | 0.0184 | 1.3529 |
+| `dmae_hier_concat_coord_jitter` | 0.5212 | 0.0858 | 0.1646 | 0.6838 | 0.0702 | 0.0182 | 1.2941 |
+
+Reading:
+
+- `dmae_hier_concat_coord_jitter` has the highest mean proposal IoU, but it
+  does not convert that into AP@50, AP@75, or AP75/AP50.
+- `cosine_coord_jitter` remains strongest on AP@50, R50@300, frac IoU>=0.5,
+  and first-TP rank.
+- The proposal diagnostic does not overturn the Tier 3 D-MAE decision.

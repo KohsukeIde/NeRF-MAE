@@ -2413,3 +2413,93 @@ Proposal figure outputs:
   coverage, and center/size error. Full histogram/scatter figures should be
   generated after `dmae_hier_concat_coord_jitter` finishes so the final
   candidate is included.
+
+## Experiment 33: Coord-Jitter Decision Readout
+
+Snapshot:
+- 2026-05-26 JST
+
+Completed jobs:
+
+| job | condition | status |
+|---|---|---|
+| `1796104.pbs1` | `baseline_coord_jitter` FCOS retry | complete |
+| `1797098.pbs1` | `dmae_hier_concat_coord_jitter` pretrain | complete |
+| `1797099.pbs1` | `dmae_hier_concat_coord_jitter` FCOS | complete |
+
+`qstat` no longer shows these NeRF-MAE decision jobs. Remaining running jobs at
+this check are unrelated SSL/BSO jobs.
+
+Updated aggregation:
+- Regenerated `results/shortcut_probe_artifacts/results_table.csv`.
+- The table now has `104` rows and includes both:
+  - `baseline_coord_jitter`
+  - `dmae_hier_concat_coord_jitter`
+
+Decision metrics:
+
+| condition | pretrain seed | finetune seed | AP@50 | AP@75 | AP75/AP50 | R50@300 |
+|---|---:|---:|---:|---:|---:|---:|
+| `baseline_coord_jitter` | 1 | 1 | 0.5564 | 0.1015 | 0.1824 | 0.6765 |
+| `cosine_coord_jitter` | 1 | 1 | 0.6219 | 0.1031 | 0.1657 | 0.7279 |
+| `dmae_hier_concat` | 1 | 1 | 0.5778 | 0.1055 | 0.1826 | 0.6912 |
+| `dmae_hier_concat_coord_jitter` | 1 | 1 | 0.5212 | 0.0858 | 0.1646 | 0.6838 |
+
+Key deltas:
+
+| comparison | AP@50 delta | AP@75 delta | AP75/AP50 delta | R50@300 delta |
+|---|---:|---:|---:|---:|
+| `cosine_coord_jitter - baseline_coord_jitter` | +0.0655 | +0.0016 | -0.0167 | +0.0515 |
+| `dmae_hier_concat_coord_jitter - cosine_coord_jitter` | -0.1007 | -0.0173 | -0.0011 | -0.0441 |
+| `dmae_hier_concat_coord_jitter - baseline_coord_jitter` | -0.0352 | -0.0157 | -0.0178 | +0.0074 |
+
+Reading:
+- `baseline_coord_jitter` is below `cosine_coord_jitter` by AP@50 `0.0655`.
+  Therefore coord-jitter alone does not explain the strong
+  `cosine_coord_jitter` scout. The target-alpha-to-RGBA cosine curriculum still
+  carries a meaningful signal under coordinate augmentation.
+- `dmae_hier_concat_coord_jitter` is worse than `cosine_coord_jitter` on AP@50,
+  AP@75, AP75/AP50, and R50@300.
+- It is also worse than `baseline_coord_jitter` on AP@50, AP@75, and
+  AP75/AP50, with only a small R50@300 improvement.
+- Under the pre-registered tiered criterion, this is Tier 3:
+  `dmae_hier_concat_coord_jitter` trails `cosine_coord_jitter` by more than
+  `0.03` AP@50 and does not compensate with AP@75 or AP75/AP50.
+
+Decision:
+- Do not promote current D-MAE as the main method path.
+- Keep `dmae_hier_concat` as a useful ablation/localization diagnostic because
+  the no-jitter version still has the best AP75/AP50 ratio among the current
+  D-MAE scouts.
+- Main experimental direction should shift to the cosine/coord-jitter
+  curriculum analysis path unless a substantially different D-MAE design is
+  proposed.
+- The immediate next paper-scale question is not "does coord-jitter alone win?"
+  but "which cosine/coord-jitter/curriculum row should be validated with the
+  agreed 1 pretrain seed x 3 finetune seeds protocol?"
+
+Additional proposal-quality diagnostic:
+- Added `nerf_rpn/tools/abci3_proposal_quality_coord_jitter_decision.pbs`.
+- Ran short HG job `1800305.pbs1`.
+- Outputs:
+  - `results/shortcut_probe_artifacts/proposal_quality/e100_coord_jitter_decision.json`
+  - `results/shortcut_probe_artifacts/proposal_quality/e100_coord_jitter_decision.md`
+  - `results/shortcut_probe_artifacts/proposal_quality/e100_coord_jitter_decision.png`
+
+Proposal-quality readout:
+
+| condition | AP@50 | AP@75 | AP75/AP50 | R50@300 | mean IoU | frac IoU>=0.5 | first TP rank |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `baseline_coord_jitter` | 0.5564 | 0.1015 | 0.1824 | 0.6765 | 0.0632 | 0.0180 | 1.2941 |
+| `cosine_coord_jitter` | 0.6219 | 0.1031 | 0.1657 | 0.7279 | 0.0635 | 0.0196 | 1.0588 |
+| `dmae_hier_concat` | 0.5778 | 0.1055 | 0.1826 | 0.6912 | 0.0649 | 0.0184 | 1.3529 |
+| `dmae_hier_concat_coord_jitter` | 0.5212 | 0.0858 | 0.1646 | 0.6838 | 0.0702 | 0.0182 | 1.2941 |
+
+Proposal-quality reading:
+- `dmae_hier_concat_coord_jitter` has the highest mean proposal IoU, but this
+  does not translate into AP@50/AP@75 or better AP75/AP50.
+- `cosine_coord_jitter` has the best AP@50, R50@300, frac-IoU>=0.5, and first
+  TP rank among this comparison set.
+- Therefore the D-MAE coord-jitter failure is not rescued by the proposal
+  diagnostic. The current D-MAE design should remain an ablation rather than
+  the main method.
