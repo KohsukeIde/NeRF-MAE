@@ -2880,3 +2880,14 @@ Decision rule:
   roughly unchanged.
 - Tier 3: no AP@50/AP@75 improvement; keep `cosine_coord_jitter` as empirical
   best and use Pyramid as an ablation.
+
+Submitted jobs:
+
+| condition | PYR_MODE | pretrain job | dependent FCOS job | status at submit |
+|---|---|---|---|---|
+| `pyramid_alpha` | `alpha` | `1805486.pbs1` | `1805487.pbs1` | pretrain running, FCOS hold |
+| `pyramid_rgb` | `rgb` | `1805488.pbs1` | `1805489.pbs1` | pretrain running, FCOS hold |
+| `pyramid_both` | `both` | `1805490.pbs1` | `1805491.pbs1` | pretrain running, FCOS hold |
+
+Submission log:
+- `output/launcher/pyramid_sweep_20260527_220600/submitted.tsv`
