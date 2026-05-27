@@ -2653,3 +2653,75 @@ Current startup check:
 - At the latest check, all four pretrains were around epoch 8. The observed
   wall-clock rate is roughly `2.3-2.5 min/epoch`, implying about `12-13 h` for
   e300 pretrain before the dependent FCOS jobs start.
+
+## Experiment 35: Surface-Maturation E300 Scout Results
+
+Snapshot:
+- 2026-05-27 JST
+
+Completed jobs:
+
+| pretrain job | dependent FCOS job | condition | status |
+|---|---|---|---|
+| `1800728.pbs1` | `1800729.pbs1` | `surface_maturation_tau0p3_k10_w0p05` | complete |
+| `1800730.pbs1` | `1800731.pbs1` | `surface_maturation_tau0p5_k20_w0p05` | complete |
+| `1800732.pbs1` | `1800733.pbs1` | `surface_maturation_tau0p7_k30_w0p05` | complete |
+| `1800734.pbs1` | `1800735.pbs1` | `input_alpha_curriculum` | complete |
+
+Aggregation:
+- Regenerated `results/shortcut_probe_artifacts/results_table.csv`.
+- The table now has `108` rows and records the `SM_*` environment columns.
+
+Surface-Maturation scout metrics:
+
+| condition | AP@50 | AP@75 | AP75/AP50 | R50@300 | gate mean at e300 |
+|---|---:|---:|---:|---:|---:|
+| `surface_maturation_tau0p3_k10_w0p05` | 0.5246 | 0.0766 | 0.1460 | 0.6618 | 0.3185 |
+| `surface_maturation_tau0p5_k20_w0p05` | 0.6079 | 0.0519 | 0.0854 | 0.7132 | 0.2586 |
+| `surface_maturation_tau0p7_k30_w0p05` | 0.5973 | 0.0919 | 0.1539 | 0.7279 | 0.2524 |
+| `input_alpha_curriculum` | 0.5176 | 0.0727 | 0.1404 | 0.7059 | 0.2749 |
+
+Reference controls:
+
+| condition | AP@50 | AP@75 | AP75/AP50 | R50@300 | note |
+|---|---:|---:|---:|---:|---|
+| `baseline_e300` ABCI clean, ft seed 1 | 0.4695 | 0.0869 | 0.1851 | 0.6618 | no coord-jitter |
+| `cosine_e300` ABCI clean, ft seed 1 | 0.5539 | 0.1135 | 0.2049 | 0.7059 | no coord-jitter |
+| `shuffle_e300` ABCI clean, ft seed 1 | 0.4162 | 0.0326 | 0.0783 | 0.5956 | no coord-jitter |
+| `baseline_e300` ABCI clean, ft seeds 1-3 mean | 0.4938 | 0.0911 | - | 0.6618 | no coord-jitter |
+| `cosine_e300` ABCI clean, ft seeds 1-3 mean | 0.5723 | 0.1067 | - | 0.7010 | no coord-jitter |
+| `shuffle_e300` ABCI clean, ft seeds 1-3 mean | 0.4294 | 0.0453 | - | 0.6103 | no coord-jitter |
+| `baseline_coord_jitter_e100` | 0.5564 | 0.1015 | 0.1824 | 0.6765 | coord-jitter |
+| `cosine_coord_jitter_e100` | 0.6219 | 0.1031 | 0.1657 | 0.7279 | coord-jitter |
+| `dmae_hier_concat_coord_jitter_e100` | 0.5212 | 0.0858 | 0.1646 | 0.6838 | coord-jitter |
+
+Reading:
+- `tau0p5_k20` gives the best AP@50 among the Surface-Maturation variants:
+  `0.6079`. It is close to `cosine_coord_jitter_e100` AP@50 (`0.6219`,
+  delta `-0.0140`) and above the clean `cosine_e300` finetune-seed-1 AP@50
+  (`0.5539`, delta `+0.0541`).
+- However, `tau0p5_k20` collapses AP@75 to `0.0519`. This is a coarse-detection
+  gain, not a localization-quality gain.
+- `tau0p7_k30` is the best balanced Surface-Maturation variant: AP@50 `0.5973`,
+  AP@75 `0.0919`, R50@300 `0.7279`. It matches `cosine_coord_jitter_e100` on
+  R50@300 but remains below it on AP@50 and AP@75.
+- `tau0p3_k10` and `input_alpha_curriculum` are weak. The input-side alpha
+  curriculum branch should be dropped unless a separate reason emerges.
+
+Decision:
+- Surface-Maturation is not a clear method win yet. It is better than D-MAE
+  coord-jitter on AP@50 and competitive with cosine coord-jitter on coarse AP
+  for `tau0p5`, but it does not improve AP@75 or AP75/AP50.
+- Do not promote Surface-Maturation to the main method as-is.
+- Keep `tau0p7_k30_w0p05` as the only Surface-Maturation variant worth a small
+  follow-up if we want a more localization-preserving gate.
+- If time is constrained, the paper path should still prioritize
+  `cosine_coord_jitter` / cosine curriculum as the empirical best, with
+  Surface-Maturation as a negative/partial method scout.
+
+Possible follow-up only if useful:
+- Run proposal-quality diagnostics for `tau0p5` and `tau0p7` to see whether
+  the AP@75 drop comes from score ranking, center/size error, or proposal IoU.
+- If trying one more Surface-Maturation setting, use a less aggressive gate:
+  for example `tau=0.65, k=15, w_min=0.10`, based on the fact that AP@50
+  survives at high tau but AP@75 remains below cosine.
