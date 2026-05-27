@@ -56,6 +56,15 @@ SM_INPUT_RGB_START="${SM_INPUT_RGB_START:-}"
 SM_INPUT_RGB_END="${SM_INPUT_RGB_END:-}"
 SM_INPUT_RGB_EPOCHS="${SM_INPUT_RGB_EPOCHS:-}"
 SM_LOG_STATS="${SM_LOG_STATS:-}"
+PYR_MODE="${PYR_MODE:-}"
+PYR_SCALE="${PYR_SCALE:-}"
+PYR_SCHEDULE="${PYR_SCHEDULE:-}"
+PYR_EPOCHS="${PYR_EPOCHS:-}"
+PYR_ALPHA_POOL="${PYR_ALPHA_POOL:-}"
+PYR_RGB_POOL="${PYR_RGB_POOL:-}"
+PYR_UPSAMPLE="${PYR_UPSAMPLE:-}"
+PYR_ALPHA_UPSAMPLE="${PYR_ALPHA_UPSAMPLE:-}"
+PYR_LOG_STATS="${PYR_LOG_STATS:-}"
 AUTO_RESUME_PRETRAIN="${AUTO_RESUME_PRETRAIN:-1}"
 RESUME_ALLOW_PARTIAL="${RESUME_ALLOW_PARTIAL:-1}"
 SKIP_EXISTING="${SKIP_EXISTING:-1}"
@@ -173,6 +182,9 @@ case "${KIND}:${CONDITION}" in
     SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
   surface_maturation:surface_maturation_tau0p3_k10_w0p05|surface_maturation:surface_maturation_tau0p5_k20_w0p05|surface_maturation:surface_maturation_tau0p7_k30_w0p05|surface_maturation:input_alpha_curriculum)
+    SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
+    ;;
+  pyramid:pyramid_alpha|pyramid:pyramid_rgb|pyramid:pyramid_both)
     SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
   *)
@@ -295,6 +307,15 @@ export SM_INPUT_RGB_START="$(printf '%q' "${SM_INPUT_RGB_START}")"
 export SM_INPUT_RGB_END="$(printf '%q' "${SM_INPUT_RGB_END}")"
 export SM_INPUT_RGB_EPOCHS="$(printf '%q' "${SM_INPUT_RGB_EPOCHS}")"
 export SM_LOG_STATS="$(printf '%q' "${SM_LOG_STATS}")"
+export PYR_MODE="$(printf '%q' "${PYR_MODE}")"
+export PYR_SCALE="$(printf '%q' "${PYR_SCALE}")"
+export PYR_SCHEDULE="$(printf '%q' "${PYR_SCHEDULE}")"
+export PYR_EPOCHS="$(printf '%q' "${PYR_EPOCHS}")"
+export PYR_ALPHA_POOL="$(printf '%q' "${PYR_ALPHA_POOL}")"
+export PYR_RGB_POOL="$(printf '%q' "${PYR_RGB_POOL}")"
+export PYR_UPSAMPLE="$(printf '%q' "${PYR_UPSAMPLE}")"
+export PYR_ALPHA_UPSAMPLE="$(printf '%q' "${PYR_ALPHA_UPSAMPLE}")"
+export PYR_LOG_STATS="$(printf '%q' "${PYR_LOG_STATS}")"
 export NERFMAE_DDP_USE_ENV=1
 export NERFMAE_DDP_NUM_NODES="$(printf '%q' "${PRETRAIN_NODES}")"
 export NERFMAE_DDP_WORLD_SIZE="$(printf '%q' "${PRETRAIN_WORLD_SIZE}")"
@@ -705,6 +726,45 @@ case "${KIND}:${CONDITION}" in
       PROBE_ALPHA_INPUT=keep \
       PROBE_ALPHA_TARGET=keep \
       PROBE_RGB_LOSS=removed_occupied \
+      PROBE_ALPHA_LOSS=removed \
+      PROBE_RGB_WEIGHT=1.0 \
+      PROBE_ALPHA_WEIGHT=1.0 \
+      bash train_mae3d.sh
+    ;;
+  pyramid:pyramid_alpha|pyramid:pyramid_rgb|pyramid:pyramid_both)
+    pyr_mode="${PYR_MODE:-both}"
+    case "${CONDITION}" in
+      pyramid_alpha)
+        pyr_mode="${PYR_MODE:-alpha}"
+        ;;
+      pyramid_rgb)
+        pyr_mode="${PYR_MODE:-rgb}"
+        ;;
+      pyramid_both)
+        pyr_mode="${PYR_MODE:-both}"
+        ;;
+    esac
+    env "${common_env[@]}" "${resume_env[@]}" \
+      TRAIN_ENTRYPOINT=run_swin_pyramid_mae.py \
+      ROTATE_PROB="${ROTATE_PROB:-1.0}" \
+      FLIP_PROB="${FLIP_PROB:-0.5}" \
+      ROT_SCALE_PROB="${ROT_SCALE_PROB:-0.0}" \
+      COORD_SHIFT_PROB="${COORD_SHIFT_PROB:-1.0}" \
+      COORD_SHIFT_MAX_VOXELS="${COORD_SHIFT_MAX_VOXELS:-8}" \
+      PYR_MODE="${pyr_mode}" \
+      PYR_SCALE="${PYR_SCALE:-2}" \
+      PYR_SCHEDULE="${PYR_SCHEDULE:-cosine}" \
+      PYR_EPOCHS="${PYR_EPOCHS:-${EPOCHS}}" \
+      PYR_ALPHA_POOL="${PYR_ALPHA_POOL:-max}" \
+      PYR_RGB_POOL="${PYR_RGB_POOL:-avg}" \
+      PYR_UPSAMPLE="${PYR_UPSAMPLE:-trilinear}" \
+      PYR_ALPHA_UPSAMPLE="${PYR_ALPHA_UPSAMPLE:-nearest}" \
+      PYR_LOG_STATS="${PYR_LOG_STATS:-1}" \
+      PROBE_MODE=custom \
+      PROBE_RGB_INPUT=keep \
+      PROBE_ALPHA_INPUT=keep \
+      PROBE_ALPHA_TARGET=keep \
+      PROBE_RGB_LOSS=occupied \
       PROBE_ALPHA_LOSS=removed \
       PROBE_RGB_WEIGHT=1.0 \
       PROBE_ALPHA_WEIGHT=1.0 \

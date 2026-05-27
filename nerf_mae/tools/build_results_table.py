@@ -75,6 +75,8 @@ def infer_protocol(pretrain_save_name: str, source: str) -> tuple[str, str]:
         return "16", "ABCI3_1n8g_gb16_det0_surface_maturation_coord_jitter"
     if "abci3input_cj_det0_1n8g" in pretrain_save_name:
         return "16", "ABCI3_1n8g_gb16_det0_input_alpha_coord_jitter"
+    if "abci3pyr_cj_det0_1n8g" in pretrain_save_name:
+        return "16", "ABCI3_1n8g_gb16_det0_pyramid_coord_jitter"
     if "abci3clean" in pretrain_save_name:
         return "", "ABCI3_clean"
     if source == "shortcut_probe_artifacts":
@@ -117,6 +119,38 @@ def infer_surface_env(condition: str) -> dict[str, str]:
                 "SM_K": "20",
                 "SM_W_MIN": "0.05",
                 "SM_INPUT_RGB_CURRICULUM": "cosine_release",
+            }
+        )
+    return fields
+
+
+def infer_pyramid_env(condition: str) -> dict[str, str]:
+    fields = {
+        "PYR_MODE": "",
+        "PYR_SCALE": "",
+        "PYR_SCHEDULE": "",
+        "PYR_EPOCHS": "",
+        "PYR_ALPHA_POOL": "",
+        "PYR_RGB_POOL": "",
+        "PYR_UPSAMPLE": "",
+        "PYR_ALPHA_UPSAMPLE": "",
+    }
+    if condition in {"pyramid_alpha", "pyramid_rgb", "pyramid_both"}:
+        mode = {
+            "pyramid_alpha": "alpha",
+            "pyramid_rgb": "rgb",
+            "pyramid_both": "both",
+        }[condition]
+        fields.update(
+            {
+                "PYR_MODE": mode,
+                "PYR_SCALE": "2",
+                "PYR_SCHEDULE": "cosine",
+                "PYR_EPOCHS": "epoch",
+                "PYR_ALPHA_POOL": "max",
+                "PYR_RGB_POOL": "avg",
+                "PYR_UPSAMPLE": "trilinear",
+                "PYR_ALPHA_UPSAMPLE": "nearest",
             }
         )
     return fields
@@ -193,6 +227,7 @@ def parse_run(root: Path, eval_json: Path, git_hash: str) -> dict[str, str]:
     condition = infer_condition(pretrain_save_name, run_name)
     global_batch, gpu_env = infer_protocol(pretrain_save_name, source)
     surface_env = infer_surface_env(condition)
+    pyramid_env = infer_pyramid_env(condition)
     with eval_json.open() as f:
         data = json.load(f)
 
@@ -218,7 +253,10 @@ def parse_run(root: Path, eval_json: Path, git_hash: str) -> dict[str, str]:
         "source": source,
         "git_hash": git_hash,
     }
+    if pyramid_env.get("PYR_EPOCHS") == "epoch":
+        pyramid_env["PYR_EPOCHS"] = epoch
     row.update(surface_env)
+    row.update(pyramid_env)
     return row
 
 
@@ -273,6 +311,14 @@ def main() -> None:
         "SM_STOP_GATE_GRAD",
         "SM_RGB_MASK",
         "SM_INPUT_RGB_CURRICULUM",
+        "PYR_MODE",
+        "PYR_SCALE",
+        "PYR_SCHEDULE",
+        "PYR_EPOCHS",
+        "PYR_ALPHA_POOL",
+        "PYR_RGB_POOL",
+        "PYR_UPSAMPLE",
+        "PYR_ALPHA_UPSAMPLE",
     ]
     out_csv = args.out_csv if args.out_csv.is_absolute() else root / args.out_csv
     out_csv.parent.mkdir(parents=True, exist_ok=True)

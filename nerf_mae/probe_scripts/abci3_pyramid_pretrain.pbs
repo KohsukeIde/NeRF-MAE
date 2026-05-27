@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+#PBS -q rt_HF
+#PBS -l select=1
+#PBS -l walltime=72:00:00
+#PBS -P gag51404
+#PBS -j oe
+#PBS -N pyr_mae_pretrain
+
+set -euo pipefail
+
+WORK_DIR="${PBS_O_WORKDIR:?PBS_O_WORKDIR is not set}"
+if [[ -d "${WORK_DIR}/nerf_mae" ]]; then
+  ROOT_DIR="${ROOT_DIR:-${WORK_DIR}}"
+else
+  ROOT_DIR="${ROOT_DIR:-$(cd "${WORK_DIR}/.." && pwd)}"
+fi
+
+CONDITION="${CONDITION:-pyramid_both}"
+EPOCHS="${EPOCHS:-${NUM_EPOCHS:-300}}"
+SEED="${SEED:-1}"
+RUN_SUFFIX="${RUN_SUFFIX:-abci3pyr_cj_det0_1n8g}"
+
+case "${CONDITION}" in
+  pyramid_alpha)
+    default_pyr_mode=alpha
+    ;;
+  pyramid_rgb)
+    default_pyr_mode=rgb
+    ;;
+  pyramid_both)
+    default_pyr_mode=both
+    ;;
+  *)
+    echo "[error] unsupported pyramid CONDITION=${CONDITION}" >&2
+    exit 1
+    ;;
+esac
+
+ROOT_DIR="${ROOT_DIR}" \
+KIND=pyramid \
+CONDITION="${CONDITION}" \
+EPOCHS="${EPOCHS}" \
+SEED="${SEED}" \
+RUN_SUFFIX="${RUN_SUFFIX}" \
+PRETRAIN_NODES="${PRETRAIN_NODES:-1}" \
+PRETRAIN_GPU_IDS="${PRETRAIN_GPU_IDS:-${GPUS:-0,1,2,3,4,5,6,7}}" \
+PRETRAIN_BATCH_SIZE_PER_GPU="${PRETRAIN_BATCH_SIZE_PER_GPU:-2}" \
+PRETRAIN_LR="${PRETRAIN_LR:-1e-3}" \
+PRETRAIN_WEIGHT_DECAY="${PRETRAIN_WEIGHT_DECAY:-0.0}" \
+PRETRAIN_EVAL_INTERVAL="${PRETRAIN_EVAL_INTERVAL:-300}" \
+PRETRAIN_CHECKPOINT_INTERVAL="${PRETRAIN_CHECKPOINT_INTERVAL:-10}" \
+PRETRAIN_LOG_INTERVAL="${PRETRAIN_LOG_INTERVAL:-30}" \
+PRETRAIN_DATA_ROOT="${PRETRAIN_DATA_ROOT:-${DATA_ROOT:-${ROOT_DIR}/dataset/pretrain}}" \
+PROBE_ENV_PREFIX="${PROBE_ENV_PREFIX:-${ROOT_DIR}/.venv-abci3}" \
+ABCI3_CUDA_MODULE="${ABCI3_CUDA_MODULE:-cuda/11.8/11.8.0}" \
+USE_WANDB="${USE_WANDB:-0}" \
+WANDB_MODE="${WANDB_MODE:-offline}" \
+DETERMINISTIC="${DETERMINISTIC:-0}" \
+PYR_MODE="${PYR_MODE:-${default_pyr_mode}}" \
+PYR_SCALE="${PYR_SCALE:-2}" \
+PYR_SCHEDULE="${PYR_SCHEDULE:-cosine}" \
+PYR_EPOCHS="${PYR_EPOCHS:-${EPOCHS}}" \
+PYR_ALPHA_POOL="${PYR_ALPHA_POOL:-max}" \
+PYR_RGB_POOL="${PYR_RGB_POOL:-avg}" \
+PYR_UPSAMPLE="${PYR_UPSAMPLE:-trilinear}" \
+PYR_ALPHA_UPSAMPLE="${PYR_ALPHA_UPSAMPLE:-nearest}" \
+PYR_LOG_STATS="${PYR_LOG_STATS:-1}" \
+bash "${ROOT_DIR}/nerf_mae/probe_scripts/abci3_e300_gate_pretrain.pbs"

@@ -53,6 +53,10 @@ case "${KIND}:${CONDITION}" in
     PRETRAIN_SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     VARIANT_NAME="${CONDITION}"
     ;;
+  pyramid:pyramid_alpha|pyramid:pyramid_rgb|pyramid:pyramid_both)
+    PRETRAIN_SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
+    VARIANT_NAME="${CONDITION}"
+    ;;
   *)
     echo "[error] unknown KIND:CONDITION=${KIND}:${CONDITION}" >&2
     exit 1

@@ -2808,3 +2808,75 @@ Decision:
 - Keep `cosine_coord_jitter` as the empirical best path.
 - Do not continue Surface-Maturation unless a very small targeted follow-up is
   needed for the localization-gate story.
+
+## Experiment 37: Scene-Level Pyramid Alpha/RGB Target Curriculum Setup
+
+Snapshot:
+- 2026-05-27 JST
+
+Motivation:
+- The strongest current intervention is still scene-level `cosine_coord_jitter`.
+- Local/channel interventions did not become main-method candidates:
+  D-MAE trails `cosine_coord_jitter`, Surface-Maturation does not improve
+  AP@75/localization, and input-side alpha curriculum is weak.
+- Working hypothesis: preserving scene-level coherence while training from
+  coarse structure to full RGBA fidelity may be more effective than local
+  decoder/gate interventions.
+
+Implemented MVP:
+- Applied `pyramid_mvp_bundle.zip`.
+- Added `nerf_mae/model/mae/pyramid_probe.py`.
+- Added `nerf_mae/run_swin_pyramid_mae.py`.
+- Added `nerf_mae/probe_scripts/abci3_pyramid_pretrain.pbs`.
+- Added `nerf_mae/probe_scripts/submit_pyramid_sweep.sh`.
+- Extended the shared ABCI3 pretrain/FCOS scripts with `KIND=pyramid`.
+- Extended `results_table.csv` builder with `PYR_*` metadata fields.
+
+Important implementation correction:
+- The bundle originally used the pyramid alpha target to build the RGB occupied
+  mask. That would make `P_A` change RGB supervision locations, weakening the
+  intended orthogonal target-only test.
+- The local implementation now builds RGB supervision masks from the original
+  full-resolution alpha target and uses the pyramid target only as the
+  reconstruction target. This keeps:
+  - `pyramid_alpha`: alpha target low-res -> full-res, RGB target/mask full-res
+  - `pyramid_rgb`: RGB target low-res -> full-res, alpha target full-res
+  - `pyramid_both`: alpha and RGB targets low-res -> full-res
+
+Pyramid scout conditions:
+
+| condition | PYR_MODE | meaning |
+|---|---|---|
+| `pyramid_alpha` | `alpha` | alpha target pyramid only |
+| `pyramid_rgb` | `rgb` | RGB target pyramid only |
+| `pyramid_both` | `both` | alpha and RGB target pyramid |
+
+Default protocol:
+- Pretrain: e300, seed1, ABCI3 HF 1 node x 8 GPUs, global batch 16,
+  deterministic off.
+- Augmentation: coord-jitter on, matching `cosine_coord_jitter`
+  (`rotate=1.0`, `flip=0.5`, `coord_shift=1.0`, `coord_shift_max=8`).
+- Pyramid: `scale=2`, cosine transition over 300 epochs, alpha max-pooling,
+  RGB average-pooling, alpha nearest upsampling, RGB trilinear upsampling.
+- FCOS: dependent e1000, finetune seed1, same downstream protocol as the other
+  scouts.
+
+Validation before submit:
+- `python -m py_compile` passed for:
+  - `nerf_mae/model/mae/pyramid_probe.py`
+  - `nerf_mae/run_swin_pyramid_mae.py`
+  - `nerf_mae/tools/build_results_table.py`
+- `bash -n` passed for:
+  - `nerf_mae/probe_scripts/abci3_e300_gate_pretrain.pbs`
+  - `nerf_mae/probe_scripts/abci3_e300_gate_fcos.pbs`
+  - `nerf_mae/probe_scripts/abci3_pyramid_pretrain.pbs`
+  - `nerf_mae/probe_scripts/submit_pyramid_sweep.sh`
+- ABCI3 preflight passed for pretrain/FCOS data and Python imports.
+- `run_swin_pyramid_mae.py` import check passed in `.venv-abci3`.
+
+Decision rule:
+- Tier 1: AP@50 >= `cosine_coord_jitter` and AP@75 improves.
+- Tier 2: AP@50 improves over `cosine_coord_jitter` by >= 0.02 with AP@75
+  roughly unchanged.
+- Tier 3: no AP@50/AP@75 improvement; keep `cosine_coord_jitter` as empirical
+  best and use Pyramid as an ablation.
