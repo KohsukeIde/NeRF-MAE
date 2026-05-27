@@ -2891,3 +2891,17 @@ Submitted jobs:
 
 Submission log:
 - `output/launcher/pyramid_sweep_20260527_220600/submitted.tsv`
+
+Additional Track-0 submissions:
+
+| purpose | condition | pretrain seed | finetune seed | pretrain job | FCOS job | status at submit |
+|---|---|---:|---:|---|---|---|
+| coord-jitter shuffle scout | `shuffle_coord_jitter` | 1 | 1 | `1805494.pbs1` | `1805495.pbs1` | pretrain running, FCOS hold |
+| coord-jitter FT seed | `baseline_coord_jitter` | 1 | 2 | existing | `1805496.pbs1` | FCOS running |
+| coord-jitter FT seed | `baseline_coord_jitter` | 1 | 3 | existing | `1805497.pbs1` | FCOS running |
+| coord-jitter FT seed | `cosine_coord_jitter` | 1 | 2 | existing | `1805498.pbs1` | FCOS running |
+| coord-jitter FT seed | `cosine_coord_jitter` | 1 | 3 | existing | `1805499.pbs1` | FCOS running |
+
+Submission logs:
+- `output/launcher/shuffle_coord_jitter_20260527_2210/submitted.tsv`
+- `output/launcher/coord_jitter_finetune_seeds_20260527_2210/submitted.tsv`
