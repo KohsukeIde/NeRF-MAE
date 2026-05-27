@@ -77,6 +77,8 @@ def infer_protocol(pretrain_save_name: str, source: str) -> tuple[str, str]:
         return "16", "ABCI3_1n8g_gb16_det0_input_alpha_coord_jitter"
     if "abci3pyr_cj_det0_1n8g" in pretrain_save_name:
         return "16", "ABCI3_1n8g_gb16_det0_pyramid_coord_jitter"
+    if "abci3shuf_cj_det0_1n8g" in pretrain_save_name:
+        return "16", "ABCI3_1n8g_gb16_det0_shuffle_coord_jitter"
     if "abci3clean" in pretrain_save_name:
         return "", "ABCI3_clean"
     if source == "shortcut_probe_artifacts":
