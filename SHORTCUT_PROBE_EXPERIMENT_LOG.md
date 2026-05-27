@@ -2725,3 +2725,86 @@ Possible follow-up only if useful:
 - If trying one more Surface-Maturation setting, use a less aggressive gate:
   for example `tau=0.65, k=15, w_min=0.10`, based on the fact that AP@50
   survives at high tau but AP@75 remains below cosine.
+
+## Experiment 36: Surface Tau0p7 Proposal Diagnostic and Gradient Conflict
+
+Snapshot:
+- 2026-05-27 JST
+
+Decision update:
+- Keep only `surface_maturation_tau0p7_k30_w0p05` as the Surface-Maturation
+  diagnostic target.
+- Drop `tau0p5_k20` from further diagnostics despite its high AP@50 because
+  AP@75 is too weak (`0.0519`).
+
+Generated artifacts:
+- `results/shortcut_probe_artifacts/proposal_quality/surface_tau0p7_decision.json`
+- `results/shortcut_probe_artifacts/proposal_quality/surface_tau0p7_decision.md`
+- `results/shortcut_probe_artifacts/proposal_quality/surface_tau0p7_decision.png`
+
+Implementation note:
+- Extended `nerf_rpn/tools/summarize_proposal_quality.py` to report:
+  proposal IoU histogram, score-IoU calibration, AP@50-TP failure at AP@75,
+  and object-size AP@50/AP@75.
+- `baseline_e1200` has `eval.json` only in this checkout. No proposal dump or
+  FCOS checkpoint was found, so proposal-level diagnostics for `baseline_e1200`
+  cannot be regenerated without restoring or rerunning that FCOS checkpoint.
+
+Proposal diagnostic:
+
+| condition | AP@50 | AP@75 | AP75/AP50 | R50@300 | mean IoU | frac IoU>=0.5 | TP50 fail75 | center err >=0.5 | size err >=0.5 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| `baseline_coord_jitter` | 0.5564 | 0.1015 | 0.1824 | 0.6765 | 0.0632 | 0.0180 | 0.6848 | 0.0474 | 0.1816 |
+| `cosine_coord_jitter` | 0.6219 | 0.1031 | 0.1657 | 0.7279 | 0.0635 | 0.0196 | 0.7500 | 0.0498 | 0.1818 |
+| `surface_tau0p7_k30` | 0.5973 | 0.0919 | 0.1539 | 0.7279 | 0.0609 | 0.0194 | 0.6869 | 0.0519 | 0.1775 |
+
+Object-size diagnostic:
+
+| condition | AP50 small | AP50 medium | AP50 large | AP75 small | AP75 medium | AP75 large |
+|---|---:|---:|---:|---:|---:|---:|
+| `baseline_coord_jitter` | 0.2066 | 0.2033 | 0.2453 | 0.0609 | 0.0437 | 0.0323 |
+| `cosine_coord_jitter` | 0.1846 | 0.2943 | 0.2639 | 0.0455 | 0.0795 | 0.0272 |
+| `surface_tau0p7_k30` | 0.1833 | 0.2232 | 0.2656 | 0.0496 | 0.0173 | 0.0527 |
+
+Reading:
+- `surface_tau0p7_k30` matches `cosine_coord_jitter` on R50@300 (`0.7279`)
+  and has nearly the same fraction of top300 proposals with IoU >= 0.5
+  (`0.0194` vs `0.0196`).
+- The AP gap is therefore not explained by missing coarse proposal coverage.
+  It is more likely score ranking / calibration and localization quality.
+- The clearest weakness is medium-object localization: `surface_tau0p7_k30`
+  has AP75-medium `0.0173`, far below `cosine_coord_jitter` `0.0795`.
+- Surface also has slightly worse center error at IoU>=0.5 (`0.0519` vs
+  `0.0498`) but slightly better size error (`0.1775` vs `0.1818`), so the
+  AP@75 drop is not a simple size-regression failure.
+
+Gradient-conflict monitor:
+
+| condition | n | mean cos | median cos | min | max | negative fraction |
+|---|---:|---:|---:|---:|---:|---:|
+| `baseline` | 10 | -0.0199 | -0.0198 | -0.7618 | 0.2863 | 0.6000 |
+| `cosine_coord_jitter` | 10 | -0.0558 | 0.0334 | -0.9177 | 0.5467 | 0.3000 |
+
+Per-epoch means:
+
+| condition | e1 | e2 | e3 | e4 | e5 |
+|---|---:|---:|---:|---:|---:|
+| `baseline` | -0.3969 | 0.1542 | 0.1111 | 0.1146 | -0.0826 |
+| `cosine_coord_jitter` | -0.4559 | -0.0191 | 0.1610 | 0.1177 | -0.0827 |
+
+Reading:
+- The monitor does show strong early alpha/RGB gradient conflict in both
+  settings, especially at epoch 1 iter 20.
+- `cosine_coord_jitter` does not remove the initial conflict in this compressed
+  5-epoch monitor, but it has a lower negative fraction overall (`0.30` vs
+  `0.60`) and a positive median gradient cosine.
+- This supports a cautious motivation: cosine/alpha curriculum appears to
+  reduce or defer alpha/RGB conflict after the earliest phase, but this is not
+  strong enough to claim that conflict mitigation is the only mechanism.
+
+Decision:
+- Use the gradient-conflict result as motivation/diagnostic support for
+  cosine curriculum, not as a standalone proof.
+- Keep `cosine_coord_jitter` as the empirical best path.
+- Do not continue Surface-Maturation unless a very small targeted follow-up is
+  needed for the localization-gate story.
