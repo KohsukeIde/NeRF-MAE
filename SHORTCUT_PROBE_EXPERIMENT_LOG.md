@@ -3115,6 +3115,55 @@ Reading:
   next method. Wait for the Surface+cosine+jitter FCOS result before opening
   another heavy branch.
 
+## Experiment 40: Feature Equivariance Sanity and Robustness Jobs
+
+Snapshot:
+- 2026-05-29 JST
+
+Motivation:
+- The feature equivariance probe is correlational and could still be an
+  alignment/implementation artifact.
+- Before any explicit equivariance regularizer scout, validate the probe itself:
+  identity-transform sanity, same-random-transform sanity, stage resolution
+  metadata, and larger scene/pair robustness.
+
+Implementation update:
+- Extended `feature_equivariance_probe.py` with `--pair-mode`:
+  - `random`: two independently sampled coord-jitter transforms.
+  - `identity`: `T1 == T2 == identity`.
+  - `shared_random`: `T1 == T2 == sampled coord-jitter transform`.
+- Added stage resolution metadata to the JSON/Markdown output:
+  feature shape and input-to-feature stride for each stage.
+- Added explicit scene count and transform-pair count to the report.
+- Added `PAIR_MODE` support to `abci3_feature_equivariance_probe.pbs`.
+
+Validation:
+- `python -m py_compile nerf_mae/tools/feature_equivariance_probe.py`
+- `bash -n nerf_mae/probe_scripts/abci3_feature_equivariance_probe.pbs`
+
+Submitted jobs:
+
+| purpose | job | dependency | output prefix |
+|---|---|---|---|
+| identity sanity | `1807592.pbs1` | none | `identity_feature_equivariance_sanity` |
+| shared-random sanity | `1807593.pbs1` | none | `shared_random_feature_equivariance_sanity` |
+| robustness probe | `1807594.pbs1` | `afterok:1807592.pbs1:1807593.pbs1` | `coord_jitter_feature_equivariance_robust` |
+
+Sanity expectations:
+- `identity` should give near-perfect feature cosine at every stage/region.
+- `shared_random` should also be near-perfect; if not, transform/padding/path
+  handling is suspect.
+- Only if both sanity checks pass should the random-transform robustness result
+  be used to motivate or reject an equivariance regularizer.
+
+Surface+cosine status:
+- `surface_maturation_cosine_coord_jitter_tau0p7_k30_w0p05` pretrain
+  `1807420.pbs1` is still running.
+- At 2026-05-29 early JST, it had produced `epoch_40.pt`; dependent FCOS
+  `1807421.pbs1` remains on hold.
+- Do not submit explicit equivariance regularizer scouts until this FCOS result
+  is known, unless sanity/robustness results create a very strong reason.
+
 Decision rule:
 - If `cosine_coord_jitter_e100` is clearly more transform-aligned than
   `baseline_coord_jitter_e100`, the SECS/equivariance branch becomes plausible.

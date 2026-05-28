@@ -173,6 +173,56 @@ def sample_transform(
     )
 
 
+def identity_transform() -> CoordTransform:
+    return CoordTransform(
+        rotate90=False,
+        flip_x=False,
+        flip_y=False,
+        shift_x=0,
+        shift_y=0,
+    )
+
+
+def sample_transform_pair(
+    rng: random.Random,
+    pair_mode: str,
+    rotate_prob: float,
+    flip_prob: float,
+    coord_shift_prob: float,
+    coord_shift_max_voxels: int,
+) -> Tuple[CoordTransform, CoordTransform]:
+    if pair_mode == "identity":
+        identity = identity_transform()
+        return identity, identity
+    if pair_mode == "shared_random":
+        transform = sample_transform(
+            rng,
+            rotate_prob,
+            flip_prob,
+            coord_shift_prob,
+            coord_shift_max_voxels,
+        )
+        return transform, transform
+    if pair_mode == "random":
+        return (
+            sample_transform(
+                rng,
+                rotate_prob,
+                flip_prob,
+                coord_shift_prob,
+                coord_shift_max_voxels,
+            ),
+            sample_transform(
+                rng,
+                rotate_prob,
+                flip_prob,
+                coord_shift_prob,
+                coord_shift_max_voxels,
+            ),
+        )
+    raise ValueError(f"Unsupported pair_mode={pair_mode!r}")
+
+
 def build_model(resolution: int, device: torch.device) -> SwinTransformer_MAE3D_Probe:
     model = SwinTransformer_MAE3D_Probe(
         patch_size=[4, 4, 4],
@@ -319,13 +369,41 @@ def aggregate_rows(rows: List[Dict[str, object]]) -> List[Dict[str, object]]:
     return summary
 
 
-def write_markdown(path: Path, summary: List[Dict[str, object]], load_reports: Dict[str, object]) -> None:
+def write_markdown(
+    path: Path,
+    summary: List[Dict[str, object]],
+    load_reports: Dict[str, object],
+    config: Dict[str, object],
+    stage_meta: Dict[str, object],
+) -> None:
     lines = [
         "# Feature Equivariance Probe",
         "",
-        "Checkpoint load reports:",
+        "Config:",
         "",
+        f"- pair_mode: `{config.get('pair_mode')}`",
+        f"- scene_count: `{config.get('scene_count')}`",
+        f"- num_pairs_per_scene: `{config.get('num_pairs')}`",
+        f"- transform_pair_count_per_checkpoint: `{config.get('transform_pair_count')}`",
+        f"- stages: `{config.get('stages')}`",
+        f"- max_tokens: `{config.get('max_tokens')}`",
+        "",
+        "Stage resolution metadata:",
+        "",
+        "| stage | feature_shape | stride_xyz |",
+        "|---:|---|---|",
     ]
+    for stage, meta in sorted(stage_meta.items(), key=lambda item: int(item[0])):
+        lines.append(
+            f"| {stage} | `{meta['feature_shape']}` | `{meta['stride_xyz']}` |"
+        )
+    lines.extend(
+        [
+            "",
+            "Checkpoint load reports:",
+            "",
+        ]
+    )
     for label, report in load_reports.items():
         lines.append(
             f"- `{label}`: epoch={report.get('epoch')} missing={len(report.get('missing_keys', []))} "
@@ -353,6 +431,16 @@ def main() -> None:
     parser.add_argument("--split", default="val_scenes")
     parser.add_argument("--max-scenes", type=int, default=8)
     parser.add_argument("--num-pairs", type=int, default=2)
+    parser.add_argument(
+        "--pair-mode",
+        default="random",
+        choices=["random", "identity", "shared_random"],
+        help=(
+            "random compares two independently sampled transforms; identity is "
+            "T1=T2=I for sanity; shared_random is T1=T2=random transform for "
+            "transform-path sanity."
+        ),
+    )
     parser.add_argument("--seed", type=int, default=17)
     parser.add_argument("--resolution", type=int, default=160)
     parser.add_argument("--stages", default="0,1,2,3")
@@ -392,6 +480,7 @@ def main() -> None:
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     rows: List[Dict[str, object]] = []
     load_reports: Dict[str, object] = {}
+    stage_meta: Dict[str, object] = {}
 
     for label, checkpoint_path in checkpoints:
         model = build_model(args.resolution, device)
@@ -405,15 +494,9 @@ def main() -> None:
             full_valid_raw = torch.ones_like(volume_raw[:1])
 
             for pair_idx in range(args.num_pairs):
-                t1 = sample_transform(
+                t1, t2 = sample_transform_pair(
                     rng,
-                    args.rotate_prob,
-                    args.flip_prob,
-                    args.coord_shift_prob,
-                    args.coord_shift_max_voxels,
-                )
-                t2 = sample_transform(
-                    rng,
+                    args.pair_mode,
                     args.rotate_prob,
                     args.flip_prob,
                     args.coord_shift_prob,
@@ -434,6 +517,16 @@ def main() -> None:
                     f1 = inverse_align_feature(feats1[stage], t1, args.resolution)
                     f2 = inverse_align_feature(feats2[stage], t2, args.resolution)
                     spatial = f1.shape[1:4]
+                    stage_key = str(stage)
+                    if stage_key not in stage_meta:
+                        stage_meta[stage_key] = {
+                            "feature_shape": [int(dim) for dim in spatial],
+                            "stride_xyz": [
+                                float(args.resolution) / float(spatial[0]),
+                                float(args.resolution) / float(spatial[1]),
+                                float(args.resolution) / float(spatial[2]),
+                            ],
+                        }
                     valid1 = inverse_align_mask(downsample_like(m1, spatial), t1, args.resolution)
                     valid2 = inverse_align_mask(downsample_like(m2, spatial), t2, args.resolution)
                     valid = (valid1 > 0.5) & (valid2 > 0.5)
@@ -470,13 +563,15 @@ def main() -> None:
     summary = aggregate_rows(rows)
     args.output_json.parent.mkdir(parents=True, exist_ok=True)
     args.output_md.parent.mkdir(parents=True, exist_ok=True)
-    payload = {
-        "config": {
+    config = {
             "data_root": str(args.data_root),
             "split_file": str(split_file),
             "split": args.split,
             "max_scenes": args.max_scenes,
+            "scene_count": len(scenes),
             "num_pairs": args.num_pairs,
+            "pair_mode": args.pair_mode,
+            "transform_pair_count": len(scenes) * args.num_pairs,
             "seed": args.seed,
             "stages": stages,
             "rotate_prob": args.rotate_prob,
@@ -485,13 +580,16 @@ def main() -> None:
             "coord_shift_max_voxels": args.coord_shift_max_voxels,
             "surface_threshold": args.surface_threshold,
             "max_tokens": args.max_tokens,
-        },
+    }
+    payload = {
+        "config": config,
+        "stage_meta": stage_meta,
         "load_reports": load_reports,
         "summary": summary,
         "rows": rows,
     }
     args.output_json.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
-    write_markdown(args.output_md, summary, load_reports)
+    write_markdown(args.output_md, summary, load_reports, config, stage_meta)
     print(f"[info] wrote {args.output_json}")
     print(f"[info] wrote {args.output_md}")
 

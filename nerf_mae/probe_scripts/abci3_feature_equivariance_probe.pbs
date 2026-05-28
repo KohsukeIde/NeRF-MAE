@@ -19,6 +19,7 @@ OUTPUT_PREFIX="${OUTPUT_PREFIX:-coord_jitter_feature_equivariance}"
 
 MAX_SCENES="${MAX_SCENES:-8}"
 NUM_PAIRS="${NUM_PAIRS:-2}"
+PAIR_MODE="${PAIR_MODE:-random}"
 PROBE_SEED="${PROBE_SEED:-17}"
 STAGES="${STAGES:-0,1,2,3}"
 MAX_TOKENS="${MAX_TOKENS:-8192}"
@@ -39,6 +40,7 @@ mkdir -p "${OUTPUT_DIR}"
   --split val_scenes \
   --max-scenes "${MAX_SCENES}" \
   --num-pairs "${NUM_PAIRS}" \
+  --pair-mode "${PAIR_MODE}" \
   --seed "${PROBE_SEED}" \
   --stages "${STAGES}" \
   --max-tokens "${MAX_TOKENS}" \
