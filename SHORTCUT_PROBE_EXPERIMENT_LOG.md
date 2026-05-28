@@ -2874,7 +2874,7 @@ Validation before submit:
 - ABCI3 preflight passed for pretrain/FCOS data and Python imports.
 - `run_swin_pyramid_mae.py` import check passed in `.venv-abci3`.
 
-Decision rule:
+Original Experiment 39 decision rule:
 - Tier 1: AP@50 >= `cosine_coord_jitter` and AP@75 improves.
 - Tier 2: AP@50 improves over `cosine_coord_jitter` by >= 0.02 with AP@75
   roughly unchanged.
@@ -3163,6 +3163,78 @@ Surface+cosine status:
   `1807421.pbs1` remains on hold.
 - Do not submit explicit equivariance regularizer scouts until this FCOS result
   is known, unless sanity/robustness results create a very strong reason.
+
+## Experiment 41: Feature Equivariance Sanity and Robustness Results
+
+Snapshot:
+- 2026-05-29 JST
+
+Completed jobs:
+- `1807592.pbs1`: identity sanity
+- `1807593.pbs1`: shared-random sanity
+- `1807594.pbs1`: robustness probe
+
+Artifacts:
+- `results/shortcut_probe_artifacts/feature_equivariance/identity_feature_equivariance_sanity.{json,md}`
+- `results/shortcut_probe_artifacts/feature_equivariance/shared_random_feature_equivariance_sanity.{json,md}`
+- `results/shortcut_probe_artifacts/feature_equivariance/coord_jitter_feature_equivariance_robust.{json,md}`
+
+Sanity results:
+- `identity`: all checkpoints/stages/regions have cosine `1.0000`, L2 `0.0000`,
+  and CKA `1.0000`.
+- `shared_random`: all checkpoints/stages/regions also have cosine `1.0000`,
+  L2 `0.0000`, and CKA `1.0000`.
+- Stage resolution metadata is correct:
+
+| stage | feature shape | stride |
+|---:|---|---|
+| 0 | `[40, 40, 40]` | `[4.0, 4.0, 4.0]` |
+| 1 | `[20, 20, 20]` | `[8.0, 8.0, 8.0]` |
+| 2 | `[10, 10, 10]` | `[16.0, 16.0, 16.0]` |
+| 3 | `[5, 5, 5]` | `[32.0, 32.0, 32.0]` |
+
+This passes the core implementation sanity checks: same-scene pairing,
+model.eval path, model padding path, stage downsample factors, and same-transform
+alignment are not obviously broken.
+
+Robustness probe:
+- `pair_mode=random`
+- `scene_count=16`
+- `num_pairs_per_scene=3`
+- `transform_pair_count_per_checkpoint=48`
+
+Key robust surface-region metrics:
+
+| label | stage0 cos | stage0 CKA | stage1 cos | stage1 CKA | stage2 cos | stage3 cos |
+|---|---:|---:|---:|---:|---:|---:|
+| `baseline_coord_jitter_e100` | 0.5378 | 0.3174 | 0.6038 | 0.3410 | 0.7010 | 0.6454 |
+| `cosine_coord_jitter_e100` | 0.5682 | 0.3608 | 0.5759 | 0.3792 | 0.6966 | 0.6401 |
+| `baseline_e300` | 0.5122 | 0.2998 | 0.6486 | 0.3526 | 0.7840 | 0.7295 |
+| `cosine_e300` | 0.5922 | 0.4027 | 0.6443 | 0.4324 | 0.8380 | 0.8099 |
+| `shuffle_coord_jitter_e300` | 0.5618 | 0.2414 | 0.6383 | 0.3791 | 0.9090 | 0.8168 |
+
+Reading:
+- The original weak-positive equivariance signal does not become a clean
+  mechanism after increasing scene/pair count.
+- `cosine_coord_jitter_e100` improves stage0 surface cosine/CKA over
+  `baseline_coord_jitter_e100`, but stage1 surface cosine is lower and later
+  stages are essentially tied or slightly worse.
+- `cosine_e300` without coord-jitter is stronger than `cosine_coord_jitter_e100`
+  on several stage/region metrics, so the probe is not isolating coord-jitter
+  equivariance as the cause of transfer.
+- `shuffle_coord_jitter_e300` has very high stage2/3 cosine despite weak
+  downstream AP, which further argues that feature alignment alone is not a
+  sufficient causal explanation.
+
+Decision:
+- The feature equivariance probe is now implementation-sane, but the mechanism
+  evidence is too weak for SECS-MAE to be the next default method.
+- Do not launch explicit equivariance regularizer scouts yet.
+- Wait for `surface_maturation_cosine_coord_jitter_tau0p7_k30_w0p05` FCOS.
+- If Surface+cosine+jitter does not beat `cosine_coord_jitter`, then an early
+  surface equivariance regularizer may still be tried as the final method scout,
+  but it should be framed as a causal test with strict no-go rules, not as a
+  broad new sweep.
 
 Decision rule:
 - If `cosine_coord_jitter_e100` is clearly more transform-aligned than

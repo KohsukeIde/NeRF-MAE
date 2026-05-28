@@ -1,0 +1,6951 @@
+{
+  "config": {
+    "coord_shift_max_voxels": 8,
+    "coord_shift_prob": 1.0,
+    "data_root": "/groups/gag51404/ide/vgi/NeRF-MAE/dataset/pretrain",
+    "flip_prob": 0.5,
+    "max_scenes": 4,
+    "max_tokens": 8192,
+    "num_pairs": 1,
+    "pair_mode": "shared_random",
+    "rotate_prob": 1.0,
+    "scene_count": 4,
+    "seed": 29,
+    "split": "val_scenes",
+    "split_file": "/groups/gag51404/ide/vgi/NeRF-MAE/dataset/pretrain/nerfmae_split.npz",
+    "stages": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "surface_threshold": 0.01,
+    "transform_pair_count": 4
+  },
+  "load_reports": {
+    "baseline_coord_jitter_e100": {
+      "epoch": 100,
+      "missing_keys": [],
+      "path": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_baseline_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0/epoch_100.pt",
+      "unexpected_keys": []
+    },
+    "baseline_e300": {
+      "epoch": 300,
+      "missing_keys": [],
+      "path": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_all_p1.0_e300_seed1/epoch_300.pt",
+      "unexpected_keys": []
+    },
+    "cosine_coord_jitter_e100": {
+      "epoch": 100,
+      "missing_keys": [],
+      "path": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_cosine_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0/epoch_100.pt",
+      "unexpected_keys": []
+    },
+    "cosine_e300": {
+      "epoch": 300,
+      "missing_keys": [],
+      "path": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1/epoch_300.pt",
+      "unexpected_keys": []
+    },
+    "shuffle_coord_jitter_e300": {
+      "epoch": 300,
+      "missing_keys": [],
+      "path": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_shuffle_coord_jitter_p1.0_e300_seed1_abci3shuf_cj_det0_1n8g/epoch_300.pt",
+      "unexpected_keys": []
+    }
+  },
+  "rows": [
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 25272.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 4540.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 20732.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 3348.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 727.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 2621.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 420.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 110.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 310.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 45.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 15.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 30.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 3,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 2520.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 2520.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 240.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 240.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 17328.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 5861.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 11467.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 2280.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 1035.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 1245.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 294.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 188.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 106.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 30.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 23.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 7.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -6,
+        "shift_y": -7
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 42160.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 11833.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 30327.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 5100.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 1827.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 3273.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 720.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 407.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 313.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 80.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 61.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 19.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 22572.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 10137.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 12435.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 2926.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 1592.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 1334.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 408.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 295.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 113.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 45.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 6
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 2880.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 2880.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 400.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 400.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 18720.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 1698.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 17022.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 2400.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 223.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 2177.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 300.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 57.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 243.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 42.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 12.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 30.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -3,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 43400.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 13819.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 29581.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 5440.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 2101.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 3339.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 720.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 407.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 313.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 80.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 61.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 19.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": -1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 23598.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 4633.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 18965.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 2926.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 712.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 2214.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 413.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 103.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 310.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 45.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 15.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 30.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -5
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 2520.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 2520.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 320.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 320.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 19656.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 7584.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 12072.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 2400.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 1154.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 1246.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 300.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 194.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 106.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 45.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 38.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 7.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -1,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 42160.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 12819.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 29341.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 5440.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 2101.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 3339.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 720.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 407.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 313.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 80.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 61.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 19.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -4,
+        "shift_y": 2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 25272.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 4540.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 20732.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 3192.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 671.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 2521.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 420.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 110.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 310.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 45.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 15.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 30.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -5,
+        "shift_y": 1
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 2240.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 2240.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 320.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 320.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 17784.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 6168.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 11616.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 2160.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 923.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 1237.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 300.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 194.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 106.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 30.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 23.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 7.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -8,
+        "shift_y": -3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 43520.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 19971.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 23549.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 5440.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 2978.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 2462.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 720.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 511.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 209.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 80.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 70.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 10.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": -2,
+        "shift_y": -2
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 22572.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 4633.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 17939.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 2926.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 712.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 2214.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 350.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 59.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 291.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 45.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 15.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 30.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": 6,
+        "shift_y": -8
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 2560.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 1068.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 1492.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 240.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 124.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 116.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 31.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 9.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 5,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 17784.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 1698.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 16086.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 2388.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 444.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 1944.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 300.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 57.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 243.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 30.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 30.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": true,
+        "rotate90": true,
+        "shift_x": -7,
+        "shift_y": 3
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 42160.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 18706.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 23454.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 5100.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 2682.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 2418.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 640.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 431.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 209.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 80.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 70.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 10.0,
+      "transform1": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      },
+      "transform2": {
+        "flip_x": true,
+        "flip_y": false,
+        "rotate90": true,
+        "shift_x": 4,
+        "shift_y": -4
+      }
+    }
+  ],
+  "stage_meta": {
+    "0": {
+      "feature_shape": [
+        40,
+        40,
+        40
+      ],
+      "stride_xyz": [
+        4.0,
+        4.0,
+        4.0
+      ]
+    },
+    "1": {
+      "feature_shape": [
+        20,
+        20,
+        20
+      ],
+      "stride_xyz": [
+        8.0,
+        8.0,
+        8.0
+      ]
+    },
+    "2": {
+      "feature_shape": [
+        10,
+        10,
+        10
+      ],
+      "stride_xyz": [
+        16.0,
+        16.0,
+        16.0
+      ]
+    },
+    "3": {
+      "feature_shape": [
+        5,
+        5,
+        5
+      ],
+      "stride_xyz": [
+        32.0,
+        32.0,
+        32.0
+      ]
+    }
+  },
+  "summary": [
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "all",
+      "stage": 0,
+      "tokens_mean": 21983.5,
+      "tokens_std": 16267.993637815329
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "empty",
+      "stage": 0,
+      "tokens_mean": 15724.5,
+      "tokens_std": 11307.954265324328
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.999999980131785,
+      "cosine_std": 3.44127577060238e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "surface",
+      "stage": 0,
+      "tokens_mean": 6259.0,
+      "tokens_std": 5373.02466028214
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "all",
+      "stage": 1,
+      "tokens_mean": 2771.5,
+      "tokens_std": 2104.964528600581
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "empty",
+      "stage": 1,
+      "tokens_mean": 1779.75,
+      "tokens_std": 1295.5813045373366
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "surface",
+      "stage": 1,
+      "tokens_mean": 991.75,
+      "tokens_std": 879.126223398362
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "all",
+      "stage": 2,
+      "tokens_mean": 368.25,
+      "tokens_std": 281.74264261319524
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "empty",
+      "stage": 2,
+      "tokens_mean": 192.25,
+      "tokens_std": 140.31482459098896
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.999999980131785,
+      "cosine_std": 3.44127577060238e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "surface",
+      "stage": 2,
+      "tokens_mean": 176.0,
+      "tokens_std": 173.1954579850946
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "all",
+      "stage": 3,
+      "tokens_mean": 43.75,
+      "tokens_std": 30.652623596249203
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "empty",
+      "stage": 3,
+      "tokens_mean": 15.25,
+      "tokens_std": 11.615363389350618
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.999999980131785,
+      "cosine_std": 3.44127577060238e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "surface",
+      "stage": 3,
+      "tokens_mean": 28.5,
+      "tokens_std": 26.714540360385516
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 0,
+      "tokens_mean": 21820.0,
+      "tokens_std": 16515.64882164791
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 0,
+      "tokens_mean": 16261.5,
+      "tokens_std": 11967.173336534683
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 0,
+      "tokens_mean": 5558.5,
+      "tokens_std": 4878.357681296716
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 1,
+      "tokens_mean": 2742.0,
+      "tokens_std": 2033.1296072803623
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 1,
+      "tokens_mean": 1844.75,
+      "tokens_std": 1363.498533185863
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 1,
+      "tokens_mean": 897.25,
+      "tokens_std": 756.626889556537
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 2,
+      "tokens_mean": 368.5,
+      "tokens_std": 282.64642223102703
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 2,
+      "tokens_mean": 192.25,
+      "tokens_std": 140.31482459098896
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999602635702,
+      "cosine_std": 3.44127577060238e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 2,
+      "tokens_mean": 176.25,
+      "tokens_std": 172.08210249761595
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 3,
+      "tokens_mean": 40.0,
+      "tokens_std": 31.3581462037113
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 3,
+      "tokens_mean": 15.25,
+      "tokens_std": 11.615363389350618
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.999999980131785,
+      "cosine_std": 3.44127577060238e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 3,
+      "tokens_mean": 24.75,
+      "tokens_std": 25.979158313283875
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "all",
+      "stage": 0,
+      "tokens_mean": 22204.0,
+      "tokens_std": 17145.28288869371
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "empty",
+      "stage": 0,
+      "tokens_mean": 14534.25,
+      "tokens_std": 9649.569744294302
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "surface",
+      "stage": 0,
+      "tokens_mean": 7669.75,
+      "tokens_std": 8606.129690517102
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "all",
+      "stage": 1,
+      "tokens_mean": 2778.0,
+      "tokens_std": 2135.5192967207454
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "empty",
+      "stage": 1,
+      "tokens_mean": 1635.0,
+      "tokens_std": 1057.7576912191814
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "surface",
+      "stage": 1,
+      "tokens_mean": 1143.0,
+      "tokens_std": 1283.8559109183554
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "all",
+      "stage": 2,
+      "tokens_mean": 370.0,
+      "tokens_std": 282.1347195933177
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "empty",
+      "stage": 2,
+      "tokens_mean": 166.25,
+      "tokens_std": 118.40713660924328
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999602635702,
+      "cosine_std": 3.44127577060238e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "surface",
+      "stage": 2,
+      "tokens_mean": 203.75,
+      "tokens_std": 219.69732967577613
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "all",
+      "stage": 3,
+      "tokens_mean": 40.0,
+      "tokens_std": 31.3581462037113
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "empty",
+      "stage": 3,
+      "tokens_mean": 13.0,
+      "tokens_std": 11.51810169544733
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "surface",
+      "stage": 3,
+      "tokens_mean": 27.0,
+      "tokens_std": 30.21037349432586
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 0,
+      "tokens_mean": 21893.0,
+      "tokens_std": 16679.07059760825
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 0,
+      "tokens_mean": 15479.5,
+      "tokens_std": 11094.262616325612
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 0,
+      "tokens_mean": 6413.5,
+      "tokens_std": 6635.128860843623
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 1,
+      "tokens_mean": 2791.5,
+      "tokens_std": 2074.060992352925
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 1,
+      "tokens_mean": 1812.5,
+      "tokens_std": 1249.9574659430084
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 1,
+      "tokens_mean": 979.0,
+      "tokens_std": 1027.0718897266474
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 2,
+      "tokens_mean": 367.0,
+      "tokens_std": 281.4888985377576
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 2,
+      "tokens_mean": 177.25,
+      "tokens_std": 123.44600709081953
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 2,
+      "tokens_mean": 189.75,
+      "tokens_std": 193.1344523037427
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 3,
+      "tokens_mean": 43.0,
+      "tokens_std": 30.648545370593585
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 3,
+      "tokens_mean": 14.75,
+      "tokens_std": 12.120918557051139
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.999999980131785,
+      "cosine_std": 3.44127577060238e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 3,
+      "tokens_mean": 28.25,
+      "tokens_std": 27.524231748285608
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 0,
+      "tokens_mean": 21269.0,
+      "tokens_std": 16333.029888337722
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 0,
+      "tokens_mean": 14742.75,
+      "tokens_std": 9371.740975756142
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 0,
+      "tokens_mean": 6526.25,
+      "tokens_std": 8267.10744960614
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 1,
+      "tokens_mean": 2663.5,
+      "tokens_std": 1996.2206791835415
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 1,
+      "tokens_mean": 1673.0,
+      "tokens_std": 1055.9981060589078
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 1,
+      "tokens_mean": 990.5,
+      "tokens_std": 1152.9988435958353
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 2,
+      "tokens_mean": 332.5,
+      "tokens_std": 245.95053703268604
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999701976776,
+      "cosine_std": 3.4412757706023796e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 2,
+      "tokens_mean": 188.0,
+      "tokens_std": 123.98386991863094
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 2,
+      "tokens_mean": 144.5,
+      "tokens_std": 191.4253553390111
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 3,
+      "tokens_mean": 40.0,
+      "tokens_std": 31.3581462037113
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 3,
+      "tokens_mean": 17.5,
+      "tokens_std": 15.0
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 3,
+      "tokens_mean": 22.5,
+      "tokens_std": 32.274861218395145
+    }
+  ]
+}

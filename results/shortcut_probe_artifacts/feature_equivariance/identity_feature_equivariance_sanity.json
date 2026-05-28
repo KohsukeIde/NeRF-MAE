@@ -1,0 +1,6951 @@
+{
+  "config": {
+    "coord_shift_max_voxels": 8,
+    "coord_shift_prob": 1.0,
+    "data_root": "/groups/gag51404/ide/vgi/NeRF-MAE/dataset/pretrain",
+    "flip_prob": 0.5,
+    "max_scenes": 4,
+    "max_tokens": 8192,
+    "num_pairs": 1,
+    "pair_mode": "identity",
+    "rotate_prob": 1.0,
+    "scene_count": 4,
+    "seed": 23,
+    "split": "val_scenes",
+    "split_file": "/groups/gag51404/ide/vgi/NeRF-MAE/dataset/pretrain/nerfmae_split.npz",
+    "stages": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "surface_threshold": 0.01,
+    "transform_pair_count": 4
+  },
+  "load_reports": {
+    "baseline_coord_jitter_e100": {
+      "epoch": 100,
+      "missing_keys": [],
+      "path": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_baseline_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0/epoch_100.pt",
+      "unexpected_keys": []
+    },
+    "baseline_e300": {
+      "epoch": 300,
+      "missing_keys": [],
+      "path": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_all_p1.0_e300_seed1/epoch_300.pt",
+      "unexpected_keys": []
+    },
+    "cosine_coord_jitter_e100": {
+      "epoch": 100,
+      "missing_keys": [],
+      "path": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_cosine_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0/epoch_100.pt",
+      "unexpected_keys": []
+    },
+    "cosine_e300": {
+      "epoch": 300,
+      "missing_keys": [],
+      "path": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1/epoch_300.pt",
+      "unexpected_keys": []
+    },
+    "shuffle_coord_jitter_e300": {
+      "epoch": 300,
+      "missing_keys": [],
+      "path": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_shuffle_coord_jitter_p1.0_e300_seed1_abci3shuf_cj_det0_1n8g/epoch_300.pt",
+      "unexpected_keys": []
+    }
+  },
+  "rows": [
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 25920.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 12396.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 13524.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 3360.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 1950.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 1410.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 420.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 297.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 123.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 45.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 3240.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 1421.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 1819.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 400.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 246.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 154.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 31.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 9.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 20160.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 7982.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 12178.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 2400.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 1154.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 1246.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 300.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 194.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 106.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 45.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 38.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 7.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 44800.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 21220.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 23580.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 5440.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 2978.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 2462.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 720.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 511.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 209.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 80.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 70.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 10.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 25920.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 12396.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 13524.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 3360.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 1950.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 1410.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 420.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 297.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 123.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 45.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 3240.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 1421.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 1819.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 400.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 246.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 154.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 31.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 9.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 20160.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 7982.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 12178.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 2400.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 1154.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 1246.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 300.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 194.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 106.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 45.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 38.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 7.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 44800.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 21220.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 23580.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 5440.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 2978.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 2462.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 720.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 511.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 209.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 80.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 70.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 10.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 25920.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 12396.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 13524.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 3360.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 1950.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 1410.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 420.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 297.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 123.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 45.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 3240.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 1421.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 1819.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 400.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 246.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 154.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 31.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 9.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 20160.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 7982.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 12178.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 2400.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 1154.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 1246.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 300.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 194.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 106.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 45.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 38.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 7.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 44800.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 21220.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 23580.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 5440.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 2978.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 2462.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 720.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 511.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 209.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 80.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 70.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 10.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 25920.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 12396.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 13524.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 3360.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 1950.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 1410.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 420.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 297.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 123.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 45.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 3240.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 1421.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 1819.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 400.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 246.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 154.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 31.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 9.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 20160.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 7982.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 12178.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 2400.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 1154.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 1246.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 300.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 194.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 106.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 45.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 38.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 7.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 44800.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 21220.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 23580.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 5440.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 2978.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 2462.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 720.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 511.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 209.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 80.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 70.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 10.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 25920.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 12396.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 0,
+      "tokens": 13524.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 3360.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 1950.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 1,
+      "tokens": 1410.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 420.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 297.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 2,
+      "tokens": 123.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 45.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_3194_00",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 3240.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 1421.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 0,
+      "tokens": 1819.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 400.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 246.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 1,
+      "tokens": 154.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 40.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 31.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 2,
+      "tokens": 9.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 5.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": NaN,
+      "cosine": NaN,
+      "l2": NaN,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "ai_041_002",
+      "stage": 3,
+      "tokens": 0.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 20160.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 7982.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 0,
+      "tokens": 12178.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 2400.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 1154.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 1,
+      "tokens": 1246.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 300.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 194.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 2,
+      "tokens": 106.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 45.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 38.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2690_02",
+      "stage": 3,
+      "tokens": 7.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 44800.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 21220.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 0,
+      "tokens": 23580.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 5440.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 2978.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 1,
+      "tokens": 2462.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 720.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 511.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 0.9999999403953552,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 2,
+      "tokens": 209.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "all",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 80.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "surface",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 70.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    },
+    {
+      "cka": 1.0,
+      "cosine": 1.0,
+      "l2": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "pair": 0,
+      "region": "empty",
+      "scene": "3dfront_2936_01",
+      "stage": 3,
+      "tokens": 10.0,
+      "transform1": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      },
+      "transform2": {
+        "flip_x": false,
+        "flip_y": false,
+        "rotate90": false,
+        "shift_x": 0,
+        "shift_y": 0
+      }
+    }
+  ],
+  "stage_meta": {
+    "0": {
+      "feature_shape": [
+        40,
+        40,
+        40
+      ],
+      "stride_xyz": [
+        4.0,
+        4.0,
+        4.0
+      ]
+    },
+    "1": {
+      "feature_shape": [
+        20,
+        20,
+        20
+      ],
+      "stride_xyz": [
+        8.0,
+        8.0,
+        8.0
+      ]
+    },
+    "2": {
+      "feature_shape": [
+        10,
+        10,
+        10
+      ],
+      "stride_xyz": [
+        16.0,
+        16.0,
+        16.0
+      ]
+    },
+    "3": {
+      "feature_shape": [
+        5,
+        5,
+        5
+      ],
+      "stride_xyz": [
+        32.0,
+        32.0,
+        32.0
+      ]
+    }
+  },
+  "summary": [
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "all",
+      "stage": 0,
+      "tokens_mean": 23530.0,
+      "tokens_std": 17138.319637584078
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "empty",
+      "stage": 0,
+      "tokens_mean": 12775.25,
+      "tokens_std": 8901.29898292004
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "surface",
+      "stage": 0,
+      "tokens_mean": 10754.75,
+      "tokens_std": 8307.0690930476
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "all",
+      "stage": 1,
+      "tokens_mean": 2900.0,
+      "tokens_std": 2094.691703648375
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "empty",
+      "stage": 1,
+      "tokens_mean": 1318.0,
+      "tokens_std": 944.6833684715036
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999701976776,
+      "cosine_std": 3.4412757706023796e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "surface",
+      "stage": 1,
+      "tokens_mean": 1582.0,
+      "tokens_std": 1162.22774589722
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "all",
+      "stage": 2,
+      "tokens_mean": 370.0,
+      "tokens_std": 282.1347195933177
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999701976776,
+      "cosine_std": 3.4412757706023796e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "empty",
+      "stage": 2,
+      "tokens_mean": 111.75,
+      "tokens_std": 82.0055892404089
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "surface",
+      "stage": 2,
+      "tokens_mean": 258.25,
+      "tokens_std": 200.9599877255835
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "all",
+      "stage": 3,
+      "tokens_mean": 43.75,
+      "tokens_std": 30.652623596249203
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.999999980131785,
+      "cosine_std": 3.44127577060238e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "empty",
+      "stage": 3,
+      "tokens_mean": 5.5,
+      "tokens_std": 4.203173404306164
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_coord_jitter_e100",
+      "n": 4,
+      "region": "surface",
+      "stage": 3,
+      "tokens_mean": 38.25,
+      "tokens_std": 26.562818625539975
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 0,
+      "tokens_mean": 23530.0,
+      "tokens_std": 17138.319637584078
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 0,
+      "tokens_mean": 12775.25,
+      "tokens_std": 8901.29898292004
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 0,
+      "tokens_mean": 10754.75,
+      "tokens_std": 8307.0690930476
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 1,
+      "tokens_mean": 2900.0,
+      "tokens_std": 2094.691703648375
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 1,
+      "tokens_mean": 1318.0,
+      "tokens_std": 944.6833684715036
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999701976776,
+      "cosine_std": 3.4412757706023796e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 1,
+      "tokens_mean": 1582.0,
+      "tokens_std": 1162.22774589722
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 2,
+      "tokens_mean": 370.0,
+      "tokens_std": 282.1347195933177
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999701976776,
+      "cosine_std": 3.4412757706023796e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 2,
+      "tokens_mean": 111.75,
+      "tokens_std": 82.0055892404089
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 2,
+      "tokens_mean": 258.25,
+      "tokens_std": 200.9599877255835
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 3,
+      "tokens_mean": 43.75,
+      "tokens_std": 30.652623596249203
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 3,
+      "tokens_mean": 5.5,
+      "tokens_std": 4.203173404306164
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "baseline_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 3,
+      "tokens_mean": 38.25,
+      "tokens_std": 26.562818625539975
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "all",
+      "stage": 0,
+      "tokens_mean": 23530.0,
+      "tokens_std": 17138.319637584078
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "empty",
+      "stage": 0,
+      "tokens_mean": 12775.25,
+      "tokens_std": 8901.29898292004
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "surface",
+      "stage": 0,
+      "tokens_mean": 10754.75,
+      "tokens_std": 8307.0690930476
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "all",
+      "stage": 1,
+      "tokens_mean": 2900.0,
+      "tokens_std": 2094.691703648375
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "empty",
+      "stage": 1,
+      "tokens_mean": 1318.0,
+      "tokens_std": 944.6833684715036
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999701976776,
+      "cosine_std": 3.4412757706023796e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "surface",
+      "stage": 1,
+      "tokens_mean": 1582.0,
+      "tokens_std": 1162.22774589722
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "all",
+      "stage": 2,
+      "tokens_mean": 370.0,
+      "tokens_std": 282.1347195933177
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999701976776,
+      "cosine_std": 3.4412757706023796e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "empty",
+      "stage": 2,
+      "tokens_mean": 111.75,
+      "tokens_std": 82.0055892404089
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "surface",
+      "stage": 2,
+      "tokens_mean": 258.25,
+      "tokens_std": 200.9599877255835
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "all",
+      "stage": 3,
+      "tokens_mean": 43.75,
+      "tokens_std": 30.652623596249203
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "empty",
+      "stage": 3,
+      "tokens_mean": 5.5,
+      "tokens_std": 4.203173404306164
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_coord_jitter_e100",
+      "n": 4,
+      "region": "surface",
+      "stage": 3,
+      "tokens_mean": 38.25,
+      "tokens_std": 26.562818625539975
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 0,
+      "tokens_mean": 23530.0,
+      "tokens_std": 17138.319637584078
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 0,
+      "tokens_mean": 12775.25,
+      "tokens_std": 8901.29898292004
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 0,
+      "tokens_mean": 10754.75,
+      "tokens_std": 8307.0690930476
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 1,
+      "tokens_mean": 2900.0,
+      "tokens_std": 2094.691703648375
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 1,
+      "tokens_mean": 1318.0,
+      "tokens_std": 944.6833684715036
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999701976776,
+      "cosine_std": 3.4412757706023796e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 1,
+      "tokens_mean": 1582.0,
+      "tokens_std": 1162.22774589722
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 2,
+      "tokens_mean": 370.0,
+      "tokens_std": 282.1347195933177
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999701976776,
+      "cosine_std": 3.4412757706023796e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 2,
+      "tokens_mean": 111.75,
+      "tokens_std": 82.0055892404089
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 2,
+      "tokens_mean": 258.25,
+      "tokens_std": 200.9599877255835
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 3,
+      "tokens_mean": 43.75,
+      "tokens_std": 30.652623596249203
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 3,
+      "tokens_mean": 5.5,
+      "tokens_std": 4.203173404306164
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "cosine_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 3,
+      "tokens_mean": 38.25,
+      "tokens_std": 26.562818625539975
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 0,
+      "tokens_mean": 23530.0,
+      "tokens_std": 17138.319637584078
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 0,
+      "tokens_mean": 12775.25,
+      "tokens_std": 8901.29898292004
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 0,
+      "tokens_mean": 10754.75,
+      "tokens_std": 8307.0690930476
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 1,
+      "tokens_mean": 2900.0,
+      "tokens_std": 2094.691703648375
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 1,
+      "tokens_mean": 1318.0,
+      "tokens_std": 944.6833684715036
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999701976776,
+      "cosine_std": 3.4412757706023796e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 1,
+      "tokens_mean": 1582.0,
+      "tokens_std": 1162.22774589722
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 2,
+      "tokens_mean": 370.0,
+      "tokens_std": 282.1347195933177
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999701976776,
+      "cosine_std": 3.4412757706023796e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 2,
+      "tokens_mean": 111.75,
+      "tokens_std": 82.0055892404089
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 0.9999999850988388,
+      "cosine_std": 2.9802322387695312e-08,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 2,
+      "tokens_mean": 258.25,
+      "tokens_std": 200.9599877255835
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "all",
+      "stage": 3,
+      "tokens_mean": 43.75,
+      "tokens_std": 30.652623596249203
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "empty",
+      "stage": 3,
+      "tokens_mean": 5.5,
+      "tokens_std": 4.203173404306164
+    },
+    {
+      "cka_mean": 1.0,
+      "cka_std": 0.0,
+      "cosine_mean": 1.0,
+      "cosine_std": 0.0,
+      "l2_mean": 0.0,
+      "l2_std": 0.0,
+      "label": "shuffle_coord_jitter_e300",
+      "n": 4,
+      "region": "surface",
+      "stage": 3,
+      "tokens_mean": 38.25,
+      "tokens_std": 26.562818625539975
+    }
+  ]
+}
