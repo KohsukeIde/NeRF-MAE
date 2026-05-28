@@ -181,7 +181,7 @@ case "${KIND}:${CONDITION}" in
   diagnostic:alpha_target_only|diagnostic:alpha_target_only_no_pos|diagnostic:alpha_target_only_coord_jitter|diagnostic:baseline_no_pos|diagnostic:baseline_coord_jitter|diagnostic:cosine_no_pos|diagnostic:cosine_coord_jitter|diagnostic:shuffle_coord_jitter|diagnostic:dmae_target_alpha_gated_rgb|diagnostic:dmae_hier_concat|diagnostic:dmae_hier_concat_coord_jitter|diagnostic:dmae_hier_film)
     SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
-  surface_maturation:surface_maturation_tau0p3_k10_w0p05|surface_maturation:surface_maturation_tau0p5_k20_w0p05|surface_maturation:surface_maturation_tau0p7_k30_w0p05|surface_maturation:input_alpha_curriculum)
+  surface_maturation:surface_maturation_tau0p3_k10_w0p05|surface_maturation:surface_maturation_tau0p5_k20_w0p05|surface_maturation:surface_maturation_tau0p7_k30_w0p05|surface_maturation:surface_maturation_cosine_coord_jitter_tau0p7_k30_w0p05|surface_maturation:input_alpha_curriculum)
     SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
   pyramid:pyramid_alpha|pyramid:pyramid_rgb|pyramid:pyramid_both)
@@ -668,7 +668,7 @@ case "${KIND}:${CONDITION}" in
       PROBE_DECOMP_MODE="${decomp_mode}" \
       bash train_mae3d.sh
     ;;
-  surface_maturation:surface_maturation_tau0p3_k10_w0p05|surface_maturation:surface_maturation_tau0p5_k20_w0p05|surface_maturation:surface_maturation_tau0p7_k30_w0p05|surface_maturation:input_alpha_curriculum)
+  surface_maturation:surface_maturation_tau0p3_k10_w0p05|surface_maturation:surface_maturation_tau0p5_k20_w0p05|surface_maturation:surface_maturation_tau0p7_k30_w0p05|surface_maturation:surface_maturation_cosine_coord_jitter_tau0p7_k30_w0p05|surface_maturation:input_alpha_curriculum)
     sm_tau="${SM_TAU:-0.5}"
     sm_k="${SM_K:-20}"
     sm_w_min="${SM_W_MIN:-0.05}"
@@ -688,6 +688,11 @@ case "${KIND}:${CONDITION}" in
         sm_w_min="${SM_W_MIN:-0.05}"
         ;;
       surface_maturation_tau0p7_k30_w0p05)
+        sm_tau="${SM_TAU:-0.7}"
+        sm_k="${SM_K:-30}"
+        sm_w_min="${SM_W_MIN:-0.05}"
+        ;;
+      surface_maturation_cosine_coord_jitter_tau0p7_k30_w0p05)
         sm_tau="${SM_TAU:-0.7}"
         sm_k="${SM_K:-30}"
         sm_w_min="${SM_W_MIN:-0.05}"
@@ -729,6 +734,11 @@ case "${KIND}:${CONDITION}" in
       PROBE_ALPHA_LOSS=removed \
       PROBE_RGB_WEIGHT=1.0 \
       PROBE_ALPHA_WEIGHT=1.0 \
+      PROBE_CURRICULUM="$([[ "${CONDITION}" == "surface_maturation_cosine_coord_jitter_tau0p7_k30_w0p05" ]] && printf cosine_rgb_ramp || printf none)" \
+      PROBE_CURRICULUM_EPOCHS="${EPOCHS}" \
+      PROBE_CURRICULUM_RGB_START_WEIGHT="$([[ "${CONDITION}" == "surface_maturation_cosine_coord_jitter_tau0p7_k30_w0p05" ]] && printf 0.0 || printf 1.0)" \
+      PROBE_CURRICULUM_RGB_END_WEIGHT=1.0 \
+      PROBE_CURRICULUM_ALPHA_WEIGHT=1.0 \
       bash train_mae3d.sh
     ;;
   pyramid:pyramid_alpha|pyramid:pyramid_rgb|pyramid:pyramid_both)

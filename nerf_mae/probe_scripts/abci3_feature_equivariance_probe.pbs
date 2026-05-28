@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+#PBS -q rt_HG
+#PBS -l select=1
+#PBS -l walltime=06:00:00
+#PBS -P gag51404
+#PBS -j oe
+#PBS -N feat_eq_probe
+
+set -euo pipefail
+
+cd "${PBS_O_WORKDIR:?PBS_O_WORKDIR is not set}"
+
+ROOT_DIR="${ROOT_DIR:-${PBS_O_WORKDIR}}"
+PROBE_ENV_PREFIX="${PROBE_ENV_PREFIX:-${ROOT_DIR}/.venv-abci3}"
+ABCI3_CUDA_MODULE="${ABCI3_CUDA_MODULE:-cuda/11.8/11.8.0}"
+DATA_ROOT="${DATA_ROOT:-${ROOT_DIR}/dataset/pretrain}"
+OUTPUT_DIR="${OUTPUT_DIR:-${ROOT_DIR}/results/shortcut_probe_artifacts/feature_equivariance}"
+OUTPUT_PREFIX="${OUTPUT_PREFIX:-coord_jitter_feature_equivariance}"
+
+MAX_SCENES="${MAX_SCENES:-8}"
+NUM_PAIRS="${NUM_PAIRS:-2}"
+PROBE_SEED="${PROBE_SEED:-17}"
+STAGES="${STAGES:-0,1,2,3}"
+MAX_TOKENS="${MAX_TOKENS:-8192}"
+DEVICE="${DEVICE:-cuda:0}"
+
+source /etc/profile.d/modules.sh
+module load "${ABCI3_CUDA_MODULE}"
+
+export PYTHONPATH="${ROOT_DIR}"
+export PATH="${PROBE_ENV_PREFIX}/bin:${PATH}"
+export LD_LIBRARY_PATH="${PROBE_ENV_PREFIX}/lib/python3.11/site-packages/torch/lib:${LD_LIBRARY_PATH:-}"
+export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
+
+mkdir -p "${OUTPUT_DIR}"
+
+"${PROBE_ENV_PREFIX}/bin/python" "${ROOT_DIR}/nerf_mae/tools/feature_equivariance_probe.py" \
+  --data-root "${DATA_ROOT}" \
+  --split val_scenes \
+  --max-scenes "${MAX_SCENES}" \
+  --num-pairs "${NUM_PAIRS}" \
+  --seed "${PROBE_SEED}" \
+  --stages "${STAGES}" \
+  --max-tokens "${MAX_TOKENS}" \
+  --device "${DEVICE}" \
+  --output-json "${OUTPUT_DIR}/${OUTPUT_PREFIX}.json" \
+  --output-md "${OUTPUT_DIR}/${OUTPUT_PREFIX}.md" \
+  --checkpoint "baseline_e300=${ROOT_DIR}/output/nerf_mae/results/nerfmae_all_p1.0_e300_seed1_abci3clean/epoch_300.pt" \
+  --checkpoint "cosine_e300=${ROOT_DIR}/output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1_abci3clean/epoch_300.pt" \
+  --checkpoint "baseline_coord_jitter_e100=${ROOT_DIR}/output/nerf_mae/results/nerfmae_baseline_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0/epoch_100.pt" \
+  --checkpoint "cosine_coord_jitter_e100=${ROOT_DIR}/output/nerf_mae/results/nerfmae_cosine_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0/epoch_100.pt" \
+  --checkpoint "shuffle_coord_jitter_e300=${ROOT_DIR}/output/nerf_mae/results/nerfmae_shuffle_coord_jitter_p1.0_e300_seed1_abci3shuf_cj_det0_1n8g/epoch_300.pt"
+
+echo "[info] feature equivariance probe complete output_dir=${OUTPUT_DIR}"

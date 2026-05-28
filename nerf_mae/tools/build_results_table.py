@@ -73,6 +73,8 @@ def infer_protocol(pretrain_save_name: str, source: str) -> tuple[str, str]:
         return "16", "ABCI3_1n8g_gb16_det0"
     if "abci3sm_cj_det0_1n8g" in pretrain_save_name:
         return "16", "ABCI3_1n8g_gb16_det0_surface_maturation_coord_jitter"
+    if "abci3smcos_cj_det0_1n8g" in pretrain_save_name:
+        return "16", "ABCI3_1n8g_gb16_det0_surface_maturation_cosine_coord_jitter"
     if "abci3input_cj_det0_1n8g" in pretrain_save_name:
         return "16", "ABCI3_1n8g_gb16_det0_input_alpha_coord_jitter"
     if "abci3pyr_cj_det0_1n8g" in pretrain_save_name:
@@ -97,7 +99,11 @@ def infer_surface_env(condition: str) -> dict[str, str]:
         "SM_RGB_MASK": "",
         "SM_INPUT_RGB_CURRICULUM": "",
     }
-    if condition.startswith("surface_maturation_tau") or condition == "input_alpha_curriculum":
+    if (
+        condition.startswith("surface_maturation_tau")
+        or condition.startswith("surface_maturation_cosine_coord_jitter_tau")
+        or condition == "input_alpha_curriculum"
+    ):
         fields.update(
             {
                 "SM_MODE": "surface_maturation",
@@ -114,6 +120,15 @@ def infer_surface_env(condition: str) -> dict[str, str]:
         fields.update({"SM_TAU": "0.5", "SM_K": "20", "SM_W_MIN": "0.05"})
     elif condition == "surface_maturation_tau0p7_k30_w0p05":
         fields.update({"SM_TAU": "0.7", "SM_K": "30", "SM_W_MIN": "0.05"})
+    elif condition == "surface_maturation_cosine_coord_jitter_tau0p7_k30_w0p05":
+        fields.update(
+            {
+                "SM_TAU": "0.7",
+                "SM_K": "30",
+                "SM_W_MIN": "0.05",
+                "SM_INPUT_RGB_CURRICULUM": "cosine_rgb_ramp",
+            }
+        )
     elif condition == "input_alpha_curriculum":
         fields.update(
             {

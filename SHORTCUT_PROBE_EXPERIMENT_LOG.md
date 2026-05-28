@@ -2999,3 +2999,127 @@ Decision:
 - The next paper direction should not open another broad method sweep unless it
   directly targets the AP@75/localization gap with a very small, pre-specified
   diagnostic.
+
+## Experiment 39: Mechanism Gate Before SECS-MAE
+
+Snapshot:
+- 2026-05-29 JST
+
+Motivation:
+- `coord_jitter` is empirically useful, but that does not yet prove that the
+  model learned transform equivariance.
+- Before implementing an explicit SECS/equivariance objective, first run a
+  lighter existing-checkpoint feature equivariance probe.
+- Also test one local-control loophole: whether Surface-Maturation becomes
+  complementary when combined with the successful cosine + coord-jitter setup.
+
+Implemented:
+- Added `nerf_mae/tools/feature_equivariance_probe.py`.
+  - Loads existing MAE checkpoints.
+  - Applies two independent coord-jitter transforms to the same scene.
+  - Extracts encoder feature maps without MAE masking.
+  - Inverse-aligns each feature map to canonical scene coordinates.
+  - Reports token cosine, normalized L2, and linear CKA by stage and by
+    all/surface/empty regions.
+- Added `nerf_mae/probe_scripts/abci3_feature_equivariance_probe.pbs`.
+- Added `surface_maturation_cosine_coord_jitter_tau0p7_k30_w0p05` to the shared
+  pretrain/FCOS scripts.
+- Updated `build_results_table.py` so the new Surface+cosine condition is
+  indexed with its `SM_*` metadata.
+
+Validation:
+- `python -m py_compile` passed for:
+  - `nerf_mae/tools/feature_equivariance_probe.py`
+  - `nerf_mae/tools/build_results_table.py`
+- `bash -n` passed for:
+  - `nerf_mae/probe_scripts/abci3_feature_equivariance_probe.pbs`
+  - `nerf_mae/probe_scripts/abci3_e300_gate_pretrain.pbs`
+  - `nerf_mae/probe_scripts/abci3_e300_gate_fcos.pbs`
+
+Feature equivariance probe defaults:
+- No new pretraining.
+- Split: `val_scenes`
+- `max_scenes=8`, `num_pairs=2`, `seed=17`
+- Coord-jitter transform: `rotate_prob=1.0`, `flip_prob=0.5`,
+  `coord_shift_prob=1.0`, `coord_shift_max_voxels=8`
+- Stages: `0,1,2,3`
+- Checkpoints:
+  - `baseline_e300`
+  - `cosine_e300`
+  - `baseline_coord_jitter_e100`
+  - `cosine_coord_jitter_e100`
+  - `shuffle_coord_jitter_e300`
+
+Submitted jobs:
+
+| purpose | job | dependency | expected output |
+|---|---|---|---|
+| feature equivariance probe | `1807419.pbs1` | none | `results/shortcut_probe_artifacts/feature_equivariance/coord_jitter_feature_equivariance.{json,md}` |
+| Surface+cosine+jitter pretrain | `1807420.pbs1` | none | `output/nerf_mae/results/nerfmae_surface_maturation_cosine_coord_jitter_tau0p7_k30_w0p05_p1.0_e300_seed1_abci3smcos_cj_det0_1n8g/epoch_300.pt` |
+| Surface+cosine+jitter FCOS | `1807421.pbs1` | `afterok:1807420.pbs1` | corresponding FCOS eval JSON |
+
+Submission log:
+- `output/launcher/mechanism_gate_20260529_014503/submitted.tsv`
+
+Retry note:
+- Initial feature equivariance job `1807419.pbs1` failed because raw scenes are
+  not always cubic 160^3 before NeRF-MAE padding, while the first implementation
+  extracted features before applying the model's padding path.
+- Fixed the probe to apply the same `model.transform()` padding used by
+  training before feature extraction.
+- Resubmitted feature equivariance probe as `1807435.pbs1`.
+- `1807435.pbs1` then hit a missing split feature file. Fixed the probe to
+  mirror dataset loading behavior by skipping split scenes whose `.npz` feature
+  file is absent, and resubmitted as `1807436.pbs1`.
+- `1807436.pbs1` then hit the PyTorch 2.6 `weights_only=True` checkpoint
+  default on old local checkpoints. The probe now explicitly uses
+  `weights_only=False` for trusted local training checkpoints and was
+  resubmitted as `1807437.pbs1`.
+
+Feature equivariance result:
+- `1807437.pbs1` completed.
+- Artifacts:
+  - `results/shortcut_probe_artifacts/feature_equivariance/coord_jitter_feature_equivariance.json`
+  - `results/shortcut_probe_artifacts/feature_equivariance/coord_jitter_feature_equivariance.md`
+- All checkpoint loads succeeded with `missing=0`, `unexpected=0`.
+
+Key feature equivariance summary:
+
+| label | stage | region | cosine | l2 | cka |
+|---|---:|---|---:|---:|---:|
+| `baseline_coord_jitter_e100` | 0 | all | 0.6704 | 0.7483 | 0.5296 |
+| `cosine_coord_jitter_e100` | 0 | all | 0.7000 | 0.7152 | 0.5368 |
+| `baseline_coord_jitter_e100` | 0 | surface | 0.6127 | 0.8305 | 0.4481 |
+| `cosine_coord_jitter_e100` | 0 | surface | 0.6645 | 0.7628 | 0.4765 |
+| `baseline_coord_jitter_e100` | 1 | surface | 0.6836 | 0.7407 | 0.4514 |
+| `cosine_coord_jitter_e100` | 1 | surface | 0.7211 | 0.6837 | 0.5243 |
+| `baseline_coord_jitter_e100` | 2 | surface | 0.7308 | 0.6664 | 0.4128 |
+| `cosine_coord_jitter_e100` | 2 | surface | 0.7249 | 0.6778 | 0.4107 |
+| `baseline_coord_jitter_e100` | 3 | surface | 0.6998 | 0.7393 | 0.5998 |
+| `cosine_coord_jitter_e100` | 3 | surface | 0.7007 | 0.7467 | 0.6502 |
+
+Reading:
+- The feature probe is positive but not decisive for an equivariance mechanism.
+- `cosine_coord_jitter_e100` improves transform-aligned feature similarity over
+  `baseline_coord_jitter_e100` in early/mid surface features:
+  - stage 0 surface cosine: `0.6645` vs `0.6127`
+  - stage 1 surface cosine: `0.7211` vs `0.6836`
+  - stage 1 surface CKA: `0.5243` vs `0.4514`
+- The advantage does not persist cleanly through all later stages; stage 2
+  surface is essentially tied/slightly worse, and stage 3 surface cosine is
+  nearly identical.
+- Therefore, `coord_jitter + cosine` likely improves some transform-aligned
+  early representation dynamics, but this is not strong enough yet to justify
+  jumping directly to a full SECS-MAE method.
+- Treat explicit equivariance loss as a conditional next step, not the default
+  next method. Wait for the Surface+cosine+jitter FCOS result before opening
+  another heavy branch.
+
+Decision rule:
+- If `cosine_coord_jitter_e100` is clearly more transform-aligned than
+  `baseline_coord_jitter_e100`, the SECS/equivariance branch becomes plausible.
+- If `baseline_coord_jitter_e100` and `cosine_coord_jitter_e100` are similar,
+  coord-jitter is more likely acting as augmentation/regularization, and SECS
+  should not be the next main-method bet.
+- If Surface+cosine+jitter beats `cosine_coord_jitter`, local interventions are
+  not exhausted; otherwise, the local-control loophole is weaker.
