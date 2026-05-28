@@ -2905,3 +2905,97 @@ Additional Track-0 submissions:
 Submission logs:
 - `output/launcher/shuffle_coord_jitter_20260527_2210/submitted.tsv`
 - `output/launcher/coord_jitter_finetune_seeds_20260527_2210/submitted.tsv`
+
+## Experiment 38: Pyramid Scout Results and Coord-Jitter Seed Check
+
+Snapshot:
+- 2026-05-28 JST
+
+Completed jobs:
+- Pyramid scout pretrain/FCOS:
+  - `pyramid_alpha`: `1805486.pbs1` -> `1805487.pbs1`
+  - `pyramid_rgb`: `1805488.pbs1` -> `1805489.pbs1`
+  - `pyramid_both`: `1805490.pbs1` -> `1805491.pbs1`
+- Coord-jitter controls:
+  - `shuffle_coord_jitter`: `1805494.pbs1` -> `1805495.pbs1`
+  - `baseline_coord_jitter` finetune seeds 2/3: `1805496.pbs1`, `1805497.pbs1`
+  - `cosine_coord_jitter` finetune seeds 2/3: `1805498.pbs1`, `1805499.pbs1`
+- Proposal diagnostic:
+  - `pyramid_decision`: `1807156.pbs1`
+
+Aggregation:
+- Regenerated `results/shortcut_probe_artifacts/results_table.csv`.
+- Current table size: 116 rows.
+- Proposal diagnostic artifacts:
+  - `results/shortcut_probe_artifacts/proposal_quality/pyramid_decision.json`
+  - `results/shortcut_probe_artifacts/proposal_quality/pyramid_decision.md`
+  - `results/shortcut_probe_artifacts/proposal_quality/pyramid_decision.png`
+
+Single-finetune-seed scout metrics:
+
+| condition | AP@50 | AP@75 | AP75/AP50 | R50@300 |
+|---|---:|---:|---:|---:|
+| `baseline_coord_jitter` | 0.5564 | 0.1015 | 0.1824 | 0.6765 |
+| `cosine_coord_jitter` | 0.6219 | 0.1031 | 0.1657 | 0.7279 |
+| `shuffle_coord_jitter` | 0.4138 | 0.0574 | 0.1388 | 0.6103 |
+| `pyramid_alpha` | 0.5694 | 0.0978 | 0.1718 | 0.7206 |
+| `pyramid_rgb` | 0.5447 | 0.1163 | 0.2136 | 0.6985 |
+| `pyramid_both` | 0.5677 | 0.0521 | 0.0918 | 0.6985 |
+| `surface_tau0p7` | 0.5973 | 0.0919 | 0.1539 | 0.7279 |
+| `dmae_hier_concat_coord_jitter` | 0.5212 | 0.0858 | 0.1646 | 0.6838 |
+
+Coord-jitter 3-finetune-seed summary:
+
+| condition | AP@50 mean | AP@50 std | AP@75 mean | AP@75 std | R50@300 mean | R50@300 std |
+|---|---:|---:|---:|---:|---:|---:|
+| `baseline_coord_jitter` | 0.5454 | 0.0103 | 0.1073 | 0.0264 | 0.6912 | 0.0255 |
+| `cosine_coord_jitter` | 0.5873 | 0.0395 | 0.0872 | 0.0256 | 0.7181 | 0.0236 |
+
+Paired `cosine_coord_jitter - baseline_coord_jitter`:
+
+| finetune seed | dAP@50 | dAP@75 | dR50@300 |
+|---:|---:|---:|---:|
+| 1 | +0.0655 | +0.0016 | +0.0515 |
+| 2 | +0.0597 | -0.0784 | +0.0147 |
+| 3 | +0.0006 | +0.0166 | +0.0147 |
+
+Proposal diagnostic summary:
+
+| condition | AP@50 | AP@75 | R50@300 | mean proposal IoU | frac IoU>=0.5 | TP50 fail75 | first TP rank |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `baseline_coord_jitter` | 0.5564 | 0.1015 | 0.6765 | 0.0632 | 0.0180 | 0.6848 | 1.2941 |
+| `cosine_coord_jitter` | 0.6219 | 0.1031 | 0.7279 | 0.0635 | 0.0196 | 0.7500 | 1.0588 |
+| `surface_tau0p7` | 0.5973 | 0.0919 | 0.7279 | 0.0609 | 0.0194 | 0.6869 | 1.2941 |
+| `shuffle_coord_jitter` | 0.4138 | 0.0574 | 0.6103 | 0.0605 | 0.0163 | 0.7590 | 4.2941 |
+| `pyramid_alpha` | 0.5694 | 0.0978 | 0.7206 | 0.0660 | 0.0192 | 0.7347 | 1.2941 |
+| `pyramid_rgb` | 0.5447 | 0.1163 | 0.6985 | 0.0655 | 0.0186 | 0.6947 | 3.0000 |
+| `pyramid_both` | 0.5677 | 0.0521 | 0.6985 | 0.0641 | 0.0186 | 0.7895 | 1.0588 |
+
+Reading:
+- Pyramid does not meet the pre-registered Tier 1 or Tier 2 rule.
+  `pyramid_alpha` is the best Pyramid AP@50 scout, but it is below
+  `cosine_coord_jitter` (`0.5694` vs `0.6219`) and also below the
+  `cosine_coord_jitter` 3-finetune-seed mean (`0.5873`).
+- `pyramid_rgb` has the best Pyramid AP@75 (`0.1163`) and AP75/AP50 ratio
+  (`0.2136`), but its AP@50 is weak (`0.5447`) and first TP rank is worse.
+  This is a localization-oriented ablation signal, not a main-method win.
+- `pyramid_both` fails on AP@75 (`0.0521`) despite a reasonable AP@50. Joint
+  low-res alpha/RGB target curriculum is not viable in this MVP.
+- `shuffle_coord_jitter` is clearly weak (`AP@50=0.4138`, `R50@300=0.6103`,
+  first TP rank `4.2941`), supporting that meaningful target-alpha structure
+  matters under coord-jitter.
+- `cosine_coord_jitter` remains the empirical AP@50/recall best path, but the
+  3-finetune-seed result is not a clean localization claim: AP@50 improves over
+  baseline on average (`+0.0419`), while AP@75 is lower on average due to seed 2.
+
+Decision:
+- Do not promote Pyramid P_A/P_R/P_AR to the main method.
+- Do not spend 3-finetune-seed compute on Pyramid winner selection.
+- Keep Pyramid as an ablation showing that simple scene-level target pyramid
+  decomposition does not recover the `cosine_coord_jitter` gain.
+- Keep `cosine_coord_jitter` as the current empirical best for AP@50/recall,
+  with cautious wording: it improves sample-efficient coarse detection, but does
+  not yet solve tight localization/AP@75.
+- The next paper direction should not open another broad method sweep unless it
+  directly targets the AP@75/localization gap with a very small, pre-specified
+  diagnostic.

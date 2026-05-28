@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+#PBS -q rt_HG
+#PBS -l select=1
+#PBS -l walltime=02:00:00
+#PBS -P gag51404
+#PBS -j oe
+
+set -euo pipefail
+
+cd "${PBS_O_WORKDIR:?PBS_O_WORKDIR is not set}"
+
+ROOT_DIR="${ROOT_DIR:-${PBS_O_WORKDIR}}"
+PROBE_ENV_PREFIX="${PROBE_ENV_PREFIX:-${ROOT_DIR}/.venv-abci3}"
+ABCI3_CUDA_MODULE="${ABCI3_CUDA_MODULE:-cuda/11.8/11.8.0}"
+GT_BOXES_DIR="${GT_BOXES_DIR:-${ROOT_DIR}/dataset/_downloads/front3d_rpn_extract/front3d_rpn_data/obb}"
+OUTPUT_DIR="${OUTPUT_DIR:-${ROOT_DIR}/results/shortcut_probe_artifacts/proposal_quality}"
+
+source /etc/profile.d/modules.sh
+module load "${ABCI3_CUDA_MODULE}"
+
+export PYTHONPATH="${ROOT_DIR}"
+export PATH="${PROBE_ENV_PREFIX}/bin:${PATH}"
+export LD_LIBRARY_PATH="${PROBE_ENV_PREFIX}/lib/python3.11/site-packages/torch/lib:${LD_LIBRARY_PATH:-}"
+export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
+
+mkdir -p "${OUTPUT_DIR}"
+
+"${PROBE_ENV_PREFIX}/bin/python" "${ROOT_DIR}/nerf_rpn/tools/summarize_proposal_quality.py" \
+  --gt-boxes-dir "${GT_BOXES_DIR}" \
+  --device cuda:0 \
+  --output-json "${OUTPUT_DIR}/pyramid_decision.json" \
+  --output-md "${OUTPUT_DIR}/pyramid_decision.md" \
+  --diagnostic "baseline_coord_jitter=${ROOT_DIR}/output/nerf_rpn/results/nerfmae_baseline_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0_epoch100_sched_epoch_seed1_fcos1000_eval" \
+  --diagnostic "cosine_coord_jitter=${ROOT_DIR}/output/nerf_rpn/results/nerfmae_cosine_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0_epoch100_sched_epoch_seed1_fcos1000_eval" \
+  --diagnostic "surface_tau0p7=${ROOT_DIR}/output/nerf_rpn/results/nerfmae_surface_maturation_tau0p7_k30_w0p05_p1.0_e300_seed1_abci3sm_cj_det0_1n8g_epoch300_sched_epoch_seed1_fcos1000_eval" \
+  --diagnostic "shuffle_coord_jitter=${ROOT_DIR}/output/nerf_rpn/results/nerfmae_shuffle_coord_jitter_p1.0_e300_seed1_abci3shuf_cj_det0_1n8g_epoch300_sched_epoch_seed1_fcos1000_eval" \
+  --diagnostic "pyramid_alpha=${ROOT_DIR}/output/nerf_rpn/results/nerfmae_pyramid_alpha_p1.0_e300_seed1_abci3pyr_cj_det0_1n8g_epoch300_sched_epoch_seed1_fcos1000_eval" \
+  --diagnostic "pyramid_rgb=${ROOT_DIR}/output/nerf_rpn/results/nerfmae_pyramid_rgb_p1.0_e300_seed1_abci3pyr_cj_det0_1n8g_epoch300_sched_epoch_seed1_fcos1000_eval" \
+  --diagnostic "pyramid_both=${ROOT_DIR}/output/nerf_rpn/results/nerfmae_pyramid_both_p1.0_e300_seed1_abci3pyr_cj_det0_1n8g_epoch300_sched_epoch_seed1_fcos1000_eval"
+
+"${PROBE_ENV_PREFIX}/bin/python" "${ROOT_DIR}/nerf_rpn/tools/plot_proposal_quality.py" \
+  --summary-json "${OUTPUT_DIR}/pyramid_decision.json" \
+  --output-png "${OUTPUT_DIR}/pyramid_decision.png" \
+  --title "Pyramid Target Curriculum Decision"
+
+echo "[info] pyramid proposal quality summary complete output_dir=${OUTPUT_DIR}"
