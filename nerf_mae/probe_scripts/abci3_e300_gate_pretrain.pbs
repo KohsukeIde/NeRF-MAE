@@ -175,7 +175,7 @@ case "${KIND}:${CONDITION}" in
   baseline:baseline)
     SAVE_NAME="nerfmae_all_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
-  curriculum:cosine_ramp|curriculum:cosine_ramp_alpha_shuffle)
+  curriculum:cosine_ramp|curriculum:cosine_ramp_alpha_shuffle|curriculum:cosine_ramp_coord_jitter|curriculum:linear_ramp_coord_jitter|curriculum:step_ramp_coord_jitter|curriculum:reverse_ramp_coord_jitter|curriculum:constant_mixed_coord_jitter)
     SAVE_NAME="nerfmae_alpha_rgba_curr_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
   diagnostic:alpha_target_only|diagnostic:alpha_target_only_no_pos|diagnostic:alpha_target_only_coord_jitter|diagnostic:baseline_no_pos|diagnostic:baseline_coord_jitter|diagnostic:cosine_no_pos|diagnostic:cosine_coord_jitter|diagnostic:shuffle_coord_jitter|diagnostic:dmae_target_alpha_gated_rgb|diagnostic:dmae_hier_concat|diagnostic:dmae_hier_concat_coord_jitter|diagnostic:dmae_hier_film)
@@ -526,20 +526,56 @@ case "${KIND}:${CONDITION}" in
   baseline:baseline)
     env "${common_env[@]}" "${resume_env[@]}" PROBE_MODE=baseline bash train_mae3d.sh
     ;;
-  curriculum:cosine_ramp)
+  curriculum:cosine_ramp|curriculum:cosine_ramp_coord_jitter|curriculum:linear_ramp_coord_jitter|curriculum:step_ramp_coord_jitter|curriculum:reverse_ramp_coord_jitter|curriculum:constant_mixed_coord_jitter)
+    curriculum_mode="cosine_rgb_ramp"
+    curriculum_epochs="${EPOCHS}"
+    rgb_start="0.0"
+    rgb_end="1.0"
+    rgb_weight="1.0"
+    extra_env=()
+    if [[ "${CONDITION}" == *_coord_jitter ]]; then
+      extra_env=(
+        ROTATE_PROB="${ROTATE_PROB:-1.0}"
+        FLIP_PROB="${FLIP_PROB:-0.5}"
+        ROT_SCALE_PROB="${ROT_SCALE_PROB:-0.0}"
+        COORD_SHIFT_PROB="${COORD_SHIFT_PROB:-1.0}"
+        COORD_SHIFT_MAX_VOXELS="${COORD_SHIFT_MAX_VOXELS:-8}"
+      )
+    fi
+    case "${CONDITION}" in
+      linear_ramp_coord_jitter)
+        curriculum_mode="linear_rgb_ramp"
+        ;;
+      step_ramp_coord_jitter)
+        curriculum_mode="alpha_warmup"
+        curriculum_epochs="${PROBE_CURRICULUM_EPOCHS:-$(((EPOCHS + 1) / 2))}"
+        ;;
+      reverse_ramp_coord_jitter)
+        curriculum_mode="cosine_rgb_ramp"
+        rgb_start="1.0"
+        rgb_end="0.0"
+        ;;
+      constant_mixed_coord_jitter)
+        curriculum_mode="none"
+        rgb_start="0.5"
+        rgb_end="0.5"
+        rgb_weight="0.5"
+        ;;
+    esac
     env "${common_env[@]}" "${resume_env[@]}" \
+      "${extra_env[@]}" \
       PROBE_MODE=custom \
       PROBE_RGB_INPUT=keep \
       PROBE_ALPHA_INPUT=keep \
       PROBE_ALPHA_TARGET=keep \
       PROBE_RGB_LOSS=occupied \
       PROBE_ALPHA_LOSS=removed \
-      PROBE_RGB_WEIGHT=1.0 \
+      PROBE_RGB_WEIGHT="${rgb_weight}" \
       PROBE_ALPHA_WEIGHT=1.0 \
-      PROBE_CURRICULUM=cosine_rgb_ramp \
-      PROBE_CURRICULUM_EPOCHS="${EPOCHS}" \
-      PROBE_CURRICULUM_RGB_START_WEIGHT=0.0 \
-      PROBE_CURRICULUM_RGB_END_WEIGHT=1.0 \
+      PROBE_CURRICULUM="${curriculum_mode}" \
+      PROBE_CURRICULUM_EPOCHS="${curriculum_epochs}" \
+      PROBE_CURRICULUM_RGB_START_WEIGHT="${rgb_start}" \
+      PROBE_CURRICULUM_RGB_END_WEIGHT="${rgb_end}" \
       PROBE_CURRICULUM_ALPHA_WEIGHT=1.0 \
       bash train_mae3d.sh
     ;;

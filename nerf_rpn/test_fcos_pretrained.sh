@@ -14,6 +14,11 @@ SAVE_PATH="${SAVE_PATH:-../output/nerf_rpn/results/${SAVE_NAME}}"
 CHECKPOINT="${CHECKPOINT:-../checkpoints/front3d_obb_finetuned.pt}"
 SEED="${SEED:-}"
 DETERMINISTIC="${DETERMINISTIC:-0}"
+ROTATE_PROB="${ROTATE_PROB:-0.0}"
+FLIP_PROB="${FLIP_PROB:-0.0}"
+ROT_SCALE_PROB="${ROT_SCALE_PROB:-0.0}"
+COORD_SHIFT_PROB="${COORD_SHIFT_PROB:-0.0}"
+COORD_SHIFT_MAX_VOXELS="${COORD_SHIFT_MAX_VOXELS:-0}"
 
 cmd=(
 python3 -u run_fcos_pretrained.py
@@ -43,6 +48,21 @@ fi
 if [[ "${DETERMINISTIC}" == "1" ]]; then
   export CUBLAS_WORKSPACE_CONFIG="${CUBLAS_WORKSPACE_CONFIG:-:4096:8}"
   cmd+=(--deterministic)
+fi
+if [[ -n "${ROTATE_PROB}" ]]; then
+  cmd+=(--rotate_prob "${ROTATE_PROB}")
+fi
+if [[ -n "${FLIP_PROB}" ]]; then
+  cmd+=(--flip_prob "${FLIP_PROB}")
+fi
+if [[ -n "${ROT_SCALE_PROB}" ]]; then
+  cmd+=(--rot_scale_prob "${ROT_SCALE_PROB}")
+fi
+if [[ -n "${COORD_SHIFT_PROB}" ]]; then
+  cmd+=(--coord_shift_prob "${COORD_SHIFT_PROB}")
+fi
+if [[ -n "${COORD_SHIFT_MAX_VOXELS}" ]]; then
+  cmd+=(--coord_shift_max_voxels "${COORD_SHIFT_MAX_VOXELS}")
 fi
 
 "${cmd[@]}"

@@ -1217,7 +1217,9 @@ class Trainer:
                 self.logger.info(
                     f"epoch {epoch} [{i}/{len(self.train_loader)}]  "
                     f"lr: {self.scheduler.get_last_lr()[0]:.6f}  "
-                    f"loss: {report_loss.item():.4f}"
+                    f"loss: {report_loss.item():.4f}  "
+                    f"loss_rgb: {report_loss_rgb.item():.4f}  "
+                    f"loss_alpha: {report_loss_alpha.item() if report_loss_alpha is not None else 0.0:.4f}"
                     f"{profile_msg}"
                 )
 

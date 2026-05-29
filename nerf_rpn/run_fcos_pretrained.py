@@ -280,6 +280,18 @@ def parse_args():
         type=float,
         help="The probability of extra scaling and rotation.",
     )
+    parser.add_argument(
+        "--coord_shift_prob",
+        default=0.0,
+        type=float,
+        help="The probability of shifting the scene grid in voxel coordinates.",
+    )
+    parser.add_argument(
+        "--coord_shift_max_voxels",
+        default=0,
+        type=int,
+        help="Maximum absolute random scene-grid shift along each axis.",
+    )
 
     # Distributed training parameters
     parser.add_argument(
@@ -651,6 +663,11 @@ class Trainer:
                     self.args.boxes_path,
                     normalize_density=self.args.normalize_density,
                     scene_list=self.test_scenes,
+                    flip_prob=self.args.flip_prob,
+                    rotate_prob=self.args.rotate_prob,
+                    rot_scale_prob=self.args.rot_scale_prob,
+                    coord_shift_prob=self.args.coord_shift_prob,
+                    coord_shift_max_voxels=self.args.coord_shift_max_voxels,
                     preload=self.args.preload,
                 )
             elif self.args.dataset == "scannet":
@@ -918,6 +935,8 @@ class Trainer:
                 flip_prob=self.args.flip_prob,
                 rotate_prob=self.args.rotate_prob,
                 rot_scale_prob=self.args.rot_scale_prob,
+                coord_shift_prob=self.args.coord_shift_prob,
+                coord_shift_max_voxels=self.args.coord_shift_max_voxels,
                 preload=self.args.preload,
                 percent_train=self.args.percent_train,
             )

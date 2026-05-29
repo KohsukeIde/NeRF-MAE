@@ -3244,3 +3244,85 @@ Decision rule:
   should not be the next main-method bet.
 - If Surface+cosine+jitter beats `cosine_coord_jitter`, local interventions are
   not exhausted; otherwise, the local-control loophole is weaker.
+
+## Experiment 42: Optimization-Trajectory Gate
+
+Snapshot:
+- 2026-05-29 JST
+- Commit before this update: `e9aabce`
+
+Motivation:
+- The SECS/equivariance branch is now implementation-sane but not mechanistically
+  clean enough to be the next default method.
+- Current working hypothesis is an optimization-trajectory mechanism:
+  early alpha/structure learning plus scene-level coord-jitter may guide the
+  encoder toward transferable low-frequency structure before appearance/RGB
+  fidelity dominates.
+- The next gate is therefore not another local method variant, but a
+  ramp-shape/order test:
+  `cosine ~= linear ~= step > constant > reverse` would support
+  structure-to-appearance order as the key factor; `cosine` alone would look
+  more like a schedule-specific hyperparameter.
+
+Implementation updates:
+- `run_swin_mae3d.py` text logs now include `loss_rgb` and `loss_alpha` next to
+  total loss. This is needed for later trajectory/gradient-conflict summaries.
+- `abci3_e300_gate_pretrain.pbs` now supports trajectory scout conditions:
+  - `cosine_ramp_coord_jitter`
+  - `linear_ramp_coord_jitter`
+  - `step_ramp_coord_jitter`
+  - `reverse_ramp_coord_jitter`
+  - `constant_mixed_coord_jitter`
+- `abci3_e300_gate_fcos.pbs` recognizes the same curriculum conditions for
+  dependent FCOS evaluation.
+- Added `submit_ramp_shape_sweep.sh` for the order/schedule scout.
+- `build_results_table.py` now records ramp protocol metadata:
+  `PROBE_CURRICULUM`, `PROBE_CURRICULUM_EPOCHS`, RGB start/end weights,
+  RGB/alpha weights, and `PROBE_ORDER`.
+- `run_fcos_pretrained.py` and `test_fcos_pretrained.sh` now support explicit
+  eval-time coord jitter (`coord_shift_prob`, `coord_shift_max_voxels`) while
+  keeping normal eval default transforms at zero in `test_fcos_pretrained.sh`.
+- Added `abci3_eval_time_jitter_robustness.pbs` for checkpoint-only robustness
+  evaluation under rotate/flip/coord-shift transforms.
+
+Validation:
+- `bash -n nerf_mae/probe_scripts/abci3_e300_gate_pretrain.pbs`
+- `bash -n nerf_mae/probe_scripts/abci3_e300_gate_fcos.pbs`
+- `bash -n nerf_mae/probe_scripts/submit_ramp_shape_sweep.sh`
+- `bash -n nerf_rpn/test_fcos_pretrained.sh`
+- `bash -n nerf_rpn/tools/abci3_eval_time_jitter_robustness.pbs`
+- `python -m py_compile nerf_mae/run_swin_mae3d.py nerf_mae/tools/build_results_table.py nerf_rpn/run_fcos_pretrained.py`
+- Dry-run submission of all five ramp-shape conditions succeeded.
+- `build_results_table.py` generated `116` rows and populated new curriculum
+  metadata for existing cosine rows.
+
+Submitted jobs:
+
+| purpose | condition | pretrain job | FCOS/eval job | notes |
+|---|---|---:|---:|---|
+| surface+cosine+jitter | `surface_maturation_cosine_coord_jitter_tau0p7_k30_w0p05` | `1807420.pbs1` | `1807421.pbs1` | pretrain complete; FCOS running |
+| ramp-shape scout | `cosine_ramp_coord_jitter` | `1808709.pbs1` | `1808710.pbs1` | e100, 1n8g, det0 |
+| ramp-shape scout | `linear_ramp_coord_jitter` | `1808711.pbs1` | `1808712.pbs1` | e100, 1n8g, det0 |
+| ramp-shape scout | `step_ramp_coord_jitter` | `1808713.pbs1` | `1808714.pbs1` | e100, 1n8g, det0; step at half budget |
+| ramp-shape scout | `reverse_ramp_coord_jitter` | `1808715.pbs1` | `1808716.pbs1` | e100, 1n8g, det0 |
+| ramp-shape scout | `constant_mixed_coord_jitter` | `1808717.pbs1` | `1808718.pbs1` | e100, 1n8g, det0 |
+| eval-time jitter robustness | existing checkpoints | n/a | `1808719.pbs1` | eval-only under rotate/flip/shift |
+
+Why e100 first:
+- The strongest coord-jitter evidence currently referenced by the feedback is
+  `cosine_coord_jitter_e100` (`AP@50 ~= 0.6219`) versus
+  `baseline_coord_jitter_e100` (`AP@50 ~= 0.5564`).
+- Running the ramp-shape gate at e100 first is the fastest way to test whether
+  the ordering effect exists. If the expected order pattern appears, promote
+  the winning/critical rows to e300; if not, do not spend e300 compute on a
+  weak trajectory-method branch.
+
+Decision rule:
+- Support trajectory/order hypothesis if alpha-to-RGBA variants
+  (`cosine`, `linear`, `step`) are consistently above `constant_mixed` and
+  `reverse`, with no large AP@75/recall collapse.
+- If `reverse` or `constant_mixed` ties the alpha-to-RGBA variants, the order
+  mechanism is weak and method exploration should stop or move to analysis-only.
+- If order is supported, try at most one adaptive-ordering scout derived from
+  the trajectory hypothesis. If that does not beat `cosine_coord_jitter`, switch
+  to an analysis-heavy paper rather than adding more method knobs.

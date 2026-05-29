@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+#PBS -q rt_HG
+#PBS -l select=1
+#PBS -l walltime=08:00:00
+#PBS -P gag51404
+#PBS -j oe
+
+set -euo pipefail
+
+cd "${PBS_O_WORKDIR:?PBS_O_WORKDIR is not set}"
+
+ROOT_DIR="${ROOT_DIR:-${PBS_O_WORKDIR}}"
+PROBE_ENV_PREFIX="${PROBE_ENV_PREFIX:-${ROOT_DIR}/.venv-abci3}"
+ABCI3_CUDA_MODULE="${ABCI3_CUDA_MODULE:-cuda/11.8/11.8.0}"
+DATA_ROOT="${DATA_ROOT:-${ROOT_DIR}/dataset/finetune/front3d_rpn_data}"
+OUTPUT_ROOT="${OUTPUT_ROOT:-${ROOT_DIR}/results/shortcut_probe_artifacts/eval_time_jitter}"
+GPU_ID="${GPU_ID:-0}"
+SEED="${SEED:-1}"
+DETERMINISTIC="${DETERMINISTIC:-1}"
+ROTATE_PROB="${ROTATE_PROB:-1.0}"
+FLIP_PROB="${FLIP_PROB:-0.5}"
+ROT_SCALE_PROB="${ROT_SCALE_PROB:-0.0}"
+COORD_SHIFT_PROB="${COORD_SHIFT_PROB:-1.0}"
+COORD_SHIFT_MAX_VOXELS="${COORD_SHIFT_MAX_VOXELS:-8}"
+
+source /etc/profile.d/modules.sh
+module load "${ABCI3_CUDA_MODULE}"
+
+export PYTHONPATH="${ROOT_DIR}"
+export PATH="${PROBE_ENV_PREFIX}/bin:${PATH}"
+export LD_LIBRARY_PATH="${PROBE_ENV_PREFIX}/lib/python3.11/site-packages/torch/lib:${LD_LIBRARY_PATH:-}"
+export CUDA_VISIBLE_DEVICES="${GPU_ID}"
+
+mkdir -p "${OUTPUT_ROOT}"
+MANIFEST="${OUTPUT_ROOT}/manifest.tsv"
+: > "${MANIFEST}"
+printf "label\ttrain_dir\tcheckpoint\teval_dir\trotate_prob\tflip_prob\trot_scale_prob\tcoord_shift_prob\tcoord_shift_max_voxels\n" >> "${MANIFEST}"
+
+RUNS=(
+  "baseline_e300=${ROOT_DIR}/output/nerf_rpn/results/nerfmae_all_p1.0_e300_seed1_abci3clean_epoch300_sched_epoch_seed1_fcos1000"
+  "cosine_e300=${ROOT_DIR}/output/nerf_rpn/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1_abci3clean_epoch300_sched_epoch_seed1_fcos1000"
+  "baseline_coord_jitter_e100=${ROOT_DIR}/output/nerf_rpn/results/nerfmae_baseline_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0_epoch100_sched_epoch_seed1_fcos1000"
+  "cosine_coord_jitter_e100=${ROOT_DIR}/output/nerf_rpn/results/nerfmae_cosine_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0_epoch100_sched_epoch_seed1_fcos1000"
+  "shuffle_coord_jitter_e300=${ROOT_DIR}/output/nerf_rpn/results/nerfmae_shuffle_coord_jitter_p1.0_e300_seed1_abci3shuf_cj_det0_1n8g_epoch300_sched_epoch_seed1_fcos1000"
+)
+
+find_best_checkpoint() {
+  local train_dir="$1"
+  "${PROBE_ENV_PREFIX}/bin/python" - "$train_dir" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+train_dir = Path(sys.argv[1])
+candidates = list(train_dir.glob("model_best_ap50_ap25_*.pt"))
+if not candidates:
+    raise SystemExit(1)
+
+def score(path: Path) -> float:
+    match = re.search(r"model_best_ap50_ap25_([0-9.]+)_", path.name)
+    return float(match.group(1)) if match else -1.0
+
+print(max(candidates, key=score))
+PY
+}
+
+for item in "${RUNS[@]}"; do
+  label="${item%%=*}"
+  train_dir="${item#*=}"
+  if [[ ! -d "${train_dir}" ]]; then
+    echo "[warn] missing train_dir label=${label} path=${train_dir}; skipping" >&2
+    continue
+  fi
+  checkpoint="$(find_best_checkpoint "${train_dir}")"
+  eval_dir="${OUTPUT_ROOT}/${label}_jitter_eval"
+  echo "[info] eval-time jitter label=${label} checkpoint=${checkpoint}"
+  (
+    cd "${ROOT_DIR}/nerf_rpn"
+    DATASET_NAME=front3d \
+    SPLIT_NAME=3dfront \
+    DATA_ROOT="${DATA_ROOT}" \
+    GPU_IDS=0 \
+    BATCH_SIZE=2 \
+    SAVE_PATH="${eval_dir}" \
+    CHECKPOINT="${checkpoint}" \
+    SEED="${SEED}" \
+    DETERMINISTIC="${DETERMINISTIC}" \
+    ROTATE_PROB="${ROTATE_PROB}" \
+    FLIP_PROB="${FLIP_PROB}" \
+    ROT_SCALE_PROB="${ROT_SCALE_PROB}" \
+    COORD_SHIFT_PROB="${COORD_SHIFT_PROB}" \
+    COORD_SHIFT_MAX_VOXELS="${COORD_SHIFT_MAX_VOXELS}" \
+    bash test_fcos_pretrained.sh
+  )
+  test -f "${eval_dir}/eval.json"
+  printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
+    "${label}" "${train_dir}" "${checkpoint}" "${eval_dir}" \
+    "${ROTATE_PROB}" "${FLIP_PROB}" "${ROT_SCALE_PROB}" \
+    "${COORD_SHIFT_PROB}" "${COORD_SHIFT_MAX_VOXELS}" >> "${MANIFEST}"
+done
+
+echo "[info] eval-time jitter robustness complete output_root=${OUTPUT_ROOT}"

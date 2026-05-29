@@ -41,7 +41,7 @@ case "${KIND}:${CONDITION}" in
     PRETRAIN_SAVE_NAME="nerfmae_all_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     VARIANT_NAME=baseline
     ;;
-  curriculum:cosine_ramp|curriculum:cosine_ramp_alpha_shuffle)
+  curriculum:cosine_ramp|curriculum:cosine_ramp_alpha_shuffle|curriculum:cosine_ramp_coord_jitter|curriculum:linear_ramp_coord_jitter|curriculum:step_ramp_coord_jitter|curriculum:reverse_ramp_coord_jitter|curriculum:constant_mixed_coord_jitter)
     PRETRAIN_SAVE_NAME="nerfmae_alpha_rgba_curr_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     VARIANT_NAME="${CONDITION}"
     ;;

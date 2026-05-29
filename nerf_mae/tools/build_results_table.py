@@ -81,6 +81,8 @@ def infer_protocol(pretrain_save_name: str, source: str) -> tuple[str, str]:
         return "16", "ABCI3_1n8g_gb16_det0_pyramid_coord_jitter"
     if "abci3shuf_cj_det0_1n8g" in pretrain_save_name:
         return "16", "ABCI3_1n8g_gb16_det0_shuffle_coord_jitter"
+    if "abci3ramp_cj_det0_1n8g" in pretrain_save_name:
+        return "16", "ABCI3_1n8g_gb16_det0_ramp_shape_coord_jitter"
     if "abci3clean" in pretrain_save_name:
         return "", "ABCI3_clean"
     if source == "shortcut_probe_artifacts":
@@ -173,6 +175,87 @@ def infer_pyramid_env(condition: str) -> dict[str, str]:
     return fields
 
 
+def infer_curriculum_env(condition: str, epoch: str) -> dict[str, str]:
+    fields = {
+        "PROBE_CURRICULUM": "",
+        "PROBE_CURRICULUM_EPOCHS": "",
+        "PROBE_CURRICULUM_RGB_START_WEIGHT": "",
+        "PROBE_CURRICULUM_RGB_END_WEIGHT": "",
+        "PROBE_RGB_WEIGHT": "",
+        "PROBE_ALPHA_WEIGHT": "",
+        "PROBE_ORDER": "",
+    }
+    if condition in {
+        "cosine_ramp",
+        "cosine_ramp_coord_jitter",
+        "cosine_coord_jitter",
+        "shuffle_coord_jitter",
+    }:
+        fields.update(
+            {
+                "PROBE_CURRICULUM": "cosine_rgb_ramp",
+                "PROBE_CURRICULUM_EPOCHS": epoch,
+                "PROBE_CURRICULUM_RGB_START_WEIGHT": "0.0",
+                "PROBE_CURRICULUM_RGB_END_WEIGHT": "1.0",
+                "PROBE_RGB_WEIGHT": "1.0",
+                "PROBE_ALPHA_WEIGHT": "1.0",
+                "PROBE_ORDER": "alpha_to_rgba",
+            }
+        )
+    elif condition == "linear_ramp_coord_jitter":
+        fields.update(
+            {
+                "PROBE_CURRICULUM": "linear_rgb_ramp",
+                "PROBE_CURRICULUM_EPOCHS": epoch,
+                "PROBE_CURRICULUM_RGB_START_WEIGHT": "0.0",
+                "PROBE_CURRICULUM_RGB_END_WEIGHT": "1.0",
+                "PROBE_RGB_WEIGHT": "1.0",
+                "PROBE_ALPHA_WEIGHT": "1.0",
+                "PROBE_ORDER": "alpha_to_rgba",
+            }
+        )
+    elif condition == "step_ramp_coord_jitter":
+        step_epochs = ""
+        if epoch:
+            step_epochs = str((int(epoch) + 1) // 2)
+        fields.update(
+            {
+                "PROBE_CURRICULUM": "alpha_warmup",
+                "PROBE_CURRICULUM_EPOCHS": step_epochs,
+                "PROBE_CURRICULUM_RGB_START_WEIGHT": "0.0",
+                "PROBE_CURRICULUM_RGB_END_WEIGHT": "1.0",
+                "PROBE_RGB_WEIGHT": "1.0",
+                "PROBE_ALPHA_WEIGHT": "1.0",
+                "PROBE_ORDER": "alpha_to_rgba",
+            }
+        )
+    elif condition == "reverse_ramp_coord_jitter":
+        fields.update(
+            {
+                "PROBE_CURRICULUM": "cosine_rgb_ramp",
+                "PROBE_CURRICULUM_EPOCHS": epoch,
+                "PROBE_CURRICULUM_RGB_START_WEIGHT": "1.0",
+                "PROBE_CURRICULUM_RGB_END_WEIGHT": "0.0",
+                "PROBE_RGB_WEIGHT": "1.0",
+                "PROBE_ALPHA_WEIGHT": "1.0",
+                "PROBE_ORDER": "rgba_to_alpha",
+            }
+        )
+    elif condition == "constant_mixed_coord_jitter":
+        fields.update(
+            {
+                "PROBE_CURRICULUM": "none",
+                "PROBE_CURRICULUM_EPOCHS": "0",
+                "PROBE_CURRICULUM_RGB_START_WEIGHT": "0.5",
+                "PROBE_CURRICULUM_RGB_END_WEIGHT": "0.5",
+                "PROBE_RGB_WEIGHT": "0.5",
+                "PROBE_ALPHA_WEIGHT": "1.0",
+                "PROBE_ORDER": "constant_mixed",
+            }
+        )
+    return fields
+
+
 def extract_metric(data: dict[str, Any], key: str, subkey: str) -> str:
     value = data.get(key, {})
     if isinstance(value, dict) and subkey in value:
@@ -245,6 +328,7 @@ def parse_run(root: Path, eval_json: Path, git_hash: str) -> dict[str, str]:
     global_batch, gpu_env = infer_protocol(pretrain_save_name, source)
     surface_env = infer_surface_env(condition)
     pyramid_env = infer_pyramid_env(condition)
+    curriculum_env = infer_curriculum_env(condition, epoch)
     with eval_json.open() as f:
         data = json.load(f)
 
@@ -274,6 +358,7 @@ def parse_run(root: Path, eval_json: Path, git_hash: str) -> dict[str, str]:
         pyramid_env["PYR_EPOCHS"] = epoch
     row.update(surface_env)
     row.update(pyramid_env)
+    row.update(curriculum_env)
     return row
 
 
@@ -336,6 +421,13 @@ def main() -> None:
         "PYR_RGB_POOL",
         "PYR_UPSAMPLE",
         "PYR_ALPHA_UPSAMPLE",
+        "PROBE_CURRICULUM",
+        "PROBE_CURRICULUM_EPOCHS",
+        "PROBE_CURRICULUM_RGB_START_WEIGHT",
+        "PROBE_CURRICULUM_RGB_END_WEIGHT",
+        "PROBE_RGB_WEIGHT",
+        "PROBE_ALPHA_WEIGHT",
+        "PROBE_ORDER",
     ]
     out_csv = args.out_csv if args.out_csv.is_absolute() else root / args.out_csv
     out_csv.parent.mkdir(parents=True, exist_ok=True)
