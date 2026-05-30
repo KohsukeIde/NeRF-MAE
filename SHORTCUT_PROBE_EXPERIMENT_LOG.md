@@ -3402,3 +3402,74 @@ Current paper-direction implication:
   `surface+cosine+jitter` as a coarse-transfer method with explicit localization
   diagnostics. New broad method searches should stop unless a reviewer-facing
   mechanism can be stated before running the job.
+
+## Experiment 44: Paper-Code Parity and `paper_loss_e300` Kill Experiment
+
+Snapshot:
+- 2026-05-31 JST
+
+Why this exists:
+- The official released NeRF-MAE implementation appears to optimize an effective
+  objective different from the nominal reading of the paper equation:
+  RGB/radiance loss is applied over all occupied voxels, while alpha/opacity
+  loss is applied over removed patch voxels.
+- The missing decisive comparison is not another method variant. It is a
+  p1.0/e300 counterfactual where RGB loss is restricted to removed occupied
+  voxels.
+
+What was already known:
+- `public_code_loss` is the current baseline and has been measured many times
+  (`baseline_e300`, `baseline_e1200`, etc.).
+- Historical `masked_only_rgb_loss` was measured only in low-budget / older
+  protocols, not as a p1.0/e300 clean kill experiment.
+
+Implementation:
+- Added `diagnostic:paper_loss` to the ABCI3 pretrain/FCOS scripts.
+- `paper_loss` uses:
+  - `PROBE_MODE=custom`
+  - `PROBE_RGB_INPUT=keep`
+  - `PROBE_ALPHA_INPUT=keep`
+  - `PROBE_ALPHA_TARGET=keep`
+  - `PROBE_RGB_LOSS=removed_occupied`
+  - `PROBE_ALPHA_LOSS=removed`
+  - `PROBE_RGB_WEIGHT=1.0`
+  - `PROBE_ALPHA_WEIGHT=1.0`
+- Extended `results_table.csv` metadata with:
+  - `LOSS_FAMILY`
+  - `RGB_LOSS_REGION`
+  - `ALPHA_LOSS_REGION`
+  - `RGB_LOSS_DENOM`
+  - `ALPHA_LOSS_DENOM`
+- Added `results/shortcut_probe_artifacts/paper_code_parity_report.md`.
+
+Validation:
+- `bash -n nerf_mae/probe_scripts/abci3_e300_gate_pretrain.pbs`
+- `bash -n nerf_mae/probe_scripts/abci3_e300_gate_fcos.pbs`
+- `python -m py_compile nerf_mae/tools/build_results_table.py`
+- `python nerf_mae/tools/build_results_table.py --root . --out-csv results/shortcut_probe_artifacts/results_table.csv`
+
+Submitted kill experiment:
+
+| condition | pretrain job | FCOS job | log dir |
+|---|---:|---:|---|
+| `paper_loss` | `1811826.pbs1` | `1811827.pbs1` | `output/launcher/paper_loss_e300_20260531_002753` |
+
+Current status:
+- `1811826.pbs1` is running on `rt_HF`.
+- `1811827.pbs1` is held with `afterok:1811826.pbs1`.
+
+Other-task availability check:
+- Semantic/SR scripts exist in this repo.
+- The currently linked Front3D finetuning data exposes `features/`, `obb/`, and
+  `aabb/`, but no ready semantic voxel directory or high-resolution SR feature
+  directory was found under the current `dataset/` tree.
+- Therefore semantic/SR triage is not immediately runnable without preparing or
+  restoring the corresponding data.
+
+Decision rule:
+- If `paper_loss_e300 ~= public_code_loss_e300`, the paper/code loss mismatch is
+  not the main downstream driver and the objective-fidelity route should stop.
+- If `public_code_loss_e300 >> paper_loss_e300`, decompose visible vs masked
+  occupied RGB paths next.
+- If `paper_loss_e300 > public_code_loss_e300`, the paper-like objective becomes
+  a simple-fix route worth validating with finetune seeds.

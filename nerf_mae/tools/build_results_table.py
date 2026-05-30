@@ -84,6 +84,8 @@ def infer_protocol(pretrain_save_name: str, source: str) -> tuple[str, str]:
         return "16", "ABCI3_1n8g_gb16_det0_shuffle_coord_jitter"
     if "abci3ramp_cj_det0_1n8g" in pretrain_save_name:
         return "16", "ABCI3_1n8g_gb16_det0_ramp_shape_coord_jitter"
+    if "abci3paperloss_clean_1n8g" in pretrain_save_name:
+        return "16", "ABCI3_1n8g_gb16_paper_loss_clean"
     if "abci3clean" in pretrain_save_name:
         return "", "ABCI3_clean"
     if source == "shortcut_probe_artifacts":
@@ -257,6 +259,77 @@ def infer_curriculum_env(condition: str, epoch: str) -> dict[str, str]:
     return fields
 
 
+def infer_loss_env(condition: str) -> dict[str, str]:
+    fields = {
+        "LOSS_FAMILY": "",
+        "RGB_LOSS_REGION": "",
+        "ALPHA_LOSS_REGION": "",
+        "RGB_LOSS_DENOM": "",
+        "ALPHA_LOSS_DENOM": "",
+    }
+    if condition == "baseline":
+        fields.update(
+            {
+                "LOSS_FAMILY": "official_effective",
+                "RGB_LOSS_REGION": "all_occupied",
+                "ALPHA_LOSS_REGION": "removed_patches",
+                "RGB_LOSS_DENOM": "occupied_count",
+                "ALPHA_LOSS_DENOM": "removed_count",
+            }
+        )
+    elif condition in {"paper_loss", "masked_only_rgb_loss"}:
+        fields.update(
+            {
+                "LOSS_FAMILY": "paper_like_counterfactual",
+                "RGB_LOSS_REGION": "removed_occupied",
+                "ALPHA_LOSS_REGION": "removed_patches",
+                "RGB_LOSS_DENOM": "removed_occupied_count",
+                "ALPHA_LOSS_DENOM": "removed_count",
+            }
+        )
+    elif condition in {
+        "cosine_ramp",
+        "cosine_ramp_alpha_shuffle",
+        "cosine_ramp_coord_jitter",
+        "linear_ramp_coord_jitter",
+        "step_ramp_coord_jitter",
+        "reverse_ramp_coord_jitter",
+        "constant_mixed_coord_jitter",
+        "cosine_coord_jitter",
+        "shuffle_coord_jitter",
+    }:
+        fields.update(
+            {
+                "LOSS_FAMILY": "probe_occupied_rgb",
+                "RGB_LOSS_REGION": "all_occupied",
+                "ALPHA_LOSS_REGION": "removed_patches",
+                "RGB_LOSS_DENOM": "occupied_count",
+                "ALPHA_LOSS_DENOM": "removed_count",
+            }
+        )
+    elif condition.startswith("surface_maturation"):
+        fields.update(
+            {
+                "LOSS_FAMILY": "probe_surface_gated_rgb",
+                "RGB_LOSS_REGION": "removed_occupied_gated",
+                "ALPHA_LOSS_REGION": "removed_patches",
+                "RGB_LOSS_DENOM": "removed_occupied_count_with_gate",
+                "ALPHA_LOSS_DENOM": "removed_count",
+            }
+        )
+    elif condition.startswith("pyramid_"):
+        fields.update(
+            {
+                "LOSS_FAMILY": "probe_pyramid_target",
+                "RGB_LOSS_REGION": "condition_dependent_occupied",
+                "ALPHA_LOSS_REGION": "removed_patches",
+                "RGB_LOSS_DENOM": "condition_dependent",
+                "ALPHA_LOSS_DENOM": "removed_count",
+            }
+        )
+    return fields
+
+
 def extract_metric(data: dict[str, Any], key: str, subkey: str) -> str:
     value = data.get(key, {})
     if isinstance(value, dict) and subkey in value:
@@ -330,6 +403,7 @@ def parse_run(root: Path, eval_json: Path, git_hash: str) -> dict[str, str]:
     surface_env = infer_surface_env(condition)
     pyramid_env = infer_pyramid_env(condition)
     curriculum_env = infer_curriculum_env(condition, epoch)
+    loss_env = infer_loss_env(condition)
     with eval_json.open() as f:
         data = json.load(f)
 
@@ -360,6 +434,7 @@ def parse_run(root: Path, eval_json: Path, git_hash: str) -> dict[str, str]:
     row.update(surface_env)
     row.update(pyramid_env)
     row.update(curriculum_env)
+    row.update(loss_env)
     return row
 
 
@@ -429,11 +504,16 @@ def main() -> None:
         "PROBE_RGB_WEIGHT",
         "PROBE_ALPHA_WEIGHT",
         "PROBE_ORDER",
+        "LOSS_FAMILY",
+        "RGB_LOSS_REGION",
+        "ALPHA_LOSS_REGION",
+        "RGB_LOSS_DENOM",
+        "ALPHA_LOSS_DENOM",
     ]
     out_csv = args.out_csv if args.out_csv.is_absolute() else root / args.out_csv
     out_csv.parent.mkdir(parents=True, exist_ok=True)
     with out_csv.open("w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     print(f"[info] wrote {len(rows)} rows to {out_csv}")
