@@ -54,18 +54,42 @@ export PATH="${PROBE_ENV_PREFIX}/bin:${PATH}"
 
 mkdir -p "${ROOT_DIR}/output/launcher" "${ROOT_DIR}/runtime"
 
-if ! (
-  cd "${ROOT_DIR}/nerf_rpn"
-  "${PROBE_PYTHON_BIN}" - <<'PY'
+check_sort_vertices() {
+  (
+    cd "${ROOT_DIR}/nerf_rpn"
+    "${PROBE_PYTHON_BIN}" - <<'PY'
+import torch
 import sort_vertices
 print("sort_vertices import ok")
 PY
-); then
-  echo "[info] sort_vertices import missing; building rotated_iou"
-  (
-    cd "${ROOT_DIR}/nerf_rpn"
-    bash "${ROOT_DIR}/nerf_rpn/build_rotated_iou.sh"
   )
+}
+
+if ! check_sort_vertices; then
+  echo "[info] sort_vertices import missing; building rotated_iou"
+  build_lock="${ROOT_DIR}/runtime/rotated_iou_build.lock"
+  acquired_lock=0
+  while true; do
+    if mkdir "${build_lock}" 2>/dev/null; then
+      acquired_lock=1
+      break
+    fi
+    echo "[info] waiting for rotated_iou build lock: ${build_lock}"
+    sleep 20
+    if check_sort_vertices; then
+      break
+    fi
+  done
+  if [[ "${acquired_lock}" == "1" ]]; then
+    if ! check_sort_vertices; then
+      (
+        cd "${ROOT_DIR}/nerf_rpn"
+        bash "${ROOT_DIR}/nerf_rpn/build_rotated_iou.sh"
+      )
+    fi
+    rmdir "${build_lock}"
+  fi
+  check_sort_vertices
 fi
 
 (

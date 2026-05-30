@@ -3627,7 +3627,7 @@ Single-seed ScanNet FCOS transfer jobs submitted:
 | job | condition | MAE checkpoint |
 |---|---|---|
 | `1811879.pbs1` | `baseline_e300_scannet_fcos1000_seed1` | `output/nerf_mae/results/nerfmae_all_p1.0_e300_seed1/epoch_300.pt` |
-| `1811880.pbs1` | `cosine_ramp_e300_scannet_fcos1000_seed1` | `output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1/epoch_300.pt` |
+| `1811887.pbs1` | `cosine_ramp_e300_scannet_fcos1000_seed1` | `output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1/epoch_300.pt` |
 | `1811881.pbs1` | `cosine_coord_jitter_e100_scannet_fcos1000_seed1` | `output/nerf_mae/results/nerfmae_cosine_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0/epoch_100.pt` |
 | `1811882.pbs1` | `surface_cosine_jitter_e300_scannet_fcos1000_seed1` | `output/nerf_mae/results/nerfmae_surface_maturation_cosine_coord_jitter_tau0p7_k30_w0p05_p1.0_e300_seed1_abci3smcos_cj_det0_1n8g/epoch_300.pt` |
 
@@ -3640,6 +3640,11 @@ Protocol notes:
   stability.
 - Semantic voxel labeling and voxel SR remain separate; the public NeRF-MAE
   README still marks those data releases as unavailable/coming soon.
+- First `cosine_ramp_e300` submission `1811880.pbs1` failed before training
+  because concurrent jobs raced while building the `sort_vertices` CUDA op.
+  The PBS script was updated to import `torch` before `sort_vertices` and to
+  guard any future build with a lock; the job was resubmitted as
+  `1811887.pbs1`.
 
 Decision use:
 - If the e300/curriculum variants transfer to ScanNet, the sample-efficiency
