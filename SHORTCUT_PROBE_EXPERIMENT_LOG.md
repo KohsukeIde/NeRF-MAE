@@ -3549,6 +3549,15 @@ Compute-normalized table skeleton:
 | `cosine_coord_jitter` | current F3D/pretrain split | 300 or e100-labelled historical row | TBD; protocol must be reconciled | ~=0.62 best row | measured, needs protocol cleanup |
 | `paper_loss_e300` | current F3D/pretrain split | 300 | 978k using 3260 train scenes | pending | job `1811826` -> `1811827` |
 
+Concrete artifact:
+- The actual compute-normalized table has now been written to:
+  - `results/shortcut_probe_artifacts/compute_normalized_sample_efficiency.md`
+  - `results/shortcut_probe_artifacts/compute_normalized_sample_efficiency.csv`
+- Important correction from that table: the current local pretraining split is
+  mixed (`1839` Front3D-like, `1171` HM3D-like, `250` Hypersim-like train
+  scenes), not strictly Front3D-only. Any "single-source e300" wording must be
+  revised unless a true Front3D-only pretraining row is produced.
+
 Important caution:
 - The `cosine_coord_jitter ~=0.62` row must be protocol-audited before it is
   used as the headline comparison. Some logs label this evidence as e100 while
