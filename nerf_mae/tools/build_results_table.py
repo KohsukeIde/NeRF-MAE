@@ -22,6 +22,7 @@ def parse_args() -> argparse.Namespace:
         default=[
             Path("output/nerf_rpn/results"),
             Path("results/shortcut_probe_artifacts/eval"),
+            Path("results/shortcut_probe_artifacts/eval_time_jitter"),
         ],
     )
     parser.add_argument(

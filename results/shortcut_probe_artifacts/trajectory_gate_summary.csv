@@ -1,0 +1,7 @@
+condition,epoch,AP@50,AP@75,R50@300,AP@25,interpretation
+surface_maturation_cosine_coord_jitter_tau0p7_k30_w0p05,300,0.639677,0.076593,0.764706,0.819032,AP50/recall strongest but localization weak
+linear_ramp_coord_jitter,100,0.598218,0.094226,0.727941,0.819769,best ramp-shape AP50 and recall
+constant_mixed_coord_jitter,100,0.572789,0.106165,0.698529,0.819203,constant control beats step/reverse/cosine on AP50
+step_ramp_coord_jitter,100,0.569337,0.075601,0.720588,0.807907,alpha-to-rgba order not clearly better than constant
+reverse_ramp_coord_jitter,100,0.550396,0.088527,0.683824,0.820146,reverse is weak but not decisively separated from cosine
+cosine_ramp_coord_jitter,100,0.539976,0.118126,0.698529,0.824429,best AP75 but weak AP50

@@ -3326,3 +3326,79 @@ Decision rule:
 - If order is supported, try at most one adaptive-ordering scout derived from
   the trajectory hypothesis. If that does not beat `cosine_coord_jitter`, switch
   to an analysis-heavy paper rather than adding more method knobs.
+
+## Experiment 43: Optimization-Trajectory Gate Results
+
+Snapshot:
+- 2026-05-30 JST
+
+Completed jobs:
+- Surface+cosine+jitter FCOS: `1807421.pbs1`
+- Ramp-shape scout pretrain/FCOS: `1808709-1808718.pbs1`
+- Eval-time jitter robustness: `1808719.pbs1`
+
+Artifacts:
+- `results/shortcut_probe_artifacts/trajectory_gate_summary.csv`
+- `results/shortcut_probe_artifacts/trajectory_gate_summary.md`
+- `results/shortcut_probe_artifacts/eval_time_jitter_summary.csv`
+- `results/shortcut_probe_artifacts/eval_time_jitter/*_jitter_eval/eval.json`
+
+Ramp-shape / surface+cosine results:
+
+| condition | epoch | AP@50 | AP@75 | R50@300 | AP@25 | reading |
+|---|---:|---:|---:|---:|---:|---|
+| `surface_maturation_cosine_coord_jitter_tau0p7_k30_w0p05` | 300 | 0.6397 | 0.0766 | 0.7647 | 0.8190 | AP50/recall strongest but localization weak |
+| `linear_ramp_coord_jitter` | 100 | 0.5982 | 0.0942 | 0.7279 | 0.8198 | best ramp-shape AP50 and recall |
+| `constant_mixed_coord_jitter` | 100 | 0.5728 | 0.1062 | 0.6985 | 0.8192 | constant control beats step/reverse/cosine on AP50 |
+| `step_ramp_coord_jitter` | 100 | 0.5693 | 0.0756 | 0.7206 | 0.8079 | alpha-to-rgba order not clearly better than constant |
+| `reverse_ramp_coord_jitter` | 100 | 0.5504 | 0.0885 | 0.6838 | 0.8201 | reverse is weak but not decisively separated from cosine |
+| `cosine_ramp_coord_jitter` | 100 | 0.5400 | 0.1181 | 0.6985 | 0.8244 | best AP75 but weak AP50 |
+
+Expected trajectory-supporting pattern:
+
+```text
+cosine ~= linear ~= step > constant > reverse
+```
+
+Observed AP@50 pattern:
+
+```text
+linear > constant > step > reverse > cosine
+```
+
+Decision:
+- This e100 ramp-shape gate does not cleanly support the strong
+  optimization-order hypothesis.
+- In particular, `constant_mixed_coord_jitter` is too strong relative to step and
+  cosine, so "alpha-to-RGBA order is the key mechanism" is not a safe claim.
+- Do not launch adaptive-ordering as the default next method.
+- `surface+cosine+jitter` is interesting because it gives the best AP@50/recall,
+  but AP@75 remains weak, so it should be diagnosed as coarse-transfer/localization
+  trade-off rather than promoted immediately as a method.
+
+Eval-time jitter robustness:
+
+| condition | normal AP@50 | jitter AP@50 | delta AP@50 | normal AP@75 | jitter AP@75 | delta AP@75 |
+|---|---:|---:|---:|---:|---:|---:|
+| `baseline_e300` | 0.4695 | 0.5068 | +0.0373 | 0.0869 | 0.0813 | -0.0056 |
+| `cosine_e300` | 0.5539 | 0.5479 | -0.0060 | 0.1135 | 0.0754 | -0.0381 |
+| `baseline_coord_jitter_e100` | 0.5564 | 0.5489 | -0.0075 | 0.1015 | 0.0745 | -0.0270 |
+| `cosine_coord_jitter_e100` | 0.6219 | 0.5621 | -0.0598 | 0.1031 | 0.0640 | -0.0391 |
+| `shuffle_coord_jitter_e300` | 0.4138 | 0.4000 | -0.0138 | 0.0574 | 0.0474 | -0.0100 |
+
+Reading:
+- Eval-time jitter does not explain `cosine_coord_jitter_e100` as simple
+  transform robustness. It drops more than `baseline_coord_jitter_e100`.
+- Coord-jitter pretraining does not produce a clean AP@75 robustness signature
+  under this eval perturbation.
+- Together with Experiment 41, this weakens both the simple equivariance story
+  and the simple eval-time robustness story.
+
+Current paper-direction implication:
+- The most defensible reading is now analysis-heavy:
+  several interventions can improve coarse transfer, but neither simple
+  feature equivariance nor simple alpha-to-RGBA order is a sufficient mechanism.
+- If a method branch is continued, the narrowest candidate is
+  `surface+cosine+jitter` as a coarse-transfer method with explicit localization
+  diagnostics. New broad method searches should stop unless a reviewer-facing
+  mechanism can be stated before running the job.
