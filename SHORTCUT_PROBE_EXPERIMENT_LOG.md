@@ -3594,3 +3594,56 @@ Decision branches after `paper_loss_e300`:
   remains viable.
 - Generality negative: analysis-heavy route, centered on AP@50 detection
   acceleration versus representation/fine-localization fidelity.
+
+## Experiment 46: ScanNet Detection Transfer Data Prep and Single-Seed Triage
+
+Snapshot:
+- 2026-05-31 01:24 JST
+
+Correction:
+- The previous "other-task data is not runnable" statement applies to semantic
+  voxel labeling and voxel super-resolution targets in the public NeRF-MAE
+  release, not to ScanNet OBB detection.
+- ScanNet OBB detection is available through the public NeRF-RPN HuggingFace
+  dataset. The RPN archive is sufficient for FCOS train/eval because it contains
+  extracted `features/`, `obb/`, and `scannet_split.npz`.
+
+Data prepared:
+- Downloaded archive:
+  `dataset/_downloads/archives/scannet_rpn_data.zip`
+- Extracted nested archive and linked:
+  `dataset/finetune/scannet_rpn_data -> dataset/_downloads/scannet_rpn_extract/scannet_rpn_data`
+- Validated layout:
+  - `features`: 90 `.npz`
+  - `obb`: 90 `.npy`
+  - split: 60 train / 15 val / 15 test scenes
+
+Added helper scripts:
+- `nerf_mae/probe_scripts/prepare_abci3_scannet_data.sh`
+- `nerf_rpn/tools/abci3_scannet_transfer_fcos.pbs`
+
+Single-seed ScanNet FCOS transfer jobs submitted:
+
+| job | condition | MAE checkpoint |
+|---|---|---|
+| `1811879.pbs1` | `baseline_e300_scannet_fcos1000_seed1` | `output/nerf_mae/results/nerfmae_all_p1.0_e300_seed1/epoch_300.pt` |
+| `1811880.pbs1` | `cosine_ramp_e300_scannet_fcos1000_seed1` | `output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1/epoch_300.pt` |
+| `1811881.pbs1` | `cosine_coord_jitter_e100_scannet_fcos1000_seed1` | `output/nerf_mae/results/nerfmae_cosine_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0/epoch_100.pt` |
+| `1811882.pbs1` | `surface_cosine_jitter_e300_scannet_fcos1000_seed1` | `output/nerf_mae/results/nerfmae_surface_maturation_cosine_coord_jitter_tau0p7_k30_w0p05_p1.0_e300_seed1_abci3smcos_cj_det0_1n8g/epoch_300.pt` |
+
+Protocol notes:
+- These are intentionally single-seed cross-dataset triage jobs. Do not expand
+  to multi-seed until ScanNet shows a meaningful ranking difference.
+- The jobs use `DATASET_NAME=scannet`, `SPLIT_NAME=scannet`, and the prepared
+  ScanNet RPN data root.
+- Batch size is set conservatively to 1 per GPU for first-pass ScanNet FCOS
+  stability.
+- Semantic voxel labeling and voxel SR remain separate; the public NeRF-MAE
+  README still marks those data releases as unavailable/coming soon.
+
+Decision use:
+- If the e300/curriculum variants transfer to ScanNet, the sample-efficiency
+  story is no longer Front3D-only.
+- If the ranking collapses on ScanNet, the current effect should be treated as
+  Front3D/OBB-objectness-specific unless low-label Front3D provides a separate
+  generality axis.
