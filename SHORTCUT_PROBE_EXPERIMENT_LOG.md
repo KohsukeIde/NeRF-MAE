@@ -3473,3 +3473,115 @@ Decision rule:
   occupied RGB paths next.
 - If `paper_loss_e300 > public_code_loss_e300`, the paper-like objective becomes
   a simple-fix route worth validating with finetune seeds.
+
+## Experiment 45: Sample-Efficiency Framing and Runnable Next Steps
+
+Snapshot:
+- 2026-05-31 JST
+
+Why this note exists:
+- The previous "AP@50 is near the NeRF-MAE paper ceiling" wording was too
+  pessimistic. Reaching a multi-source / long-budget AP@50 neighborhood with a
+  single-source e300 run should instead be treated as a sample-efficiency
+  anomaly, not as a reason to give up.
+- However, "e300 gives AP@50 ~= 0.62" is not by itself a strong paper claim.
+  The claim must specify what compute/data was reduced, what metric was
+  preserved, and whether the signal generalizes beyond AP@50 detection.
+
+Current strongest working claim:
+
+```text
+NeRF-MAE AP@50 transfer can become highly sample-efficient under target-side
+surface/structure-biased training: a single-source e300 regime approaches the
+reported multi-source e1200 AP@50 neighborhood. Whether this reflects a general
+representation improvement or a detection/objectness-specific acceleration is
+still unresolved.
+```
+
+What is already actionable from the feedback:
+- Keep `paper_loss_e300` as the first kill experiment. Do not launch another
+  broad method variant before this result is available.
+- Treat the paper/code objective mismatch as an objective-fidelity analysis, not
+  as "the paper is false".
+- Use AP@25/AP@50/Recall as paper-protocol metrics. Keep AP@75 as a
+  fine-localization diagnostic.
+- Reframe `cosine_coord_jitter` around sample efficiency rather than asymptotic
+  SOTA.
+- Build a compute-normalized comparison table using scene count, epochs, and
+  GPU time where available.
+- Since public semantic/SR data is not available, replace immediate semantic/SR
+  triage with feasible generality checks: ScanNet/cross-dataset detection if
+  data is ready, and low-label Front3D detection.
+- Run a targeted 1-2 day survey only after the immediate kill experiment is
+  interpreted. The survey target is positioning, not discovering another knob.
+
+What is not immediately actionable:
+- Semantic voxel labeling and voxel SR are not runnable from the current public
+  release or this workspace's linked data. The official README lists those
+  finetuning datasets as "Coming Soon", and the local Front3D detection archive
+  contains only `features/`, `obb/`, `aabb/`, and `3dfront_split.npz`.
+- Therefore semantic/SR should not block the current paper-loss kill
+  experiment. If private processed targets appear later, use
+  `nerf_mae/probe_scripts/prepare_abci3_other_task_data.sh` to symlink and
+  validate them.
+- Geometry-derived targets such as alpha-distance / SDF / normal should not be
+  implemented yet. They become justified only if `paper_loss_e300` and
+  feasible generality checks show that AP@50 improves while fine/dense geometry
+  remains weak.
+
+Current data availability:
+
+| data source | available in workspace | ready tasks |
+|---|---:|---|
+| `dataset/pretrain` | 3260 train / 20 val / 18 test scenes, 3260 feature files | NeRF-MAE pretrain |
+| `dataset/finetune/front3d_rpn_data` | 122 train / 20 val / 17 test scenes, 159 feature files | Front3D detection |
+| semantic voxel targets | not found | not runnable |
+| voxel SR `features_384` targets | not found | not runnable |
+
+Compute-normalized table skeleton:
+
+| setting | pretrain data | epochs | approx scene-epochs | AP@50 | source/status |
+|---|---|---:|---:|---:|---|
+| NeRF-MAE F3D no aug | F3D | 1200 | TBD | 0.543 | paper-reported; verify table before citation |
+| NeRF-MAE F3D aug | F3D | 1200 | TBD | 0.591 | paper-reported; verify table before citation |
+| NeRF-MAE multi-source aug | F3D+HM3D+Hypersim | 1200 | TBD | 0.630 | paper-reported; verify table before citation |
+| `baseline_e300` | current F3D/pretrain split | 300 | 978k using 3260 train scenes | 0.4695/0.4862/0.5258 across ft seeds | measured |
+| `cosine_coord_jitter` | current F3D/pretrain split | 300 or e100-labelled historical row | TBD; protocol must be reconciled | ~=0.62 best row | measured, needs protocol cleanup |
+| `paper_loss_e300` | current F3D/pretrain split | 300 | 978k using 3260 train scenes | pending | job `1811826` -> `1811827` |
+
+Important caution:
+- The `cosine_coord_jitter ~=0.62` row must be protocol-audited before it is
+  used as the headline comparison. Some logs label this evidence as e100 while
+  the broader discussion calls it e300. Before writing, reconcile checkpoint
+  epoch, pretrain condition, FCOS finetune seed, and result path in
+  `results_table.csv`.
+
+Immediate execution plan:
+1. Wait for `paper_loss_e300` (`1811826.pbs1` -> `1811827.pbs1`).
+2. After completion, compare against `public_code_loss_e300` on AP@25/AP@50,
+   Recall@50, and AP@75 diagnostic.
+3. If `paper_loss` differs materially, run at most the visible/masked occupied
+   RGB path decomposition:
+   - `visible_occupied_rgb_only`
+   - `masked_occupied_rgb_only`
+4. If `paper_loss` is similar to public code, stop the objective-fidelity
+   branch and move to sample-efficiency/generalization checks.
+5. For generalization without semantic/SR data, prioritize:
+   - ScanNet detection triage if ready data/checkpoint loading exists.
+   - Low-label Front3D detection using existing detection data.
+6. In parallel, prepare the paper infrastructure:
+   - finalize `paper_code_parity_report.md`
+   - generate a compute-normalized sample-efficiency table
+   - run targeted NeRF-MAE follow-up / neural-field SSL survey
+
+Decision branches after `paper_loss_e300`:
+- `paper_loss ~= public_code_loss`: paper/code mismatch is not the main driver;
+  write it as an audit result and focus on sample efficiency/generalization.
+- `public_code_loss >> paper_loss`: dense occupied RGB supervision may be the
+  effective transfer path; decompose visible vs masked occupied RGB.
+- `paper_loss > public_code_loss`: paper-like masked occupied RGB becomes a
+  simple-fix method route worth validating with finetune seeds.
+- Generality positive on cross-dataset/low-label: sample-efficient method paper
+  remains viable.
+- Generality negative: analysis-heavy route, centered on AP@50 detection
+  acceleration versus representation/fine-localization fidelity.
