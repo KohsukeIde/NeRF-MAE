@@ -3844,3 +3844,39 @@ Paper-facing read:
   efficiency candidate rather than a settled final main-table method row.
 - Current local rows are mixed-source. Do not call them "single-source" unless
   a true Front3D-only pretraining row is isolated.
+
+## Experiment 51: `paper_loss_e300` Slow-Run Correction
+
+Snapshot:
+- 2026-05-31 JST
+
+Issue:
+- Original `paper_loss_e300` pretrain job `1811826.pbs1` was submitted with
+  `DETERMINISTIC=1`.
+- It was not a 1200-epoch run. PBS variables showed `EPOCHS=300`.
+- The large `Time Use` value in `qstat` was cumulative CPU time over the
+  allocated CPU cores, not walltime. `qstat -f` showed walltime around `20h`
+  when inspected.
+- Live worker log showed progress only to about epoch `93/300`, with about
+  `13.1 min/epoch`.
+- Recent optimized 1-node/8-H200 det0 e300 runs take about `2.32 min/epoch`.
+  The slow run was therefore about `5.6x` slower, consistent with
+  deterministic CUDA/cuDNN behavior on the 3D convolution/transpose-convolution
+  heavy MAE decoder.
+
+Action:
+- Stopped the misconfigured jobs:
+  - old pretrain: `1811826.pbs1`
+  - old dependent FCOS: `1811827.pbs1`
+- Resubmitted the diagnostic using the current ABCI-optimized scout protocol:
+  `DETERMINISTIC=0`, 1 HF node, 8 H200 GPUs, global batch 16.
+
+Replacement jobs:
+
+| condition | pretrain | dependent FCOS | log dir |
+|---|---|---|---|
+| `paper_loss_det0` | `1812733.pbs1` | `1812734.pbs1` | `output/launcher/paper_loss_e300_det0_20260531_203813` |
+
+Expected runtime:
+- Pretrain should be close to previous det0 e300 runs, about `11.6-12h`.
+- Dependent FCOS will start after `1812733.pbs1` completes.
