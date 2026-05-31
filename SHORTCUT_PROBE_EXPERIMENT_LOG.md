@@ -3652,3 +3652,46 @@ Decision use:
 - If the ranking collapses on ScanNet, the current effect should be treated as
   Front3D/OBB-objectness-specific unless low-label Front3D provides a separate
   generality axis.
+
+## Experiment 47: ScanNet Transfer Triage Results
+
+Snapshot:
+- 2026-05-31 JST
+
+Artifacts:
+- `results/shortcut_probe_artifacts/scannet_transfer_triage.csv`
+- `results/shortcut_probe_artifacts/scannet_transfer_triage.md`
+
+Protocol:
+- Public NeRF-RPN ScanNet OBB detection archive.
+- 60 train / 15 val / 15 test scenes.
+- FCOS transfer for 1000 epochs, single finetune seed.
+
+Results:
+
+| condition | AP@25 | AP@50 | AP@75 | R@50 top300 | R@50 top1000 |
+|---|---:|---:|---:|---:|---:|
+| `baseline_e300` | 0.5013 | 0.1898 | 0.0024 | 0.3596 | 0.3596 |
+| `cosine_ramp_e300` | 0.5883 | 0.1912 | 0.0006 | 0.4039 | 0.4187 |
+| `cosine_coord_jitter_e100` | 0.5540 | 0.1864 | 0.0022 | 0.3695 | 0.3744 |
+| `surface_cosine_jitter_e300` | 0.5759 | 0.1782 | 0.0014 | 0.3596 | 0.3645 |
+
+Interpretation:
+- `cosine_ramp_e300` is the best AP@50 row, but the gain over
+  `baseline_e300` is only `+0.0014`. Treat this as a single-seed tie, not as
+  evidence of robust cross-dataset AP@50 improvement.
+- `cosine_ramp_e300` does improve AP@25 and R@50, so the strongest ScanNet
+  signal is coarse proposal/objectness transfer, not tight AP@50/AP@75
+  localization.
+- `cosine_coord_jitter_e100` and `surface_cosine_jitter_e300` do not improve
+  ScanNet AP@50 over the baseline row.
+- Current conclusion: the Front3D AP@50 gain does not cleanly transfer to
+  ScanNet AP@50 in this first single-seed triage. The sample-efficiency story
+  now needs either `paper_loss_e300` support, low-label support, or a clearer
+  coarse-recall/AP@25 framing.
+
+Decision:
+- Do not expand these ScanNet rows to multi-seed yet.
+- Wait for `paper_loss_e300`. If objective-fidelity shows a material effect,
+  rerun the relevant objective on ScanNet rather than spending seeds on older
+  variants.
