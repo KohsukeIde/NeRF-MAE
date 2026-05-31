@@ -3795,3 +3795,52 @@ Decision:
   3. shell/gradient target as an auxiliary diagnostic instead of a hard SDF
      objective.
 - Keep this as target-quality evidence for the geometry-derived target branch.
+
+## Experiment 50: Compute-Normalized Sample-Efficiency Main Table
+
+Snapshot:
+- 2026-05-31 JST
+
+Purpose:
+- Turn the compute-efficiency discussion into a paper-facing main table with
+  scene count, epochs, scene-epochs, approximate ABCI3/H200 GPU-days, AP@25,
+  AP@50, and Recall@50.
+
+Artifacts:
+- `results/shortcut_probe_artifacts/compute_normalized_sample_efficiency.md`
+- `results/shortcut_probe_artifacts/compute_normalized_sample_efficiency.csv`
+
+Compute convention:
+- Paper multi-source pretraining scene count:
+  `1998 Front3D + 1330 HM3D + 250 Hypersim = 3578`.
+- Paper multi-source e1200 scene-epochs:
+  `3578 * 1200 = 4,293,600`.
+- Local pretraining split: `3260` train scenes.
+- ABCI3/H200 estimate uses measured local 1-node/8-H200 pretraining speed:
+  e300 walltime is about `11.63h`, so e300 costs
+  `8 * 11.63 / 24 = 3.88` H200 GPU-days. e100 costs `1.29` H200 GPU-days.
+
+Main rows:
+
+| setting | scenes | epochs | scene-epochs | rel. vs paper multi | approx H200 GPU-days | AP@25 | AP@50 | R@50 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| NeRF-MAE (F3D), aug | 1998 | 1200 | 2,397,600 | 0.558 | 9.52 | 0.830 | 0.591 | 0.743 |
+| NeRF-MAE (Ours), aug | 3578 | 1200 | 4,293,600 | 1.000 | 17.05 | 0.853 | 0.630 | 0.745 |
+| `baseline_e300` | 3260 | 300 | 978,000 | 0.228 | 3.88 | 0.799 | 0.494 | 0.662 |
+| `cosine_ramp_e300` | 3260 | 300 | 978,000 | 0.228 | 3.88 | 0.829 | 0.572 | 0.701 |
+| `baseline_e1200` | 3260 | 1200 | 3,912,000 | 0.911 | 15.52 | 0.849 | 0.589 | 0.713 |
+| `cosine_coord_jitter_e100` | 3260 | 100 | 326,000 | 0.076 | 1.29 | 0.799 | 0.587 | 0.718 |
+| `surface+cosine+jitter_e300` | 3260 | 300 | 978,000 | 0.228 | 3.88 | 0.819 | 0.640 | 0.765 |
+| `paper_loss_e300` | 3260 | 300 | 978,000 | 0.228 | 3.88 | pending | pending | pending |
+
+Paper-facing read:
+- e300 local rows are `22.8%` of the paper multi-source scene-epochs, i.e.
+  about `4.39x` less compute under the ABCI/H200-normalized estimate.
+- The `~1/12` phrasing should be reserved for `cosine_coord_jitter_e100`,
+  which is `7.6%` of paper multi-source scene-epochs, i.e. `13.17x` less
+  compute, with mean AP@50 `0.587` and Recall@50 `0.718`.
+- The best AP@50 row (`surface+cosine+jitter_e300`, `0.640`) is still
+  single-seed and has weak AP@75, so it should be treated as a compute
+  efficiency candidate rather than a settled final main-table method row.
+- Current local rows are mixed-source. Do not call them "single-source" unless
+  a true Front3D-only pretraining row is isolated.
