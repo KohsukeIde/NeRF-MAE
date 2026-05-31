@@ -3736,3 +3736,62 @@ Decision use:
   low-label gain.
 - If scratch is competitive, the sample-efficiency story needs to retreat to
   full-label compute efficiency and objective/mechanism analysis.
+
+## Experiment 49: Alpha Boundary / SDF Target-Quality Audit
+
+Snapshot:
+- 2026-05-31 JST
+
+Purpose:
+- Check whether alpha-derived boundary/SDF/normal targets are visually and
+  topologically usable before launching any Boundary-SDF MAE pretraining.
+- This follows the feedback that SDF/normal target quality should be audited
+  before adding another method branch.
+
+Added helper:
+- `nerf_mae/probe_scripts/audit_alpha_boundary_targets.py`
+
+Protocol:
+- Dataset: Front3D OBB features from
+  `dataset/finetune/front3d_rpn_data/features`.
+- Split: first 20 train scenes from
+  `dataset/finetune/front3d_rpn_data/3dfront_split.npz`.
+- Density-to-alpha conversion: same FCOS-loader style conversion,
+  `alpha = 1 - exp(-exp(density) / 100)`.
+- Thresholds: `0.01`, `0.05`, `0.1`.
+- Per scene/threshold outputs: alpha slice, thresholded occupancy, shell,
+  distance-to-shell, alpha-gradient magnitude.
+
+Artifacts:
+- `results/shortcut_probe_artifacts/alpha_boundary_audit_front3d_train20/README.md`
+- `results/shortcut_probe_artifacts/alpha_boundary_audit_front3d_train20/alpha_boundary_metrics.csv`
+- 60 visualization PNGs under
+  `results/shortcut_probe_artifacts/alpha_boundary_audit_front3d_train20/`
+
+Summary:
+
+| threshold | scenes | occ ratio mean | shell/occ mean | components median | dist p90 mean | grad p95 mean |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0.01 | 20 | 0.314632 | 0.6869 | 440.5 | 13.575 | 0.353083 |
+| 0.05 | 20 | 0.283159 | 0.7476 | 502.0 | 13.865 | 0.353083 |
+| 0.1 | 20 | 0.220480 | 0.8227 | 736.5 | 14.427 | 0.353083 |
+
+Qualitative read:
+- Visualization is feasible and useful: the alpha slices expose coherent room
+  surfaces, but the hard-thresholded occupancy/shell maps are noisy and
+  threshold-sensitive.
+- `thr=0.01` is the least fragmented of the tested thresholds, but even there
+  the median connected-component count is high and shell/occupied ratio is
+  about `0.69`.
+- Higher thresholds (`0.05`, `0.1`) increase fragmentation and make most
+  occupied voxels shell-like. For example, `3dfront_1013_00` at `thr=0.1`
+  has `3054` components and shell/occupied ratio `0.923`.
+
+Decision:
+- Do not launch raw thresholded Boundary-SDF MAE yet.
+- If the geometry-target route is reopened, first try one of:
+  1. low threshold (`0.01`) plus largest-component / small-component filtering,
+  2. smoothed alpha before boundary extraction,
+  3. shell/gradient target as an auxiliary diagnostic instead of a hard SDF
+     objective.
+- Keep this as target-quality evidence for the geometry-derived target branch.
