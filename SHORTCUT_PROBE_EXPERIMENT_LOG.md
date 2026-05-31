@@ -3695,3 +3695,44 @@ Decision:
 - Wait for `paper_loss_e300`. If objective-fidelity shows a material effect,
   rerun the relevant objective on ScanNet rather than spending seeds on older
   variants.
+
+## Experiment 48: Front3D Low-Label 50% Gate Submission
+
+Snapshot:
+- 2026-05-31 JST
+
+Purpose:
+- Test whether the current sample-efficiency signal also improves label
+  efficiency on Front3D, following the feedback that low-label detection is the
+  next most important evidence axis after full-label Front3D and ScanNet.
+
+Protocol:
+- Dataset: Front3D OBB detection, public/local `front3d_rpn_data`.
+- Split: `3dfront_split.npz`, 122 train / 20 val / 17 test scenes.
+- Label fraction: `PERCENT_TRAIN=0.5`.
+- FCOS transfer: 1000 epochs, single finetune seed `1`.
+- Queue: `rt_HG`, one GPU per job.
+- This is a gate. Do not expand to all label fractions or multi-seed until the
+  50% result shows a meaningful ranking difference.
+
+Added helper:
+- `nerf_rpn/tools/abci3_front3d_low_label_fcos.pbs`
+
+Submitted jobs:
+
+| job | condition | checkpoint |
+|---|---|---|
+| `1812644.pbs1` | `front3d_scratch_lowlabel_pt05_seed1_fcos1000` | scratch backbone |
+| `1812645.pbs1` | `baseline_e300_lowlabel_pt05_seed1_fcos1000` | `output/nerf_mae/results/nerfmae_all_p1.0_e300_seed1/epoch_300.pt` |
+| `1812646.pbs1` | `cosine_ramp_e300_lowlabel_pt05_seed1_fcos1000` | `output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1/epoch_300.pt` |
+| `1812647.pbs1` | `surface_cosine_jitter_e300_lowlabel_pt05_seed1_fcos1000` | `output/nerf_mae/results/nerfmae_surface_maturation_cosine_coord_jitter_tau0p7_k30_w0p05_p1.0_e300_seed1_abci3smcos_cj_det0_1n8g/epoch_300.pt` |
+
+Decision use:
+- If `cosine_ramp_e300` or `surface_cosine_jitter_e300` clearly beats
+  `baseline_e300` at 50% labels, expand low-label to 25%/50% and finetune
+  seeds for the likely paper rows.
+- If all pretrained rows are close and only scratch is lower, the paper can
+  still claim generic pretraining label efficiency, but not a method-specific
+  low-label gain.
+- If scratch is competitive, the sample-efficiency story needs to retreat to
+  full-label compute efficiency and objective/mechanism analysis.

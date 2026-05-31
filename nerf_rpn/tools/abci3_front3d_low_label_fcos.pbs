@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+#PBS -q rt_HG
+#PBS -l select=1
+#PBS -l walltime=72:00:00
+#PBS -P gag51404
+#PBS -j oe
+
+set -euo pipefail
+
+cd "${PBS_O_WORKDIR:?PBS_O_WORKDIR is not set}"
+
+ROOT_DIR="${ROOT_DIR:-${PBS_O_WORKDIR}}"
+PROBE_ENV_PREFIX="${PROBE_ENV_PREFIX:-${ROOT_DIR}/.venv-abci3}"
+ABCI3_CUDA_MODULE="${ABCI3_CUDA_MODULE:-cuda/11.8/11.8.0}"
+
+MODE="${MODE:?MODE is required: probe or scratch}"
+VARIANT_NAME="${VARIANT_NAME:?VARIANT_NAME is required}"
+SAVE_NAME="${SAVE_NAME:?SAVE_NAME is required}"
+MAE_CHECKPOINT="${MAE_CHECKPOINT:-}"
+PRETRAIN_SAVE_NAME="${PRETRAIN_SAVE_NAME:-${VARIANT_NAME}}"
+
+FRONT3D_DATA_ROOT="${FRONT3D_DATA_ROOT:-${ROOT_DIR}/dataset/finetune/front3d_rpn_data}"
+PERCENT_TRAIN="${PERCENT_TRAIN:-0.5}"
+GPU_IDS="${GPU_IDS:-0}"
+FINETUNE_SEED="${FINETUNE_SEED:-1}"
+FCOS_NUM_EPOCHS="${FCOS_NUM_EPOCHS:-1000}"
+FCOS_BATCH_SIZE_PER_GPU="${FCOS_BATCH_SIZE_PER_GPU:-2}"
+FCOS_LR="${FCOS_LR:-1e-4}"
+FCOS_WEIGHT_DECAY="${FCOS_WEIGHT_DECAY:-1e-3}"
+FCOS_LR_SCHEDULER="${FCOS_LR_SCHEDULER:-onecycle_epoch}"
+FCOS_EVAL_INTERVAL="${FCOS_EVAL_INTERVAL:-10}"
+USE_WANDB="${USE_WANDB:-0}"
+WANDB_MODE="${WANDB_MODE:-offline}"
+DETERMINISTIC="${DETERMINISTIC:-1}"
+SKIP_EXISTING="${SKIP_EXISTING:-1}"
+
+[[ -d "${FRONT3D_DATA_ROOT}/features" ]] || { echo "[error] missing Front3D features: ${FRONT3D_DATA_ROOT}/features" >&2; exit 1; }
+[[ -d "${FRONT3D_DATA_ROOT}/obb" ]] || { echo "[error] missing Front3D OBBs: ${FRONT3D_DATA_ROOT}/obb" >&2; exit 1; }
+[[ -f "${FRONT3D_DATA_ROOT}/3dfront_split.npz" ]] || { echo "[error] missing Front3D split: ${FRONT3D_DATA_ROOT}/3dfront_split.npz" >&2; exit 1; }
+
+EVAL_JSON="${ROOT_DIR}/output/nerf_rpn/results/${SAVE_NAME}_eval/eval.json"
+if [[ "${SKIP_EXISTING}" == "1" && -f "${EVAL_JSON}" ]]; then
+  echo "[info] skip existing eval=${EVAL_JSON}"
+  exit 0
+fi
+
+if [[ "${MODE}" == "probe" ]]; then
+  [[ -n "${MAE_CHECKPOINT}" ]] || { echo "[error] MAE_CHECKPOINT is required for MODE=probe" >&2; exit 1; }
+  [[ -f "${MAE_CHECKPOINT}" ]] || { echo "[error] missing MAE checkpoint: ${MAE_CHECKPOINT}" >&2; exit 1; }
+elif [[ "${MODE}" != "scratch" ]]; then
+  echo "[error] unsupported MODE=${MODE}; expected probe or scratch" >&2
+  exit 1
+fi
+
+source /etc/profile.d/modules.sh
+module load "${ABCI3_CUDA_MODULE}"
+
+export PROBE_PYTHON_BIN="${PROBE_ENV_PREFIX}/bin/python"
+export PROBE_ENV_PREFIX
+export PROBE_RUNTIME_ROOT="${PROBE_RUNTIME_ROOT:-${ROOT_DIR}/runtime}"
+export PROBE_LOG_ROOT_DEFAULT="${PROBE_LOG_ROOT_DEFAULT:-${ROOT_DIR}/output/launcher}"
+export WANDB_DIR="${WANDB_DIR:-${ROOT_DIR}/output/wandb}"
+export TMPDIR="${TMPDIR:-${ROOT_DIR}/runtime/tmp}"
+export TORCH_EXTENSIONS_DIR="${TORCH_EXTENSIONS_DIR:-${ROOT_DIR}/runtime/torch_extensions}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-${ROOT_DIR}/runtime/cache}"
+export TORCH_HOME="${TORCH_HOME:-${ROOT_DIR}/runtime/torch_home}"
+export WANDB_MODE
+export PYTHONPATH="${ROOT_DIR}"
+export PATH="${PROBE_ENV_PREFIX}/bin:${PATH}"
+
+mkdir -p "${ROOT_DIR}/output/launcher" "${ROOT_DIR}/runtime"
+
+check_sort_vertices() {
+  (
+    cd "${ROOT_DIR}/nerf_rpn"
+    "${PROBE_PYTHON_BIN}" - <<'PY'
+import torch
+import sort_vertices
+print("sort_vertices import ok")
+PY
+  )
+}
+
+if ! check_sort_vertices; then
+  echo "[info] sort_vertices import missing; building rotated_iou"
+  build_lock="${ROOT_DIR}/runtime/rotated_iou_build.lock"
+  acquired_lock=0
+  while true; do
+    if mkdir "${build_lock}" 2>/dev/null; then
+      acquired_lock=1
+      break
+    fi
+    echo "[info] waiting for rotated_iou build lock: ${build_lock}"
+    sleep 20
+    if check_sort_vertices; then
+      break
+    fi
+  done
+  if [[ "${acquired_lock}" == "1" ]]; then
+    if ! check_sort_vertices; then
+      (
+        cd "${ROOT_DIR}/nerf_rpn"
+        bash "${ROOT_DIR}/nerf_rpn/build_rotated_iou.sh"
+      )
+    fi
+    rmdir "${build_lock}"
+  fi
+  check_sort_vertices
+fi
+
+common_env=(
+  GPU_IDS="${GPU_IDS}"
+  DATASET_NAME=front3d
+  SPLIT_NAME=3dfront
+  DATA_ROOT="${FRONT3D_DATA_ROOT}"
+  PERCENT_TRAIN="${PERCENT_TRAIN}"
+  FCOS_NUM_EPOCHS="${FCOS_NUM_EPOCHS}"
+  FCOS_LR="${FCOS_LR}"
+  FCOS_WEIGHT_DECAY="${FCOS_WEIGHT_DECAY}"
+  FCOS_BATCH_SIZE_PER_GPU="${FCOS_BATCH_SIZE_PER_GPU}"
+  FCOS_EVAL_INTERVAL="${FCOS_EVAL_INTERVAL}"
+  USE_WANDB="${USE_WANDB}"
+  WANDB_MODE="${WANDB_MODE}"
+  SAVE_NAME="${SAVE_NAME}"
+  RUN_TAG="${SAVE_NAME}"
+  SEED="${FINETUNE_SEED}"
+  DETERMINISTIC="${DETERMINISTIC}"
+  LR_SCHEDULER="${FCOS_LR_SCHEDULER}"
+)
+
+if [[ "${MODE}" == "scratch" ]]; then
+  (
+    cd "${ROOT_DIR}"
+    env "${common_env[@]}" bash "${ROOT_DIR}/nerf_rpn/run_fcos_fair_scratch_variant.sh"
+  )
+else
+  (
+    cd "${ROOT_DIR}"
+    env "${common_env[@]}" \
+      PRETRAIN_SAVE_NAME="${PRETRAIN_SAVE_NAME}" \
+      VARIANT_NAME="${VARIANT_NAME}" \
+      PRETRAIN_CHECKPOINT="${MAE_CHECKPOINT}" \
+      bash "${ROOT_DIR}/nerf_rpn/run_fcos_probe_variant.sh"
+  )
+fi
+
+test -f "${EVAL_JSON}"
+echo "[info] Front3D low-label FCOS complete eval=${EVAL_JSON}"
