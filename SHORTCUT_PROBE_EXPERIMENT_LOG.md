@@ -3937,3 +3937,63 @@ Decision:
 - Keep `paper_loss_e300` in the compute-normalized table as a negative/neutral
   objective-fidelity gate: it rules out a collapse but does not produce a simple
   objective-fix story.
+
+## Experiment 53: Low-Label 25%/10%/100% Expansion Submitted
+
+Snapshot:
+- 2026-06-01 JST
+
+Artifacts:
+- `results/shortcut_probe_artifacts/lowlabel_expansion_jobs_20260601.md`
+- `results/shortcut_probe_artifacts/lowlabel_expansion_jobs_20260601.csv`
+
+Purpose:
+- Follow up the positive 50% low-label gate with the compact paper-facing row
+  set at 25%, 10%, and 100% labels.
+- Avoid launching new method variants. This is validation for the
+  compute+label-efficiency paper direction.
+
+Protocol:
+- Dataset: Front3D OBB detection.
+- FCOS: 1000 epochs, finetune seed `1`.
+- PBS: `nerf_rpn/tools/abci3_front3d_low_label_fcos.pbs`.
+- Existing 50% rows are complete and were not resubmitted.
+
+Submitted jobs:
+
+| job | labels | condition |
+|---|---:|---|
+| `1815787.pbs1` | 25% | `scratch` |
+| `1815788.pbs1` | 25% | `baseline_e300` |
+| `1815789.pbs1` | 25% | `cosine_ramp_e300` |
+| `1815790.pbs1` | 25% | `surface_cosine_jitter_e300` |
+| `1815791.pbs1` | 10% | `scratch` |
+| `1815792.pbs1` | 10% | `baseline_e300` |
+| `1815793.pbs1` | 10% | `cosine_ramp_e300` |
+| `1815794.pbs1` | 10% | `surface_cosine_jitter_e300` |
+| `1815795.pbs1` | 100% | `scratch` |
+| `1815796.pbs1` | 100% | `baseline_e300` |
+| `1815797.pbs1` | 100% | `cosine_ramp_e300` |
+| `1815798.pbs1` | 100% | `surface_cosine_jitter_e300` |
+
+Variant decision rule:
+- If `surface_cosine_jitter_e300` is consistently at or above
+  `cosine_ramp_e300` on full-label, 50%, and 25% labels, and does not introduce
+  a severe ScanNet regression, promote `surface_cosine_jitter_e300` to the main
+  method.
+- If it is mainly stronger in in-domain low-label but weaker on ScanNet or
+  full-label, keep `cosine_ramp_e300` as the main method and use surface
+  anchoring as a low-label/in-domain ablation component.
+- If 25%/10% collapse or reverse, narrow the label-efficiency claim to the
+  moderate-label regime supported by the data, currently 50%.
+
+Checkpoint note:
+- Key existing e300/e1200 pretraining runs do not have intermediate
+  `epoch_100.pt` / `epoch_200.pt` checkpoints on disk:
+  - `baseline_e300`: `epoch_300.pt`
+  - `cosine_ramp_e300`: `epoch_300.pt`
+  - `surface_cosine_jitter_e300`: `epoch_300.pt`, `model_best.pt`
+  - `baseline_e1200`: `epoch_1200.pt`
+- For future paper runs requiring epoch curves, set
+  `PRETRAIN_CHECKPOINT_INTERVAL=100` explicitly or run separate e100/e200
+  pretraining jobs under the final protocol.
