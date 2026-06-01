@@ -70,6 +70,11 @@ higher-recall / more-inflated ablation.
 Boundary-SDF pretraining should only be launched after the low-label 25%/10%
 gate is read:
 
-- If low-label is overwhelming, keep Boundary-SDF as future/appendix.
+- If low-label is overwhelming, keep Boundary-SDF as future/appendix. The
+  current working threshold for "overwhelming" is roughly `10%` labels with
+  `surface_cosine_jitter` at least `+0.15 AP@50` over scratch and `+0.10 AP@50`
+  over the e300 baseline, or an equivalently strong 25%/50% pattern.
 - If low-label is only moderate, use this v2 result to justify a small
   Boundary-SDF scout.
+- If low-label collapses below 25%/10%, use Boundary-SDF only if the paper
+  remains AAAI-strong-accept driven rather than accept/borderline driven.
