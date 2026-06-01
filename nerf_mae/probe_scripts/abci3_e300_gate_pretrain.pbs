@@ -66,6 +66,13 @@ PYR_RGB_POOL="${PYR_RGB_POOL:-}"
 PYR_UPSAMPLE="${PYR_UPSAMPLE:-}"
 PYR_ALPHA_UPSAMPLE="${PYR_ALPHA_UPSAMPLE:-}"
 PYR_LOG_STATS="${PYR_LOG_STATS:-}"
+BOUNDARY_SDF_MODE="${BOUNDARY_SDF_MODE:-}"
+BOUNDARY_SDF_WEIGHT="${BOUNDARY_SDF_WEIGHT:-}"
+BOUNDARY_ALPHA_SMOOTH_SIGMA="${BOUNDARY_ALPHA_SMOOTH_SIGMA:-}"
+BOUNDARY_ALPHA_THRESHOLD="${BOUNDARY_ALPHA_THRESHOLD:-}"
+BOUNDARY_DISTANCE_CLIP="${BOUNDARY_DISTANCE_CLIP:-}"
+BOUNDARY_SDF_LOSS="${BOUNDARY_SDF_LOSS:-}"
+BOUNDARY_SDF_MASK="${BOUNDARY_SDF_MASK:-}"
 AUTO_RESUME_PRETRAIN="${AUTO_RESUME_PRETRAIN:-1}"
 RESUME_ALLOW_PARTIAL="${RESUME_ALLOW_PARTIAL:-1}"
 SKIP_EXISTING="${SKIP_EXISTING:-1}"
@@ -186,6 +193,9 @@ case "${KIND}:${CONDITION}" in
     SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
   pyramid:pyramid_alpha|pyramid:pyramid_rgb|pyramid:pyramid_both)
+    SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
+    ;;
+  boundary_sdf:boundary_sdf_aux)
     SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
   *)
@@ -317,6 +327,13 @@ export PYR_RGB_POOL="$(printf '%q' "${PYR_RGB_POOL}")"
 export PYR_UPSAMPLE="$(printf '%q' "${PYR_UPSAMPLE}")"
 export PYR_ALPHA_UPSAMPLE="$(printf '%q' "${PYR_ALPHA_UPSAMPLE}")"
 export PYR_LOG_STATS="$(printf '%q' "${PYR_LOG_STATS}")"
+export BOUNDARY_SDF_MODE="$(printf '%q' "${BOUNDARY_SDF_MODE}")"
+export BOUNDARY_SDF_WEIGHT="$(printf '%q' "${BOUNDARY_SDF_WEIGHT}")"
+export BOUNDARY_ALPHA_SMOOTH_SIGMA="$(printf '%q' "${BOUNDARY_ALPHA_SMOOTH_SIGMA}")"
+export BOUNDARY_ALPHA_THRESHOLD="$(printf '%q' "${BOUNDARY_ALPHA_THRESHOLD}")"
+export BOUNDARY_DISTANCE_CLIP="$(printf '%q' "${BOUNDARY_DISTANCE_CLIP}")"
+export BOUNDARY_SDF_LOSS="$(printf '%q' "${BOUNDARY_SDF_LOSS}")"
+export BOUNDARY_SDF_MASK="$(printf '%q' "${BOUNDARY_SDF_MASK}")"
 export NERFMAE_DDP_USE_ENV=1
 export NERFMAE_DDP_NUM_NODES="$(printf '%q' "${PRETRAIN_NODES}")"
 export NERFMAE_DDP_WORLD_SIZE="$(printf '%q' "${PRETRAIN_WORLD_SIZE}")"
@@ -821,6 +838,26 @@ case "${KIND}:${CONDITION}" in
       PYR_UPSAMPLE="${PYR_UPSAMPLE:-trilinear}" \
       PYR_ALPHA_UPSAMPLE="${PYR_ALPHA_UPSAMPLE:-nearest}" \
       PYR_LOG_STATS="${PYR_LOG_STATS:-1}" \
+      PROBE_MODE=custom \
+      PROBE_RGB_INPUT=keep \
+      PROBE_ALPHA_INPUT=keep \
+      PROBE_ALPHA_TARGET=keep \
+      PROBE_RGB_LOSS=occupied \
+      PROBE_ALPHA_LOSS=removed \
+      PROBE_RGB_WEIGHT=1.0 \
+      PROBE_ALPHA_WEIGHT=1.0 \
+      bash train_mae3d.sh
+    ;;
+  boundary_sdf:boundary_sdf_aux)
+    env "${common_env[@]}" "${resume_env[@]}" \
+      TRAIN_ENTRYPOINT=run_swin_boundary_sdf.py \
+      BOUNDARY_SDF_MODE="${BOUNDARY_SDF_MODE:-sdf_aux}" \
+      BOUNDARY_SDF_WEIGHT="${BOUNDARY_SDF_WEIGHT:-0.2}" \
+      BOUNDARY_ALPHA_SMOOTH_SIGMA="${BOUNDARY_ALPHA_SMOOTH_SIGMA:-1.0}" \
+      BOUNDARY_ALPHA_THRESHOLD="${BOUNDARY_ALPHA_THRESHOLD:-0.02}" \
+      BOUNDARY_DISTANCE_CLIP="${BOUNDARY_DISTANCE_CLIP:-16}" \
+      BOUNDARY_SDF_LOSS="${BOUNDARY_SDF_LOSS:-mse}" \
+      BOUNDARY_SDF_MASK="${BOUNDARY_SDF_MASK:-removed}" \
       PROBE_MODE=custom \
       PROBE_RGB_INPUT=keep \
       PROBE_ALPHA_INPUT=keep \
