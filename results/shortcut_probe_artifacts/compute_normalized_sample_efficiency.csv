@@ -6,4 +6,4 @@ setting,pretrain_data,train_scenes,epochs,scene_epochs,relative_scene_epochs_vs_
 "baseline_e1200","local mixed split",3260,1200,3912000,0.911,1.10,15.52,0.849,0.589,0.713,"single finetune seed"
 "cosine_coord_jitter_e100","local mixed split",3260,100,326000,0.076,13.17,1.29,0.799,0.587,0.718,"1 pretrain seed x 3 finetune seeds; seed-1 AP@50 was 0.6219"
 "surface+cosine+jitter_e300","local mixed split",3260,300,978000,0.228,4.39,3.88,0.819,0.640,0.765,"single finetune seed; strong AP@50/recall but weak AP@75"
-"paper_loss_e300","local mixed split",3260,300,978000,0.228,4.39,3.88,,,,"pending; kill experiment 1811826.pbs1 -> 1811827.pbs1"
+"paper_loss_e300","local mixed split",3260,300,978000,0.228,4.39,3.88,0.795,0.561,0.691,"single finetune seed; paper-like removed-occupied RGB loss; det0 rerun 1812733.pbs1 -> 1812734.pbs1"

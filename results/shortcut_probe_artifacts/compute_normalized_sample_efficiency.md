@@ -42,7 +42,7 @@ Sources and conventions:
 | `baseline_e1200` | local mixed split | 3260 | 1200 | 3,912,000 | 0.911 | 1.10x less | 15.52 | 0.849 | 0.589 | 0.713 | single finetune seed |
 | `cosine_coord_jitter_e100` | local mixed split | 3260 | 100 | 326,000 | 0.076 | 13.17x less | 1.29 | 0.799 | 0.587 | 0.718 | 1 pretrain seed x 3 finetune seeds; seed-1 AP@50 was 0.6219 |
 | `surface+cosine+jitter_e300` | local mixed split | 3260 | 300 | 978,000 | 0.228 | 4.39x less | 3.88 | 0.819 | 0.640 | 0.765 | single finetune seed; strong AP@50/recall but weak AP@75 |
-| `paper_loss_e300` | local mixed split | 3260 | 300 | 978,000 | 0.228 | 4.39x less | 3.88 | pending | pending | pending | kill experiment `1811826.pbs1` -> `1811827.pbs1` |
+| `paper_loss_e300` | local mixed split | 3260 | 300 | 978,000 | 0.228 | 4.39x less | 3.88 | 0.795 | 0.561 | 0.691 | single finetune seed; paper-like removed-occupied RGB loss; det0 rerun `1812733.pbs1` -> `1812734.pbs1` |
 
 ## Paper-Facing Reading
 
@@ -79,9 +79,10 @@ unless a true Front3D-only pretraining row is added.
 
 ## Remaining Before Camera-Ready Use
 
-1. Add `paper_loss_e300` after jobs `1811826` and `1811827` finish.
-2. Add the Front3D low-label 50% gate after jobs `1812644`-`1812647` finish.
-3. Decide whether `surface+cosine+jitter_e300` gets finetune-seed expansion; do
+1. Add the Front3D low-label 50% gate to the main paper table if low-label
+   becomes a main claim; the single-seed summary is now in
+   `paper_loss_lowlabel_gate_20260601.md`.
+2. Decide whether `surface+cosine+jitter_e300` gets finetune-seed expansion; do
    not treat the single-seed `0.640` as a stable final number yet.
-4. If a "single-source" claim is desired, run or isolate Front3D-only
+3. If a "single-source" claim is desired, run or isolate Front3D-only
    pretraining. Current local pretraining rows are mixed-source.

@@ -1,0 +1,6 @@
+condition,split_or_protocol,pretrain,finetune_seed,ap25,ap50,ap75,recall25_top300,recall50_top300,recall50_top1000,eval_json
+paper_loss_e300,full_label,paper_like_removed_occupied_rgb,1,0.794869,0.561288,0.074241,0.963235,0.691176,0.691176,output/nerf_rpn/results/nerfmae_paper_loss_p1.0_e300_seed1_abci3paperloss_det0_1n8g_epoch300_sched_epoch_seed1_fcos1000_eval/eval.json
+scratch_lowlabel_50,front3d_50pct_labels,scratch,1,0.706451,0.366629,0.051283,0.933824,0.595588,0.595588,output/nerf_rpn/results/front3d_scratch_lowlabel_pt05_seed1_fcos1000_eval/eval.json
+baseline_e300_lowlabel_50,front3d_50pct_labels,baseline_e300,1,0.767142,0.419079,0.024076,0.955882,0.647059,0.654412,output/nerf_rpn/results/baseline_e300_lowlabel_pt05_seed1_fcos1000_eval/eval.json
+cosine_ramp_e300_lowlabel_50,front3d_50pct_labels,cosine_ramp_e300,1,0.768994,0.502626,0.051642,0.941176,0.669118,0.676471,output/nerf_rpn/results/cosine_ramp_e300_lowlabel_pt05_seed1_fcos1000_eval/eval.json
+surface_cosine_jitter_e300_lowlabel_50,front3d_50pct_labels,surface_cosine_jitter_e300,1,0.781147,0.521728,0.062727,0.955882,0.676471,0.683824,output/nerf_rpn/results/surface_cosine_jitter_e300_lowlabel_pt05_seed1_fcos1000_eval/eval.json

@@ -3880,3 +3880,60 @@ Replacement jobs:
 Expected runtime:
 - Pretrain should be close to previous det0 e300 runs, about `11.6-12h`.
 - Dependent FCOS will start after `1812733.pbs1` completes.
+
+## Experiment 52: `paper_loss_e300` and 50% Low-Label Gate Results
+
+Snapshot:
+- 2026-06-01 JST
+
+Artifacts:
+- `results/shortcut_probe_artifacts/paper_loss_lowlabel_gate_20260601.md`
+- `results/shortcut_probe_artifacts/paper_loss_lowlabel_gate_20260601.csv`
+- Updated `results/shortcut_probe_artifacts/compute_normalized_sample_efficiency.md`
+- Updated `results/shortcut_probe_artifacts/compute_normalized_sample_efficiency.csv`
+
+Completed jobs:
+
+| condition | pretrain job | FCOS/eval job | status |
+|---|---:|---:|---|
+| `paper_loss_e300` det0 rerun | `1812733.pbs1` | `1812734.pbs1` | complete |
+| `scratch_lowlabel_50` | n/a | `1812644.pbs1` | complete |
+| `baseline_e300_lowlabel_50` | existing ckpt | `1812645.pbs1` | complete |
+| `cosine_ramp_e300_lowlabel_50` | existing ckpt | `1812646.pbs1` | complete |
+| `surface_cosine_jitter_e300_lowlabel_50` | existing ckpt | `1812647.pbs1` | complete |
+
+Results:
+
+| condition | protocol | AP@25 | AP@50 | AP@75 | Recall@25 top300 | Recall@50 top300 |
+|---|---|---:|---:|---:|---:|---:|
+| `paper_loss_e300` | full-label | 0.7949 | 0.5613 | 0.0742 | 0.9632 | 0.6912 |
+| `scratch_lowlabel_50` | 50% labels | 0.7065 | 0.3666 | 0.0513 | 0.9338 | 0.5956 |
+| `baseline_e300_lowlabel_50` | 50% labels | 0.7671 | 0.4191 | 0.0241 | 0.9559 | 0.6471 |
+| `cosine_ramp_e300_lowlabel_50` | 50% labels | 0.7690 | 0.5026 | 0.0516 | 0.9412 | 0.6691 |
+| `surface_cosine_jitter_e300_lowlabel_50` | 50% labels | 0.7811 | 0.5217 | 0.0627 | 0.9559 | 0.6765 |
+
+Read:
+- `paper_loss_e300` is viable, not collapsed. It is above the ABCI-clean
+  `baseline_e300` mean AP@50 (`0.4938`) and close to `cosine_ramp_e300` mean
+  AP@50 (`0.5723`), but it is not better than the strongest surface/curriculum
+  rows.
+- Therefore the cleanest interpretation is not
+  `public_code_loss >> paper_loss` and not `paper_loss > public_code_loss`.
+  The paper/code loss mismatch is real, but this single run does not make it
+  the dominant transfer mechanism.
+- The 50% low-label gate supports the sample-efficiency story. Relative to
+  low-label scratch, `surface_cosine_jitter_e300` gives AP@50 `+0.1551`; relative
+  to `baseline_e300`, it gives `+0.1026`; relative to `cosine_ramp_e300`, it gives
+  `+0.0191`.
+- These low-label rows remain single finetune seed and should be treated as a
+  gate rather than final statistics.
+
+Decision:
+- Do not spend the next jobs on a broad visible-only / masked-only RGB objective
+  decomposition unless a paper reviewer-facing reason is sharpened further.
+- If compute is spent on validation, prioritize low-label expansion for the
+  compact set of rows: scratch/NeRF-RPN anchor, `baseline_e300`,
+  `cosine_ramp_e300`, and `surface_cosine_jitter_e300`.
+- Keep `paper_loss_e300` in the compute-normalized table as a negative/neutral
+  objective-fidelity gate: it rules out a collapse but does not produce a simple
+  objective-fix story.
