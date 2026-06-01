@@ -1,0 +1,3 @@
+job_id,role,condition,epochs,pretrain_seed,finetune_seed,run_suffix,status_at_submit,expected_output
+1816233.pbs1,pretrain,boundary_sdf_aux,100,1,,abci3b1sdf,running,output/nerf_mae/results/nerfmae_boundary_sdf_aux_p1.0_e100_seed1_abci3b1sdf/epoch_100.pt
+1816234.pbs1,fcos,boundary_sdf_aux,100,1,1,abci3b1sdf,hold_afterok,output/nerf_rpn/results/nerfmae_boundary_sdf_aux_p1.0_e100_seed1_abci3b1sdf_epoch100_sched_epoch_seed1_fcos1000_eval/eval.json

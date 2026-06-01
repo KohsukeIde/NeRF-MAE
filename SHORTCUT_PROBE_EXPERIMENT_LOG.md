@@ -4098,3 +4098,59 @@ Decision:
   - signed distance to the smoothed-alpha occupancy boundary
   - distance clip `16` voxels.
 - Keep `smooth100_thr001` as a higher-recall / more-inflated ablation.
+
+## Experiment 56: Boundary-SDF B1 e100 Scout Submission
+
+Snapshot:
+- 2026-06-01 JST
+
+Purpose:
+- Add one low-cost Boundary-SDF scout in parallel with the low-label gate.
+- This follows the route-decision feedback: if low-label 25%/10% is only
+  moderate, a real boundary-aware method mechanism may be needed for a
+  strong-accept framing.
+
+Code changes:
+- Added `nerf_mae/model/mae/boundary_sdf_probe.py`.
+- Added `nerf_mae/run_swin_boundary_sdf.py`.
+- Extended ABCI3 pretrain/FCOS scripts for
+  `KIND=boundary_sdf, CONDITION=boundary_sdf_aux`.
+
+Design:
+- Keep the public/effective NeRF-MAE RGB/alpha objective.
+- Add a separate decoder-side `sdf_out` head. The existing 4-channel `out`
+  head is not resized, so downstream FCOS loading should only see `sdf_out.*`
+  as unexpected keys rather than shape mismatches.
+- Use audit-v2 target settings:
+  - `BOUNDARY_ALPHA_SMOOTH_SIGMA=1.0`
+  - `BOUNDARY_ALPHA_THRESHOLD=0.02`
+  - `BOUNDARY_DISTANCE_CLIP=16`
+  - `BOUNDARY_SDF_WEIGHT=0.2`
+  - `BOUNDARY_SDF_MASK=removed`
+- The scout uses a GPU-friendly max-pool signed-distance approximation to the
+  smoothed-alpha boundary. If this scout is promising, a cached exact-distance
+  implementation can be considered for final runs.
+
+Submitted jobs:
+
+| job | role | status |
+|---|---|---|
+| `1816233.pbs1` | pretrain `boundary_sdf_aux`, e100 | running |
+| `1816234.pbs1` | dependent Front3D FCOS e1000 | hold afterok |
+
+Artifacts:
+- `results/shortcut_probe_artifacts/boundary_sdf_b1_jobs_20260601.md`
+- `results/shortcut_probe_artifacts/boundary_sdf_b1_jobs_20260601.csv`
+
+Initial runtime check:
+- The pretrain job started successfully and completed early iterations.
+- Example worker-0 log:
+  - `epoch 1 [0/204] loss=1.1396 loss_rgb=0.9020 loss_alpha=0.1840`
+  - `epoch 1 [180/204] loss=0.2389 loss_rgb=0.1546 loss_alpha=0.0670`
+- Since total loss is larger than `loss_rgb + loss_alpha`, the SDF auxiliary
+  term is active.
+
+Decision rule:
+- Do not promote this to e300 unless e100 is stable and its FCOS result shows
+  either AP@50/R50 improvement over the relevant e100 baseline, or comparable
+  AP@50 with a clear AP@75/proposal-quality gain.
