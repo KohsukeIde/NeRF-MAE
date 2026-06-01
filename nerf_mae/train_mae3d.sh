@@ -15,6 +15,7 @@ WEIGHT_DECAY="${WEIGHT_DECAY:-1e-3}"
 LOG_INTERVAL="${LOG_INTERVAL:-30}"
 EVAL_INTERVAL="${EVAL_INTERVAL:-10}"
 CHECKPOINT_INTERVAL="${CHECKPOINT_INTERVAL:-0}"
+KEEP_CHECKPOINTS="${KEEP_CHECKPOINTS:-1}"
 PROFILE_STEP_TIME="${PROFILE_STEP_TIME:-0}"
 TRAIN_NUM_WORKERS="${TRAIN_NUM_WORKERS:-}"
 EVAL_NUM_WORKERS="${EVAL_NUM_WORKERS:-}"
@@ -90,6 +91,7 @@ cmd=(
   --log_interval "${LOG_INTERVAL}"
   --eval_interval "${EVAL_INTERVAL}"
   --checkpoint_interval "${CHECKPOINT_INTERVAL}"
+  --keep_checkpoints "${KEEP_CHECKPOINTS}"
   --normalize_density
   --log_to_file
   --batch_size "${BATCH_SIZE}"

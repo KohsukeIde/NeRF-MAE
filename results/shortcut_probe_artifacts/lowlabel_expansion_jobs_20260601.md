@@ -57,6 +57,7 @@ Current key pretraining checkpoints available on disk:
 | `baseline_e1200` | `epoch_1200.pt` |
 
 Intermediate `epoch_100.pt` / `epoch_200.pt` checkpoints are not present for
-the key e300/e1200 runs above. If epoch-wise curves are needed for the paper,
-future pretraining jobs should explicitly set `PRETRAIN_CHECKPOINT_INTERVAL=100`
-or run separate e100/e200 pretraining jobs under the final protocol.
+the key e300/e1200 runs above. For future final pretraining jobs, the ABCI3
+gate scripts now default to `PRETRAIN_CHECKPOINT_INTERVAL=50` and
+`PRETRAIN_KEEP_CHECKPOINTS=0`, so `epoch_50.pt`, `epoch_100.pt`, ... should be
+kept unless explicitly overridden.

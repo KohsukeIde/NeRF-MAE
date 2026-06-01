@@ -3994,6 +3994,40 @@ Checkpoint note:
   - `cosine_ramp_e300`: `epoch_300.pt`
   - `surface_cosine_jitter_e300`: `epoch_300.pt`, `model_best.pt`
   - `baseline_e1200`: `epoch_1200.pt`
-- For future paper runs requiring epoch curves, set
-  `PRETRAIN_CHECKPOINT_INTERVAL=100` explicitly or run separate e100/e200
-  pretraining jobs under the final protocol.
+- For future paper runs requiring epoch curves, use the final checkpoint policy
+  recorded in Experiment 54.
+
+## Experiment 54: Final-Run Checkpoint Retention Policy
+
+Snapshot:
+- 2026-06-01 JST
+
+Reason:
+- The key existing e300/e1200 runs only retain their final checkpoint because
+  `run_swin_mae3d.py` defaults to `--keep_checkpoints 1`; setting only
+  `CHECKPOINT_INTERVAL` is insufficient because older `epoch_*.pt` files are
+  deleted.
+- For final paper runs, we want retained checkpoints every 50 epochs for
+  learning-curve and epoch-budget tables.
+
+Code changes:
+- `nerf_mae/train_mae3d.sh` now accepts `KEEP_CHECKPOINTS` and passes it to
+  `run_swin_mae3d.py --keep_checkpoints`.
+- ABCI3 final/gate pretrain path now defaults to:
+  - `PRETRAIN_CHECKPOINT_INTERVAL=50`
+  - `PRETRAIN_KEEP_CHECKPOINTS=0`
+- Surface/pyramid/ramp wrapper submit paths that may be reused for final
+  variants now forward the same retention controls.
+
+Expected behavior for future final pretraining:
+- e300 final runs should retain:
+  `epoch_50.pt`, `epoch_100.pt`, `epoch_150.pt`, `epoch_200.pt`,
+  `epoch_250.pt`, `epoch_300.pt`, plus `model_best.pt` if evaluation runs.
+- e1200 final runs should retain the same 50-epoch cadence through
+  `epoch_1200.pt`.
+
+Important:
+- Existing runs cannot recover deleted intermediate checkpoints. If the paper
+  needs exact e100/e200 points for `baseline_e300`, `cosine_ramp_e300`, or
+  `surface_cosine_jitter_e300`, rerun the final selected protocol with this
+  retention policy or run separate e100/e200 jobs.
