@@ -4031,3 +4031,70 @@ Important:
   needs exact e100/e200 points for `baseline_e300`, `cosine_ramp_e300`, or
   `surface_cosine_jitter_e300`, rerun the final selected protocol with this
   retention policy or run separate e100/e200 jobs.
+
+## Experiment 55: Alpha Boundary / SDF Target-Quality Audit v2
+
+Snapshot:
+- 2026-06-01 JST
+
+Purpose:
+- Follow up Experiment 49, where raw thresholded alpha was too fragmented for
+  Boundary-SDF MAE.
+- Test whether simple denoising produces a launchable geometry target before
+  spending GPU time on Boundary-SDF pretraining.
+
+Added helper:
+- `nerf_mae/probe_scripts/audit_alpha_boundary_targets_v2.py`
+
+Protocol:
+- Dataset: Front3D OBB features from
+  `dataset/finetune/front3d_rpn_data/features`.
+- Split: first 20 train scenes for visual audit, first 60 train scenes for
+  no-render robustness audit.
+- Density-to-alpha conversion: FCOS-loader style conversion,
+  `alpha = 1 - exp(-exp(density) / 100)`.
+- Variants:
+  - raw `alpha > 0.01`
+  - Gaussian-smoothed alpha with `sigma=0.75` or `1.0`
+  - thresholds `0.01` and `0.02`
+  - optional small-component filtering and binary closing.
+
+Artifacts:
+- `results/shortcut_probe_artifacts/alpha_boundary_audit_v2_front3d_train20/`
+- `results/shortcut_probe_artifacts/alpha_boundary_audit_v2_front3d_train60/`
+- `results/shortcut_probe_artifacts/alpha_boundary_audit_v2_decision.md`
+
+60-scene summary:
+
+| variant | scenes | occ ratio mean | shell/occ mean | components median | raw IoU mean | raw recall mean | sdf inside p90 mean |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `raw_thr001` | 60 | 0.308927 | 0.6611 | 562.5 | 1.0000 | 1.0000 | 3.411 |
+| `smooth075_thr001` | 60 | 0.409878 | 0.3535 | 151.5 | 0.7530 | 0.9980 | 6.781 |
+| `smooth100_thr001` | 60 | 0.434797 | 0.3000 | 56.5 | 0.7092 | 0.9968 | 7.828 |
+| `smooth100_thr002` | 60 | 0.397898 | 0.3361 | 48.0 | 0.7607 | 0.9869 | 7.015 |
+| `smooth100_thr001_close1_min64` | 60 | 0.409860 | 0.2678 | 29.0 | 0.6315 | 0.8968 | 6.330 |
+
+Read:
+- Raw alpha remains unsuitable for Boundary-SDF: high fragmentation and
+  shell-heavy occupancy.
+- Gaussian smoothing makes the target substantially more plausible.
+  `smooth100_thr001` reduces median components from `562.5` to `56.5` and
+  shell/occupied from `0.6611` to `0.3000`, while retaining almost all raw
+  support.
+- `smooth100_thr002` is the better default candidate because it is more
+  conservative: lower occupancy, higher raw IoU (`0.7607`), still-low component
+  count (`48.0`), and high raw recall (`0.9869`).
+- Morphological closing/filtering is too aggressive for the default target:
+  it improves component/shell metrics but drops raw-support recall to `0.8968`
+  and visually risks over-filling scene interiors.
+
+Decision:
+- Do not use raw Boundary-SDF targets.
+- If the low-label 25%/10% gate is only moderate and a real method mechanism is
+  needed for strong-accept positioning, the launchable Boundary-SDF scout should
+  use:
+  - `alpha_smoothing_sigma=1.0`
+  - `alpha_threshold=0.02`
+  - signed distance to the smoothed-alpha occupancy boundary
+  - distance clip `16` voxels.
+- Keep `smooth100_thr001` as a higher-recall / more-inflated ablation.
