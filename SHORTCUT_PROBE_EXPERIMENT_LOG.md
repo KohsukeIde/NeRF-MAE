@@ -4282,3 +4282,72 @@ Main-variant decision:
   weaker at 10% and 25%.
 - Do not launch a new broad method branch solely because of method-novelty
   anxiety before the current low-label result section is written.
+
+## Experiment 59: MixNeRF-MAE-lite MVP Integration
+
+Snapshot:
+- 2026-06-03 JST
+
+Source bundle:
+- `/groups/gag51404/ide/vgi/NeRF-MAE/mixnerf_mae_mvp.zip`
+
+Purpose:
+- Add a minimal encoder-side MixNeRF-MAE scout to test whether NeRF-MAE's
+  full-grid Swin encoder is helped or hurt by explicit masked-placeholders.
+- Unlike the previous loss/target weighting variants, this branch replaces
+  masked target-scene patches with plausible donor-scene patches while keeping
+  the dense 3D Swin topology and computing loss against the original target
+  scene.
+
+Implemented files:
+- `nerf_mae/model/mae/mixnerf_probe.py`
+- `nerf_mae/run_swin_mixnerf_mae.py`
+- `nerf_mae/probe_scripts/abci3_mixnerf_pretrain.pbs`
+- `nerf_mae/probe_scripts/submit_mixnerf_smoke.sh`
+- `nerf_mae/probe_scripts/submit_mixnerf_controls.sh`
+- `nerf_mae/probe_scripts/encoder_mask_path_report.py`
+- `nerf_mae/probe_scripts/mask_predictability_probe.py`
+- `nerf_mae/probe_scripts/mix_input_sanity.py`
+
+Gate integration:
+- `abci3_e300_gate_pretrain.pbs` now supports:
+  - `KIND=mixnerf,CONDITION=mixnerf_lite`
+  - `KIND=mixnerf,CONDITION=mixnerf_lite_zeros`
+  - `KIND=mixnerf,CONDITION=mixnerf_lite_noise`
+- `abci3_e300_gate_fcos.pbs` resolves matching checkpoint names for downstream
+  FCOS evaluation.
+- The bundled submit helpers were adjusted to run from the repository root,
+  matching the existing ABCI gate-script `PBS_O_WORKDIR` assumption.
+
+Validation:
+- `py_compile` passed for the MixNeRF model, runner, and probe scripts.
+- `bash -n` passed for the MixNeRF PBS/submit scripts and the updated e300 gate
+  pretrain/FCOS scripts.
+- ABCI virtualenv import passed for `SwinTransformer_MAE3D_MixNeRF`.
+- Lightweight forward smoke passed on a 64^3 synthetic pair:
+  - `patch_mask_mean=0.75`
+  - `voxel_mask_mean=0.75`
+  - `partner_mean_self_match=0.0`
+  - `base_mask_mean=0.0`
+- Real-scene mixed-input sanity passed after adding patch-aligned cropping for
+  unequal scene extents:
+  - original shapes: `(4, 106, 100, 160)` and `(4, 160, 94, 130)`
+  - cropped shape: `(4, 104, 92, 128)`
+  - `mask_mean=0.75`
+
+Artifacts:
+- `results/shortcut_probe_artifacts/mixnerf/encoder_mask_path_report.md`
+- `results/shortcut_probe_artifacts/mixnerf/mask_predictability_protocol.md`
+
+First launch plan:
+- Partner-fill smoke/scout:
+  - e10 pretrain sanity
+  - e30 pretrain + FCOS
+  - e100 pretrain + FCOS
+- Controls after the partner path is stable:
+  - e30 partner / zeros / noise
+
+Decision gate:
+- Continue only if e10/e30 losses are stable, `base_mask_mean` remains near
+  zero, partner-fill is better than zero/noise controls, and e100 is competitive
+  with the matching baseline/cosine e100 rows.

@@ -73,6 +73,13 @@ BOUNDARY_ALPHA_THRESHOLD="${BOUNDARY_ALPHA_THRESHOLD:-}"
 BOUNDARY_DISTANCE_CLIP="${BOUNDARY_DISTANCE_CLIP:-}"
 BOUNDARY_SDF_LOSS="${BOUNDARY_SDF_LOSS:-}"
 BOUNDARY_SDF_MASK="${BOUNDARY_SDF_MASK:-}"
+MIXNERF_MODE="${MIXNERF_MODE:-}"
+MIXNERF_MASK_RATIO="${MIXNERF_MASK_RATIO:-}"
+MIXNERF_PARTNER="${MIXNERF_PARTNER:-}"
+MIXNERF_FILL_MODE="${MIXNERF_FILL_MODE:-}"
+MIXNERF_PATCH_SIZE="${MIXNERF_PATCH_SIZE:-}"
+MIXNERF_DISABLE_INTERNAL_MASK="${MIXNERF_DISABLE_INTERNAL_MASK:-}"
+MIXNERF_LOG_STATS="${MIXNERF_LOG_STATS:-}"
 AUTO_RESUME_PRETRAIN="${AUTO_RESUME_PRETRAIN:-1}"
 RESUME_ALLOW_PARTIAL="${RESUME_ALLOW_PARTIAL:-1}"
 SKIP_EXISTING="${SKIP_EXISTING:-1}"
@@ -196,6 +203,9 @@ case "${KIND}:${CONDITION}" in
     SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
   boundary_sdf:boundary_sdf_aux)
+    SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
+    ;;
+  mixnerf:mixnerf_lite|mixnerf:mixnerf_lite_zeros|mixnerf:mixnerf_lite_noise)
     SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
   *)
@@ -334,6 +344,13 @@ export BOUNDARY_ALPHA_THRESHOLD="$(printf '%q' "${BOUNDARY_ALPHA_THRESHOLD}")"
 export BOUNDARY_DISTANCE_CLIP="$(printf '%q' "${BOUNDARY_DISTANCE_CLIP}")"
 export BOUNDARY_SDF_LOSS="$(printf '%q' "${BOUNDARY_SDF_LOSS}")"
 export BOUNDARY_SDF_MASK="$(printf '%q' "${BOUNDARY_SDF_MASK}")"
+export MIXNERF_MODE="$(printf '%q' "${MIXNERF_MODE}")"
+export MIXNERF_MASK_RATIO="$(printf '%q' "${MIXNERF_MASK_RATIO}")"
+export MIXNERF_PARTNER="$(printf '%q' "${MIXNERF_PARTNER}")"
+export MIXNERF_FILL_MODE="$(printf '%q' "${MIXNERF_FILL_MODE}")"
+export MIXNERF_PATCH_SIZE="$(printf '%q' "${MIXNERF_PATCH_SIZE}")"
+export MIXNERF_DISABLE_INTERNAL_MASK="$(printf '%q' "${MIXNERF_DISABLE_INTERNAL_MASK}")"
+export MIXNERF_LOG_STATS="$(printf '%q' "${MIXNERF_LOG_STATS}")"
 export NERFMAE_DDP_USE_ENV=1
 export NERFMAE_DDP_NUM_NODES="$(printf '%q' "${PRETRAIN_NODES}")"
 export NERFMAE_DDP_WORLD_SIZE="$(printf '%q' "${PRETRAIN_WORLD_SIZE}")"
@@ -866,6 +883,31 @@ case "${KIND}:${CONDITION}" in
       PROBE_ALPHA_LOSS=removed \
       PROBE_RGB_WEIGHT=1.0 \
       PROBE_ALPHA_WEIGHT=1.0 \
+      bash train_mae3d.sh
+    ;;
+  mixnerf:mixnerf_lite|mixnerf:mixnerf_lite_zeros|mixnerf:mixnerf_lite_noise)
+    mix_fill="${MIXNERF_FILL_MODE:-partner}"
+    case "${CONDITION}" in
+      mixnerf_lite)
+        mix_fill="${MIXNERF_FILL_MODE:-partner}"
+        ;;
+      mixnerf_lite_zeros)
+        mix_fill="${MIXNERF_FILL_MODE:-zeros}"
+        ;;
+      mixnerf_lite_noise)
+        mix_fill="${MIXNERF_FILL_MODE:-noise}"
+        ;;
+    esac
+    env "${common_env[@]}" "${resume_env[@]}" \
+      TRAIN_ENTRYPOINT=run_swin_mixnerf_mae.py \
+      MIXNERF_MODE="${MIXNERF_MODE:-mix}" \
+      MIXNERF_MASK_RATIO="${MIXNERF_MASK_RATIO:-0.75}" \
+      MIXNERF_PARTNER="${MIXNERF_PARTNER:-roll}" \
+      MIXNERF_FILL_MODE="${mix_fill}" \
+      MIXNERF_PATCH_SIZE="${MIXNERF_PATCH_SIZE:-4}" \
+      MIXNERF_DISABLE_INTERNAL_MASK="${MIXNERF_DISABLE_INTERNAL_MASK:-1}" \
+      MIXNERF_LOG_STATS="${MIXNERF_LOG_STATS:-1}" \
+      PROBE_MODE=baseline \
       bash train_mae3d.sh
     ;;
 esac

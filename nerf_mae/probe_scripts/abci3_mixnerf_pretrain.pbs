@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+#PBS -q rt_HG
+#PBS -l select=1:ncpus=96:ngpus=8:mem=512gb
+#PBS -l walltime=72:00:00
+#PBS -j oe
+#PBS -N mixnerf_pretrain
+
+set -euo pipefail
+cd "${PBS_O_WORKDIR:-$PWD}"
+
+# Expected launch directory: <repo>/nerf_mae
+DATA_ROOT="${DATA_ROOT:-../dataset/pretrain}"
+OUTPUT_ROOT="${OUTPUT_ROOT:-../output/nerf_mae/results}"
+DATASET_NAME="${DATASET_NAME:-nerfmae}"
+RUN_NAME="${RUN_NAME:-mixnerf_lite_p1_e30_seed1}"
+NUM_EPOCHS="${NUM_EPOCHS:-30}"
+BATCH_SIZE="${BATCH_SIZE:-16}"
+GPUS="${GPUS:-0,1,2,3,4,5,6,7}"
+SEED="${SEED:-1}"
+PERCENT_TRAIN="${PERCENT_TRAIN:-1.0}"
+RESOLUTION="${RESOLUTION:-160}"
+EXTRA_ARGS=${EXTRA_ARGS:-}
+
+# MixNeRF controls.  Use e10/e30 first; do not jump to e300.
+export MIXNERF_MODE="${MIXNERF_MODE:-mix}"
+export MIXNERF_MASK_RATIO="${MIXNERF_MASK_RATIO:-0.75}"
+export MIXNERF_PARTNER="${MIXNERF_PARTNER:-roll}"
+export MIXNERF_FILL_MODE="${MIXNERF_FILL_MODE:-partner}"
+export MIXNERF_PATCH_SIZE="${MIXNERF_PATCH_SIZE:-4}"
+export MIXNERF_DISABLE_INTERNAL_MASK="${MIXNERF_DISABLE_INTERNAL_MASK:-1}"
+export MIXNERF_LOG_STATS="${MIXNERF_LOG_STATS:-1}"
+
+python3 -u run_swin_mixnerf_mae.py \
+  --mode train \
+  --backbone_type swin_s \
+  --features_path "${DATA_ROOT}/features" \
+  --num_epochs "${NUM_EPOCHS}" \
+  --lr 1e-4 \
+  --weight_decay 1e-3 \
+  --log_interval 30 \
+  --eval_interval 10 \
+  --normalize_density \
+  --log_to_file \
+  --batch_size "${BATCH_SIZE}" \
+  --resolution "${RESOLUTION}" \
+  --masking_prob 0.75 \
+  --dataset "${DATASET_NAME}" \
+  --dataset_split "${DATA_ROOT}/${DATASET_NAME}_split.npz" \
+  --gpus "${GPUS}" \
+  --percent_train "${PERCENT_TRAIN}" \
+  --seed "${SEED}" \
+  --probe_mode baseline \
+  --save_path "${OUTPUT_ROOT}/${RUN_NAME}" \
+  --tags "${RUN_NAME}" \
+  ${EXTRA_ARGS}
