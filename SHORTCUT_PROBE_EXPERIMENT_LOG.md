@@ -4347,6 +4347,13 @@ First launch plan:
 - Controls after the partner path is stable:
   - e30 partner / zeros / noise
 
+Submitted jobs:
+- e10 partner pretrain: `1819871.pbs1`
+- e30 partner pretrain: `1819872.pbs1`
+- e100 partner pretrain: `1819873.pbs1`
+- e30 partner FCOS, dependent on `1819872.pbs1`: `1819874.pbs1`
+- e100 partner FCOS, dependent on `1819873.pbs1`: `1819875.pbs1`
+
 Decision gate:
 - Continue only if e10/e30 losses are stable, `base_mask_mean` remains near
   zero, partner-fill is better than zero/noise controls, and e100 is competitive
