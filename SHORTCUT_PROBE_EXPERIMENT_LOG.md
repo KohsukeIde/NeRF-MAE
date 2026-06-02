@@ -4215,3 +4215,68 @@ Decision:
 - Do not promote Boundary-SDF to e300 now.
 - Keep it as an audited but non-winning branch unless the paper strategy later
   requires a boundary mechanism with a cleaner exact-distance target.
+
+## Experiment 58: Official Low-Label Table Comparison
+
+Snapshot:
+- 2026-06-02 JST
+
+Artifacts:
+- `results/shortcut_probe_artifacts/official_lowlabel_comparison_20260602.md`
+- `results/shortcut_probe_artifacts/official_lowlabel_comparison_20260602.csv`
+
+Purpose:
+- Address the feedback request to compare the current low-label rows directly
+  against the official NeRF-MAE low-label table before launching any new method
+  branch.
+- Priority 3/4 items from the feedback, paper skeleton and visible-token
+  feasibility, are intentionally left for the user-side workflow.
+
+Official AP@50 values used:
+
+| labels | official scratch | official NeRF-MAE |
+|---:|---:|---:|
+| 10% | 0.15 | 0.18 |
+| 25% | 0.29 | 0.36 |
+| 50% | 0.30 | 0.42 |
+| 100% | 0.41 | 0.54 |
+
+Direct AP@50 comparison:
+
+| labels | ours scratch | ours baseline_e300 | ours cosine_ramp_e300 | ours surface_cosine_jitter_e300 | ours best |
+|---:|---:|---:|---:|---:|---:|
+| 10% | 0.1160 | 0.1328 | 0.2751 | 0.1756 | 0.2751 |
+| 25% | 0.3044 | 0.2777 | 0.3639 | 0.3460 | 0.3639 |
+| 50% | 0.3666 | 0.4191 | 0.5026 | 0.5217 | 0.5217 |
+| 100% | 0.4722 | 0.4695 | 0.5539 | 0.5984 | 0.5984 |
+
+Read:
+- `cosine_ramp_e300` exceeds the official NeRF-MAE AP@50 at all four label
+  fractions:
+  - 10%: `0.2751` vs `0.18`
+  - 25%: `0.3639` vs `0.36`
+  - 50%: `0.5026` vs `0.42`
+  - 100%: `0.5539` vs `0.54`
+- The best current variant exceeds the official NeRF-MAE table by `+0.0951`,
+  `+0.0039`, `+0.1017`, and `+0.0584` AP@50 at 10/25/50/100% labels.
+- The important scratch100 check is positive:
+  - `surface_cosine_jitter_e300` at 50% labels beats our scratch 100% by
+    `+0.0495` AP@50.
+  - `cosine_ramp_e300` at 50% labels beats our scratch 100% by `+0.0304`
+    AP@50.
+
+Caveat:
+- Our same-run scratch rows are not identical to the official reported scratch
+  rows; for example, our 100% scratch AP@50 is `0.4722` versus official `0.41`.
+  Therefore the official comparison is supportive but should not be the only
+  proof. The main proof should be same-run proposed-vs-scratch/baseline.
+
+Main-variant decision:
+- Use `cosine_ramp_e300` as the base method because it is strongest at 10% and
+  25% labels and already exceeds official NeRF-MAE AP@50 at every label
+  fraction.
+- Use `surface_cosine_jitter_e300` as an in-domain / label-richer enhancement,
+  not as a separate equal method, because it is strongest at 50% and 100% but
+  weaker at 10% and 25%.
+- Do not launch a new broad method branch solely because of method-novelty
+  anxiety before the current low-label result section is written.

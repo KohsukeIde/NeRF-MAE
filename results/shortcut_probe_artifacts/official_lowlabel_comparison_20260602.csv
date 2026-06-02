@@ -1,0 +1,5 @@
+label_fraction,scene_count,official_nerfrpn_scratch_ap50,official_nerfmae_pretrained_ap50,ours_scratch_ap50,ours_baseline_e300_ap50,ours_cosine_ramp_e300_ap50,ours_surface_cosine_jitter_e300_ap50,ours_best_ap50,ours_best_condition,ours_best_minus_official_pretrained,ours_best_minus_ours_scratch,cosine_minus_official_pretrained,cosine_minus_ours_scratch,surface_minus_ours_scratch
+0.10,12,0.15,0.18,0.1160,0.1328,0.2751,0.1756,0.2751,cosine_ramp_e300,+0.0951,+0.1591,+0.0951,+0.1591,+0.0596
+0.25,30,0.29,0.36,0.3044,0.2777,0.3639,0.3460,0.3639,cosine_ramp_e300,+0.0039,+0.0595,+0.0039,+0.0595,+0.0416
+0.50,61,0.30,0.42,0.3666,0.4191,0.5026,0.5217,0.5217,surface_cosine_jitter_e300,+0.1017,+0.1551,+0.0826,+0.1360,+0.1551
+1.00,122,0.41,0.54,0.4722,0.4695,0.5539,0.5984,0.5984,surface_cosine_jitter_e300,+0.0584,+0.1262,+0.0139,+0.0817,+0.1262
