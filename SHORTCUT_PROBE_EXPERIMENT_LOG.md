@@ -4231,6 +4231,8 @@ Purpose:
   branch.
 - Priority 3/4 items from the feedback, paper skeleton and visible-token
   feasibility, are intentionally left for the user-side workflow.
+- Official values were checked against the ECCV paper PDF on 2026-06-02:
+  `https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/12306.pdf`.
 
 Official AP@50 values used:
 

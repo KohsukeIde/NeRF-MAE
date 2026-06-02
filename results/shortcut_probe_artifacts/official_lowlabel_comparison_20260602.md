@@ -11,7 +11,8 @@ method branch.
 ## Source Values
 
 Official values are the Front3D low-label AP@50 values from NeRF-MAE
-Table 4 / Table S4:
+Table 4 / Table S4. External source checked on 2026-06-02:
+`https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/12306.pdf`.
 
 | labels | scenes | official scratch AP@50 | official NeRF-MAE AP@50 |
 |---:|---:|---:|---:|
