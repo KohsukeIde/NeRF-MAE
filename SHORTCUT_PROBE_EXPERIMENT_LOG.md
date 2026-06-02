@@ -4154,3 +4154,64 @@ Decision rule:
 - Do not promote this to e300 unless e100 is stable and its FCOS result shows
   either AP@50/R50 improvement over the relevant e100 baseline, or comparable
   AP@50 with a clear AP@75/proposal-quality gain.
+
+## Experiment 57: Low-Label Expansion and Boundary-SDF B1 Results
+
+Snapshot:
+- 2026-06-02 JST
+
+Artifacts:
+- `results/shortcut_probe_artifacts/lowlabel_boundary_sdf_results_20260602.md`
+- `results/shortcut_probe_artifacts/lowlabel_boundary_sdf_results_20260602.csv`
+
+Status:
+- All low-label expansion jobs completed.
+- Boundary-SDF B1 e100 pretrain and dependent FCOS completed.
+
+Low-label results:
+
+| condition | labels | AP@25 | AP@50 | AP@75 | R@50 top300 | R@50 top1000 |
+|---|---:|---:|---:|---:|---:|---:|
+| scratch | 10% | 0.4453 | 0.1160 | 0.0000 | 0.2794 | 0.3088 |
+| baseline_e300 | 10% | 0.5344 | 0.1328 | 0.0001 | 0.3824 | 0.4265 |
+| cosine_ramp_e300 | 10% | 0.5996 | 0.2751 | 0.0152 | 0.4485 | 0.4706 |
+| surface_cosine_jitter_e300 | 10% | 0.5918 | 0.1756 | 0.0066 | 0.4118 | 0.4412 |
+| scratch | 25% | 0.6087 | 0.3044 | 0.0122 | 0.4779 | 0.4779 |
+| baseline_e300 | 25% | 0.6550 | 0.2777 | 0.0057 | 0.5147 | 0.5221 |
+| cosine_ramp_e300 | 25% | 0.7008 | 0.3639 | 0.0095 | 0.5882 | 0.6029 |
+| surface_cosine_jitter_e300 | 25% | 0.7123 | 0.3460 | 0.0200 | 0.5368 | 0.5441 |
+| scratch | 50% | 0.7065 | 0.3666 | 0.0513 | 0.5956 | 0.5956 |
+| baseline_e300 | 50% | 0.7671 | 0.4191 | 0.0241 | 0.6471 | 0.6544 |
+| cosine_ramp_e300 | 50% | 0.7690 | 0.5026 | 0.0516 | 0.6691 | 0.6765 |
+| surface_cosine_jitter_e300 | 50% | 0.7811 | 0.5217 | 0.0627 | 0.6765 | 0.6838 |
+| scratch | 100% | 0.7952 | 0.4722 | 0.0703 | 0.6176 | 0.6324 |
+| baseline_e300 | 100% | 0.7956 | 0.4695 | 0.0869 | 0.6618 | 0.6691 |
+| cosine_ramp_e300 | 100% | 0.8249 | 0.5539 | 0.1135 | 0.7059 | 0.7059 |
+| surface_cosine_jitter_e300 | 100% | 0.8178 | 0.5984 | 0.1004 | 0.7059 | 0.7279 |
+
+Read:
+- Low-label support is positive and stronger than a 50%-only artifact.
+- At 10% labels, `cosine_ramp_e300` is the clear AP@50 winner:
+  `+0.1591` over scratch and `+0.1423` over baseline_e300.
+- At 25% labels, `cosine_ramp_e300` remains best by AP@50:
+  `+0.0595` over scratch and `+0.0862` over baseline_e300.
+- At 50% and 100%, `surface_cosine_jitter_e300` is best by AP@50.
+- Paper framing should use a hierarchy rather than two equal methods:
+  `cosine_ramp` as the base label-efficient recipe, with surface/jitter as an
+  in-domain or label-richer anchoring component.
+
+Boundary-SDF B1 results:
+
+| condition | epoch | AP@25 | AP@50 | AP@75 | R@50 top300 | R@50 top1000 |
+|---|---:|---:|---:|---:|---:|---:|
+| boundary_sdf_aux | 100 | 0.8110 | 0.5142 | 0.1031 | 0.6618 | 0.6691 |
+| baseline_coord_jitter | 100 | 0.8197 | 0.5564 | 0.1015 | 0.6765 | 0.6912 |
+| cosine_coord_jitter | 100 | 0.8097 | 0.6219 | 0.1031 | 0.7279 | 0.7279 |
+
+Decision:
+- Boundary-SDF B1 does not clear the e100 promotion gate.
+- It is lower than `baseline_coord_jitter_e100` on AP@50 and recall, and far
+  below `cosine_coord_jitter_e100` on AP@50.
+- Do not promote Boundary-SDF to e300 now.
+- Keep it as an audited but non-winning branch unless the paper strategy later
+  requires a boundary mechanism with a cleaner exact-distance target.
