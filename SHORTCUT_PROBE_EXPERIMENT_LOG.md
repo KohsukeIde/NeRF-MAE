@@ -4353,6 +4353,12 @@ Submitted jobs:
 - e100 partner pretrain: `1819873.pbs1`
 - e30 partner FCOS, dependent on `1819872.pbs1`: `1819874.pbs1`
 - e100 partner FCOS, dependent on `1819873.pbs1`: `1819875.pbs1`
+- e30 zero-fill control pretrain, dependent on e10 partner pretrain
+  `1819871.pbs1`: `1819878.pbs1`
+- e30 noise-fill control pretrain, dependent on e10 partner pretrain
+  `1819871.pbs1`: `1819879.pbs1`
+- e30 zero-fill control FCOS, dependent on `1819878.pbs1`: `1819880.pbs1`
+- e30 noise-fill control FCOS, dependent on `1819879.pbs1`: `1819881.pbs1`
 
 Decision gate:
 - Continue only if e10/e30 losses are stable, `base_mask_mean` remains near
