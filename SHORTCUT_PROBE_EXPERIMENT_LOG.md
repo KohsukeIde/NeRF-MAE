@@ -4377,9 +4377,11 @@ Purpose:
 - Follow the final feedback direction for the AAAI paper: use a budget curve as
   the primary efficiency evidence and defend the thin low-label reversal with
   a small finetune-seed expansion.
-- Keep visible-token / MixNeRF style masking mechanisms as a separate method
-  direction, not the AAAI critical path, unless their scout results are clearly
-  stronger.
+- Prioritize the budget curve as the current AAAI critical path while keeping
+  visible-token / MixNeRF style masking mechanisms conditional, not permanently
+  separated. If MixNeRF is clearly stronger, or if the budget curve is not
+  strong enough by itself, revisit whether the masking-mechanism branch should
+  be folded into the paper.
 
 Budget-curve launch:
 - Instead of separate e100/e300/e600/e1200 pretrains, launch one e1200 baseline

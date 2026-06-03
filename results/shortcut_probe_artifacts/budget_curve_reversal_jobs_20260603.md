@@ -7,8 +7,10 @@ Purpose:
 - Follow the final AAAI paper direction: use the budget curve as the primary
   efficiency figure and defend the thin 50%-label reversal with extra finetune
   seeds.
-- Keep MixNeRF / visible-token ideas out of the AAAI critical path unless they
-  independently clear their own scout gate.
+- Prioritize the budget curve as the current AAAI critical path, but do not
+  permanently exclude MixNeRF / visible-token ideas. If the MixNeRF scout is
+  clearly stronger, or if the budget curve is not strong enough by itself,
+  revisit whether the masking-mechanism branch should be folded into the paper.
 
 ## Budget Curve
 
