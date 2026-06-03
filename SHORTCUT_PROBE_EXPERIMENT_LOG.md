@@ -4427,3 +4427,29 @@ Decision:
   structure-first saturation.
 - The 50%-label reversal remains headline-worthy only if seed2/3 preserve the
   mean margin against scratch100.
+
+## Experiment 61: MixNeRF-MAE-lite Scout Results
+
+Snapshot:
+- 2026-06-04 JST
+
+Artifact:
+- `results/shortcut_probe_artifacts/mixnerf/mixnerf_results_20260604.md`
+
+Completed FCOS evals:
+
+| condition | pretrain | AP@25 | AP@50 | AP@75 | R@50 top300 |
+|---|---:|---:|---:|---:|---:|
+| MixNeRF partner-fill | e30 | 0.8486 | 0.5433 | 0.1112 | 0.6765 |
+| MixNeRF partner-fill | e100 | 0.8125 | 0.5871 | 0.0670 | 0.7206 |
+| zero-fill control | e30 | 0.8271 | 0.5292 | 0.1675 | 0.6544 |
+| noise-fill control | e30 | 0.8259 | 0.5894 | 0.1000 | 0.7206 |
+
+Interpretation:
+- MixNeRF partner-fill improves AP@50 from e30 to e100, but AP@75 collapses at
+  e100.
+- The e30 noise-fill control reaches AP@50 `0.5894`, slightly above MixNeRF e100
+  `0.5871`, with the same R@50 top300.
+- This does not isolate a useful partner-token mechanism. MixNeRF / visible-token
+  masking should remain conditional rather than replacing the current budget-curve
+  and structure-first paper path.
