@@ -14,32 +14,41 @@ Purpose:
 
 ## Budget Curve
 
-Clean curve plan:
-- Train one baseline e1200 run and one structure-first/cosine e1200 run with
-  `PRETRAIN_CHECKPOINT_INTERVAL=50`.
-- Evaluate checkpoints at epochs 100, 300, 600, and 1200.
-- This avoids separate e100/e300/e600 pretrains and gives a defensible
-  single-trajectory budget curve.
+Corrected curve plan:
+- Each budget point must use a training run whose total epoch count matches the
+  plotted budget. This matters because both the cosine RGB curriculum and the
+  one-cycle learning-rate schedule depend on total `EPOCHS`.
+- The initially submitted e1200 intermediate-checkpoint FCOS jobs for e100/e300/e600
+  were therefore cancelled. The e1200 pretrains remain valid for the e1200 point.
+- Dedicated e100/e600 pretrains were added; existing dedicated e300/e600
+  checkpoints are reused where available.
 
 Pretrain jobs:
 
-| condition | save suffix | job |
+| condition | save suffix | job | status |
 |---|---|---:|
-| baseline | `abci3budgetcurve50` | `1821253.pbs1` |
-| cosine_ramp | `abci3budgetcurve50` | `1821254.pbs1` |
+| baseline e1200 | `abci3budgetcurve50` | `1821253.pbs1` | keep for e1200 only |
+| cosine_ramp e1200 | `abci3budgetcurve50` | `1821254.pbs1` | keep for e1200 only |
+| baseline e100 | `abci3budgetB` | `1821358.pbs1` | added after schedule correction |
+| baseline e600 | `abci3budgetB` | `1821360.pbs1` | added after schedule correction |
+| cosine_ramp e100 | `abci3budgetB` | `1821362.pbs1` | added after schedule correction |
 
 Dependent FCOS jobs:
 
-| condition | checkpoint epoch | job |
+| condition | budget epoch | job | status |
 |---|---:|---:|
-| baseline | 100 | `1821255.pbs1` |
-| baseline | 300 | `1821256.pbs1` |
-| baseline | 600 | `1821257.pbs1` |
-| baseline | 1200 | `1821258.pbs1` |
-| cosine_ramp | 100 | `1821259.pbs1` |
-| cosine_ramp | 300 | `1821260.pbs1` |
-| cosine_ramp | 600 | `1821261.pbs1` |
-| cosine_ramp | 1200 | `1821262.pbs1` |
+| baseline | 100 | `1821359.pbs1` | dependent on dedicated e100 |
+| baseline | 300 | existing eval | dedicated e300 already available |
+| baseline | 600 | `1821361.pbs1` | dependent on dedicated e600 |
+| baseline | 1200 | `1821258.pbs1` | dependent on e1200 |
+| cosine_ramp | 100 | `1821363.pbs1` | dependent on dedicated e100 |
+| cosine_ramp | 300 | existing eval | dedicated e300 already available |
+| cosine_ramp | 600 | `1821364.pbs1` | FCOS-only on existing dedicated e600 |
+| cosine_ramp | 1200 | `1821262.pbs1` | dependent on e1200 |
+
+Cancelled after schedule correction:
+- `1821255.pbs1`, `1821256.pbs1`, `1821257.pbs1`
+- `1821259.pbs1`, `1821260.pbs1`, `1821261.pbs1`
 
 ## Reversal Seed Defense
 

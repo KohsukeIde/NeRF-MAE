@@ -4384,25 +4384,32 @@ Purpose:
   be folded into the paper.
 
 Budget-curve launch:
-- Instead of separate e100/e300/e600/e1200 pretrains, launch one e1200 baseline
-  and one e1200 `cosine_ramp` run with checkpoints every 50 epochs.
-- Evaluate `epoch_100.pt`, `epoch_300.pt`, `epoch_600.pt`, and `epoch_1200.pt`
-  from each trajectory.
+- Corrected after noticing that both the `cosine_ramp` schedule and the one-cycle
+  learning-rate schedule depend on total `EPOCHS`.
+- The main budget curve should therefore use dedicated total-budget runs, not
+  intermediate checkpoints from an e1200 run for e100/e300/e600.
+- The e1200 pretrains remain valid for the e1200 point. Incorrect dependent
+  FCOS jobs for e1200-intermediate e100/e300/e600 points were cancelled.
 
 Submitted budget-curve jobs:
 
-| row | job |
-|---|---:|
-| baseline e1200 pretrain, 50-epoch checkpoints | `1821253.pbs1` |
-| cosine_ramp e1200 pretrain, 50-epoch checkpoints | `1821254.pbs1` |
-| baseline e100 FCOS | `1821255.pbs1` |
-| baseline e300 FCOS | `1821256.pbs1` |
-| baseline e600 FCOS | `1821257.pbs1` |
-| baseline e1200 FCOS | `1821258.pbs1` |
-| cosine_ramp e100 FCOS | `1821259.pbs1` |
-| cosine_ramp e300 FCOS | `1821260.pbs1` |
-| cosine_ramp e600 FCOS | `1821261.pbs1` |
-| cosine_ramp e1200 FCOS | `1821262.pbs1` |
+| row | job | status |
+|---|---:|---|
+| baseline e1200 pretrain | `1821253.pbs1` | keep for e1200 only |
+| cosine_ramp e1200 pretrain | `1821254.pbs1` | keep for e1200 only |
+| baseline e100 pretrain | `1821358.pbs1` | dedicated budget run |
+| baseline e100 FCOS | `1821359.pbs1` | dependent on e100 |
+| baseline e600 pretrain | `1821360.pbs1` | dedicated budget run |
+| baseline e600 FCOS | `1821361.pbs1` | dependent on e600 |
+| baseline e1200 FCOS | `1821258.pbs1` | dependent on e1200 |
+| cosine_ramp e100 pretrain | `1821362.pbs1` | dedicated budget run |
+| cosine_ramp e100 FCOS | `1821363.pbs1` | dependent on e100 |
+| cosine_ramp e600 FCOS | `1821364.pbs1` | FCOS-only on existing dedicated e600 |
+| cosine_ramp e1200 FCOS | `1821262.pbs1` | dependent on e1200 |
+
+Cancelled:
+- `1821255.pbs1`, `1821256.pbs1`, `1821257.pbs1`
+- `1821259.pbs1`, `1821260.pbs1`, `1821261.pbs1`
 
 Submitted reversal-defense jobs:
 
