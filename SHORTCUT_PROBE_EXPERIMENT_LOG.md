@@ -4364,3 +4364,57 @@ Decision gate:
 - Continue only if e10/e30 losses are stable, `base_mask_mean` remains near
   zero, partner-fill is better than zero/noise controls, and e100 is competitive
   with the matching baseline/cosine e100 rows.
+
+## Experiment 60: Budget Curve and Reversal Seed Defense
+
+Snapshot:
+- 2026-06-03 JST
+
+Artifact:
+- `results/shortcut_probe_artifacts/budget_curve_reversal_jobs_20260603.md`
+
+Purpose:
+- Follow the final feedback direction for the AAAI paper: use a budget curve as
+  the primary efficiency evidence and defend the thin low-label reversal with
+  a small finetune-seed expansion.
+- Keep visible-token / MixNeRF style masking mechanisms as a separate method
+  direction, not the AAAI critical path, unless their scout results are clearly
+  stronger.
+
+Budget-curve launch:
+- Instead of separate e100/e300/e600/e1200 pretrains, launch one e1200 baseline
+  and one e1200 `cosine_ramp` run with checkpoints every 50 epochs.
+- Evaluate `epoch_100.pt`, `epoch_300.pt`, `epoch_600.pt`, and `epoch_1200.pt`
+  from each trajectory.
+
+Submitted budget-curve jobs:
+
+| row | job |
+|---|---:|
+| baseline e1200 pretrain, 50-epoch checkpoints | `1821253.pbs1` |
+| cosine_ramp e1200 pretrain, 50-epoch checkpoints | `1821254.pbs1` |
+| baseline e100 FCOS | `1821255.pbs1` |
+| baseline e300 FCOS | `1821256.pbs1` |
+| baseline e600 FCOS | `1821257.pbs1` |
+| baseline e1200 FCOS | `1821258.pbs1` |
+| cosine_ramp e100 FCOS | `1821259.pbs1` |
+| cosine_ramp e300 FCOS | `1821260.pbs1` |
+| cosine_ramp e600 FCOS | `1821261.pbs1` |
+| cosine_ramp e1200 FCOS | `1821262.pbs1` |
+
+Submitted reversal-defense jobs:
+
+| row | seed | job |
+|---|---:|---:|
+| scratch 100% | 2 | `1821264.pbs1` |
+| cosine_ramp e300 50% | 2 | `1821265.pbs1` |
+| surface_cosine_jitter e300 50% | 2 | `1821266.pbs1` |
+| scratch 100% | 3 | `1821267.pbs1` |
+| cosine_ramp e300 50% | 3 | `1821268.pbs1` |
+| surface_cosine_jitter e300 50% | 3 | `1821269.pbs1` |
+
+Decision:
+- Figure 1 should be the AP@50/R@50 budget curve if the curve shows early
+  structure-first saturation.
+- The 50%-label reversal remains headline-worthy only if seed2/3 preserve the
+  mean margin against scratch100.
