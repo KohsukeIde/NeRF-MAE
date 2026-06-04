@@ -22,7 +22,8 @@ MIXNERF_MASK_RATIO:
 MIXNERF_PARTNER:
     roll | shuffle. Default: roll.
 MIXNERF_FILL_MODE:
-    partner | zeros | noise. Default: partner. `zeros` and `noise` are controls.
+    partner | zeros | noise | shuffle. Default: partner. `zeros`, `noise`, and
+    same-scene patch `shuffle` are controls.
 MIXNERF_PATCH_SIZE:
     Patch size used to upsample patch masks to voxel masks. Default: auto, then 4.
 MIXNERF_DISABLE_INTERNAL_MASK:
@@ -93,7 +94,7 @@ class SwinTransformer_MAE3D_MixNeRF(SwinTransformer_MAE3D_Probe):
             raise ValueError(f"Unsupported MIXNERF_MODE={self.mixnerf_mode!r}")
         if self.mixnerf_partner not in {"roll", "shuffle"}:
             raise ValueError(f"Unsupported MIXNERF_PARTNER={self.mixnerf_partner!r}")
-        if self.mixnerf_fill_mode not in {"partner", "zeros", "noise"}:
+        if self.mixnerf_fill_mode not in {"partner", "zeros", "noise", "shuffle"}:
             raise ValueError(f"Unsupported MIXNERF_FILL_MODE={self.mixnerf_fill_mode!r}")
         if not 0.0 <= self.mixnerf_mask_ratio < 1.0:
             raise ValueError("MIXNERF_MASK_RATIO must be in [0, 1).")
@@ -165,10 +166,13 @@ class SwinTransformer_MAE3D_MixNeRF(SwinTransformer_MAE3D_Probe):
         elif self.mixnerf_fill_mode == "zeros":
             filler = torch.zeros_like(x_target)
             partner_idx = torch.arange(x_target.shape[0], device=x_target.device)
-        else:  # noise control matched per-channel roughly within current batch
+        elif self.mixnerf_fill_mode == "noise":
             mean = x_target.mean(dim=(0, 2, 3, 4), keepdim=True)
             std = x_target.std(dim=(0, 2, 3, 4), keepdim=True).clamp_min(1e-6)
             filler = torch.randn_like(x_target) * std + mean
+            partner_idx = torch.arange(x_target.shape[0], device=x_target.device)
+        else:
+            filler = self._same_scene_patch_shuffle(x_target, patch_size, patch_grid)
             partner_idx = torch.arange(x_target.shape[0], device=x_target.device)
 
         x_mixed = x_target * (1.0 - voxel_mask) + filler * voxel_mask
@@ -187,6 +191,40 @@ class SwinTransformer_MAE3D_MixNeRF(SwinTransformer_MAE3D_Probe):
                     }
                 )
         return x_mixed.contiguous(), patch_mask
+
+    @staticmethod
+    def _same_scene_patch_shuffle(
+        x: torch.Tensor, patch_size: int, patch_grid: Tuple[int, int, int]
+    ) -> torch.Tensor:
+        """Build a same-scene patch-shuffled filler.
+
+        This is a non-zero, non-partner control: each scene supplies its own filler
+        patches, but patch locations are shuffled so the masked location cannot be
+        copied directly from the same spatial position.
+        """
+        b, c, h, w, d = x.shape
+        gh, gw, gd = patch_grid
+        hh, ww, dd = gh * patch_size, gw * patch_size, gd * patch_size
+        cropped = x[:, :, :hh, :ww, :dd]
+        patches = cropped.reshape(
+            b, c, gh, patch_size, gw, patch_size, gd, patch_size
+        )
+        patches = patches.permute(0, 2, 4, 6, 1, 3, 5, 7).contiguous()
+        patches = patches.reshape(b, gh * gw * gd, c, patch_size, patch_size, patch_size)
+
+        shuffled = torch.empty_like(patches)
+        for batch_idx in range(b):
+            perm = torch.randperm(patches.shape[1], device=x.device)
+            shuffled[batch_idx] = patches[batch_idx, perm]
+
+        shuffled = shuffled.reshape(b, gh, gw, gd, c, patch_size, patch_size, patch_size)
+        shuffled = shuffled.permute(0, 4, 1, 5, 2, 6, 3, 7).contiguous()
+        shuffled = shuffled.reshape(b, c, hh, ww, dd)
+        if (hh, ww, dd) == (h, w, d):
+            return shuffled
+        out = x.clone()
+        out[:, :, :hh, :ww, :dd] = shuffled
+        return out
 
     def _set_internal_masking(self, value: float) -> Dict[str, object]:
         """Best-effort temporary override for base-model internal masking.

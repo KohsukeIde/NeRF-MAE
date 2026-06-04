@@ -80,6 +80,12 @@ MIXNERF_FILL_MODE="${MIXNERF_FILL_MODE:-}"
 MIXNERF_PATCH_SIZE="${MIXNERF_PATCH_SIZE:-}"
 MIXNERF_DISABLE_INTERNAL_MASK="${MIXNERF_DISABLE_INTERNAL_MASK:-}"
 MIXNERF_LOG_STATS="${MIXNERF_LOG_STATS:-}"
+MIXNERF_PROBE_MODE="${MIXNERF_PROBE_MODE:-}"
+MIXNERF_PROBE_RGB_LOSS="${MIXNERF_PROBE_RGB_LOSS:-}"
+MIXNERF_PROBE_ALPHA_LOSS="${MIXNERF_PROBE_ALPHA_LOSS:-}"
+MIXNERF_PROBE_RGB_INPUT="${MIXNERF_PROBE_RGB_INPUT:-}"
+MIXNERF_PROBE_ALPHA_INPUT="${MIXNERF_PROBE_ALPHA_INPUT:-}"
+MIXNERF_PROBE_ALPHA_TARGET="${MIXNERF_PROBE_ALPHA_TARGET:-}"
 AUTO_RESUME_PRETRAIN="${AUTO_RESUME_PRETRAIN:-1}"
 RESUME_ALLOW_PARTIAL="${RESUME_ALLOW_PARTIAL:-1}"
 SKIP_EXISTING="${SKIP_EXISTING:-1}"
@@ -205,7 +211,7 @@ case "${KIND}:${CONDITION}" in
   boundary_sdf:boundary_sdf_aux)
     SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
-  mixnerf:mixnerf_lite|mixnerf:mixnerf_lite_zeros|mixnerf:mixnerf_lite_noise)
+  mixnerf:mixnerf_lite|mixnerf:mixnerf_lite_zeros|mixnerf:mixnerf_lite_noise|mixnerf:mixnerf_lite_shuffle|mixnerf:mixnerf_lite_masked|mixnerf:mixnerf_lite_zeros_masked|mixnerf:mixnerf_lite_noise_masked|mixnerf:mixnerf_lite_shuffle_masked)
     SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
   *)
@@ -351,6 +357,12 @@ export MIXNERF_FILL_MODE="$(printf '%q' "${MIXNERF_FILL_MODE}")"
 export MIXNERF_PATCH_SIZE="$(printf '%q' "${MIXNERF_PATCH_SIZE}")"
 export MIXNERF_DISABLE_INTERNAL_MASK="$(printf '%q' "${MIXNERF_DISABLE_INTERNAL_MASK}")"
 export MIXNERF_LOG_STATS="$(printf '%q' "${MIXNERF_LOG_STATS}")"
+export MIXNERF_PROBE_MODE="$(printf '%q' "${MIXNERF_PROBE_MODE}")"
+export MIXNERF_PROBE_RGB_LOSS="$(printf '%q' "${MIXNERF_PROBE_RGB_LOSS}")"
+export MIXNERF_PROBE_ALPHA_LOSS="$(printf '%q' "${MIXNERF_PROBE_ALPHA_LOSS}")"
+export MIXNERF_PROBE_RGB_INPUT="$(printf '%q' "${MIXNERF_PROBE_RGB_INPUT}")"
+export MIXNERF_PROBE_ALPHA_INPUT="$(printf '%q' "${MIXNERF_PROBE_ALPHA_INPUT}")"
+export MIXNERF_PROBE_ALPHA_TARGET="$(printf '%q' "${MIXNERF_PROBE_ALPHA_TARGET}")"
 export NERFMAE_DDP_USE_ENV=1
 export NERFMAE_DDP_NUM_NODES="$(printf '%q' "${PRETRAIN_NODES}")"
 export NERFMAE_DDP_WORLD_SIZE="$(printf '%q' "${PRETRAIN_WORLD_SIZE}")"
@@ -885,17 +897,30 @@ case "${KIND}:${CONDITION}" in
       PROBE_ALPHA_WEIGHT=1.0 \
       bash train_mae3d.sh
     ;;
-  mixnerf:mixnerf_lite|mixnerf:mixnerf_lite_zeros|mixnerf:mixnerf_lite_noise)
+  mixnerf:mixnerf_lite|mixnerf:mixnerf_lite_zeros|mixnerf:mixnerf_lite_noise|mixnerf:mixnerf_lite_shuffle|mixnerf:mixnerf_lite_masked|mixnerf:mixnerf_lite_zeros_masked|mixnerf:mixnerf_lite_noise_masked|mixnerf:mixnerf_lite_shuffle_masked)
     mix_fill="${MIXNERF_FILL_MODE:-partner}"
+    mix_probe_mode="${MIXNERF_PROBE_MODE:-baseline}"
+    mix_rgb_loss="${MIXNERF_PROBE_RGB_LOSS:-occupied}"
+    mix_alpha_loss="${MIXNERF_PROBE_ALPHA_LOSS:-removed}"
     case "${CONDITION}" in
-      mixnerf_lite)
+      mixnerf_lite|mixnerf_lite_masked)
         mix_fill="${MIXNERF_FILL_MODE:-partner}"
         ;;
-      mixnerf_lite_zeros)
+      mixnerf_lite_zeros|mixnerf_lite_zeros_masked)
         mix_fill="${MIXNERF_FILL_MODE:-zeros}"
         ;;
-      mixnerf_lite_noise)
+      mixnerf_lite_noise|mixnerf_lite_noise_masked)
         mix_fill="${MIXNERF_FILL_MODE:-noise}"
+        ;;
+      mixnerf_lite_shuffle|mixnerf_lite_shuffle_masked)
+        mix_fill="${MIXNERF_FILL_MODE:-shuffle}"
+        ;;
+    esac
+    case "${CONDITION}" in
+      *_masked)
+        mix_probe_mode="${MIXNERF_PROBE_MODE:-custom}"
+        mix_rgb_loss="${MIXNERF_PROBE_RGB_LOSS:-removed_occupied}"
+        mix_alpha_loss="${MIXNERF_PROBE_ALPHA_LOSS:-removed}"
         ;;
     esac
     env "${common_env[@]}" "${resume_env[@]}" \
@@ -907,7 +932,14 @@ case "${KIND}:${CONDITION}" in
       MIXNERF_PATCH_SIZE="${MIXNERF_PATCH_SIZE:-4}" \
       MIXNERF_DISABLE_INTERNAL_MASK="${MIXNERF_DISABLE_INTERNAL_MASK:-1}" \
       MIXNERF_LOG_STATS="${MIXNERF_LOG_STATS:-1}" \
-      PROBE_MODE=baseline \
+      PROBE_MODE="${mix_probe_mode}" \
+      PROBE_RGB_INPUT="${MIXNERF_PROBE_RGB_INPUT:-keep}" \
+      PROBE_ALPHA_INPUT="${MIXNERF_PROBE_ALPHA_INPUT:-keep}" \
+      PROBE_ALPHA_TARGET="${MIXNERF_PROBE_ALPHA_TARGET:-keep}" \
+      PROBE_RGB_LOSS="${mix_rgb_loss}" \
+      PROBE_ALPHA_LOSS="${mix_alpha_loss}" \
+      PROBE_RGB_WEIGHT=1.0 \
+      PROBE_ALPHA_WEIGHT=1.0 \
       bash train_mae3d.sh
     ;;
 esac

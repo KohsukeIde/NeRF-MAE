@@ -4453,3 +4453,49 @@ Interpretation:
 - This does not isolate a useful partner-token mechanism. MixNeRF / visible-token
   masking should remain conditional rather than replacing the current budget-curve
   and structure-first paper path.
+
+## Experiment 62: MixNeRF Masked-Loss and Dithered-Filler Follow-up
+
+Snapshot:
+- 2026-06-04 JST
+
+Artifact:
+- `results/shortcut_probe_artifacts/mixnerf/mixnerf_next_scout_jobs_20260604.md`
+
+Motivation:
+- The first MixNeRF result showed that e30 noise-fill AP@50 (`0.5894`) matched or
+  exceeded e100 partner-fill AP@50 (`0.5871`).
+- The previous MixNeRF runs used `PROBE_MODE=baseline`, so they tested filler
+  corruption under the public occupied-all RGB objective rather than a pure
+  removed/masked RGB objective.
+- Existing logs confirmed the internal base mask was disabled
+  (`base_mask_mean=0.0`, `internal_mask_attrs_overridden=['masking_prob']`).
+
+Implementation updates:
+- Added same-scene patch-shuffle filler via `MIXNERF_FILL_MODE=shuffle`.
+- Added masked-loss MixNeRF conditions for partner / zero / noise / shuffle.
+- Added MixNeRF probe-loss env overrides so gate runs can use
+  `PROBE_MODE=custom`, `PROBE_RGB_LOSS=removed_occupied`,
+  `PROBE_ALPHA_LOSS=removed`.
+- Validation passed:
+  - `py_compile` for `mixnerf_probe.py` and `run_swin_mixnerf_mae.py`
+  - `bash -n` for updated MixNeRF/gate scripts
+  - `submit_mixnerf_next_scouts.sh` dry-run
+
+Submitted jobs:
+
+| condition | epochs | fill | probe mode | RGB loss | pretrain | FCOS |
+|---|---:|---|---|---|---:|---:|
+| `mixnerf_lite_masked` | 30 | partner | custom | removed_occupied | `1826351.pbs1` | `1826352.pbs1` |
+| `mixnerf_lite_zeros_masked` | 30 | zeros | custom | removed_occupied | `1826353.pbs1` | `1826354.pbs1` |
+| `mixnerf_lite_noise_masked` | 30 | noise | custom | removed_occupied | `1826355.pbs1` | `1826356.pbs1` |
+| `mixnerf_lite_shuffle_masked` | 30 | same-scene shuffle | custom | removed_occupied | `1826357.pbs1` | `1826358.pbs1` |
+| `mixnerf_lite_noise` | 100 | noise | baseline | occupied | `1826359.pbs1` | `1826360.pbs1` |
+| `mixnerf_lite_zeros` | 100 | zeros | baseline | occupied | `1826361.pbs1` | `1826362.pbs1` |
+
+Decision rule:
+- `partner > noise/zero/shuffle` under masked loss: MixNeRF partner semantics is
+  revived.
+- `noise` or `shuffle` wins: pivot method hypothesis toward Dithered /
+  mask-token-free NeRF-MAE.
+- no competitive result: stop the encoder-fill branch.

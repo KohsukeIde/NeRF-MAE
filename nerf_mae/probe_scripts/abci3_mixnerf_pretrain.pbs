@@ -29,6 +29,12 @@ export MIXNERF_FILL_MODE="${MIXNERF_FILL_MODE:-partner}"
 export MIXNERF_PATCH_SIZE="${MIXNERF_PATCH_SIZE:-4}"
 export MIXNERF_DISABLE_INTERNAL_MASK="${MIXNERF_DISABLE_INTERNAL_MASK:-1}"
 export MIXNERF_LOG_STATS="${MIXNERF_LOG_STATS:-1}"
+MIXNERF_PROBE_MODE="${MIXNERF_PROBE_MODE:-baseline}"
+MIXNERF_PROBE_RGB_INPUT="${MIXNERF_PROBE_RGB_INPUT:-keep}"
+MIXNERF_PROBE_ALPHA_INPUT="${MIXNERF_PROBE_ALPHA_INPUT:-keep}"
+MIXNERF_PROBE_ALPHA_TARGET="${MIXNERF_PROBE_ALPHA_TARGET:-keep}"
+MIXNERF_PROBE_RGB_LOSS="${MIXNERF_PROBE_RGB_LOSS:-occupied}"
+MIXNERF_PROBE_ALPHA_LOSS="${MIXNERF_PROBE_ALPHA_LOSS:-removed}"
 
 python3 -u run_swin_mixnerf_mae.py \
   --mode train \
@@ -49,7 +55,12 @@ python3 -u run_swin_mixnerf_mae.py \
   --gpus "${GPUS}" \
   --percent_train "${PERCENT_TRAIN}" \
   --seed "${SEED}" \
-  --probe_mode baseline \
+  --probe_mode "${MIXNERF_PROBE_MODE}" \
+  --probe_rgb_input "${MIXNERF_PROBE_RGB_INPUT}" \
+  --probe_alpha_input "${MIXNERF_PROBE_ALPHA_INPUT}" \
+  --probe_alpha_target "${MIXNERF_PROBE_ALPHA_TARGET}" \
+  --probe_rgb_loss "${MIXNERF_PROBE_RGB_LOSS}" \
+  --probe_alpha_loss "${MIXNERF_PROBE_ALPHA_LOSS}" \
   --save_path "${OUTPUT_ROOT}/${RUN_NAME}" \
   --tags "${RUN_NAME}" \
   ${EXTRA_ARGS}
