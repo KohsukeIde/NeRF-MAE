@@ -4499,3 +4499,80 @@ Decision rule:
 - `noise` or `shuffle` wins: pivot method hypothesis toward Dithered /
   mask-token-free NeRF-MAE.
 - no competitive result: stop the encoder-fill branch.
+
+## Experiment 63: Budget Curve, Reversal Seeds, and MixNeRF Follow-up Results
+
+Snapshot:
+- 2026-06-06 JST
+
+Artifacts:
+- `results/shortcut_probe_artifacts/budget_curve_reversal_results_20260606.md`
+- `results/shortcut_probe_artifacts/mixnerf/mixnerf_followup_results_20260606.md`
+
+Queue status:
+- Budget-curve, reversal-defense, and MixNeRF follow-up jobs are complete.
+- Remaining running jobs are unrelated SSL jobs (`simclrv1`, `simclrv2`,
+  `byol`, `ibot`).
+
+Budget curve:
+
+| method | epochs | AP@25 | AP@50 | AP@75 | R@50 top300 |
+|---|---:|---:|---:|---:|---:|
+| baseline | 100 | 0.7940 | 0.5422 | 0.0830 | 0.6912 |
+| baseline | 300 | 0.7956 | 0.4695 | 0.0869 | 0.6618 |
+| baseline | 600 | 0.7994 | 0.4994 | 0.0767 | 0.6765 |
+| baseline | 1200 | 0.7934 | 0.5648 | 0.0809 | 0.7059 |
+| cosine_ramp | 100 | 0.8095 | 0.5711 | 0.0940 | 0.7132 |
+| cosine_ramp | 300 | 0.8249 | 0.5539 | 0.1135 | 0.7059 |
+| cosine_ramp | 600 | 0.8220 | 0.6196 | 0.0721 | 0.7279 |
+| cosine_ramp | 1200 | 0.8338 | 0.5490 | 0.0640 | 0.6838 |
+
+Budget-curve interpretation:
+- The dedicated-budget curve is not monotonic.
+- `cosine_ramp` is stronger than baseline at e100/e300/e600, with the strongest
+  AP@50 at e600 (`0.6196`).
+- The e1200 `cosine_ramp` point drops below baseline e1200 on AP@50
+  (`0.5490` vs `0.5648`), so the paper should not claim monotonic budget
+  saturation or long-budget dominance.
+- The defensible read is a mid-budget sample-efficiency peak.
+
+Low-label 50% reversal, 3 finetune seeds:
+
+| condition | mean AP@50 | std AP@50 | n |
+|---|---:|---:|---:|
+| scratch 100% | 0.4828 | 0.0468 | 3 |
+| cosine_ramp 50% | 0.4970 | 0.0062 | 3 |
+| surface_cosine_jitter 50% | 0.5150 | 0.0201 | 3 |
+
+Reversal interpretation:
+- The reversal is moderate rather than decisive.
+- `cosine_ramp 50%` has a thin AP@50 mean gain over scratch 100% (`+0.0142`).
+- `surface_cosine_jitter 50%` is stronger (`+0.0322`) and lower variance than
+  scratch, but this should be framed as matching/modestly exceeding full-label
+  scratch rather than as an overwhelming reversal.
+
+Low-label seed1 grid:
+- `cosine_ramp` is best at 10% and 25% labels.
+- `surface_cosine_jitter` is best at 50% and 100% labels.
+- This supports using `cosine_ramp` as the safer base method and surface
+  anchoring as an in-domain / label-richer enhancement unless later cross-axis
+  results favor surface anchoring consistently.
+
+MixNeRF follow-up:
+
+| condition | objective | epochs | AP@25 | AP@50 | AP@75 | R@50 top300 |
+|---|---|---:|---:|---:|---:|---:|
+| MixNeRF partner-fill | masked RGB | 30 | 0.8408 | 0.5567 | 0.1361 | 0.6765 |
+| zero-fill control | masked RGB | 30 | 0.8127 | 0.4881 | 0.0499 | 0.6765 |
+| noise-fill control | masked RGB | 30 | 0.8136 | 0.5276 | 0.1808 | 0.6765 |
+| same-scene shuffle-fill | masked RGB | 30 | 0.8337 | 0.5805 | 0.1239 | 0.6838 |
+| noise-fill control | public occupied RGB | 100 | 0.8197 | 0.4909 | 0.0642 | 0.6544 |
+| zero-fill control | public occupied RGB | 100 | 0.8398 | 0.5459 | 0.0772 | 0.6838 |
+
+MixNeRF interpretation:
+- Under masked RGB, same-scene shuffle beats partner-fill on AP@50
+  (`0.5805` vs `0.5567`).
+- Cross-scene partner semantics is therefore not isolated.
+- The previous public-objective e30 noise-fill result does not scale to e100.
+- Keep MixNeRF / visible-token filling separated from the main paper path unless
+  a more targeted future mechanism beats the budget-curve results.
