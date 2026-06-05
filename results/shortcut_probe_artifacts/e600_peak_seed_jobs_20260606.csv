@@ -1,0 +1,7 @@
+label,finetune_seed,job_id
+cosine_e600,2,1830815.pbs1
+baseline_e600,2,1830817.pbs1
+baseline_e1200,2,1830818.pbs1
+cosine_e600,3,1830819.pbs1
+baseline_e600,3,1830820.pbs1
+baseline_e1200,3,1830821.pbs1

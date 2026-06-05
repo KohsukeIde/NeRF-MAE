@@ -4635,3 +4635,59 @@ Decision:
   separate method candidate.
 - `mean ~= shuffle_visible`: likely simple non-zero filler, weak novelty.
 - `shuffle_visible` collapses at e100: stop this branch.
+
+## Experiment 65: e600 Peak Seed Check Launch and e100 Coord-jitter Audit
+
+Snapshot:
+- 2026-06-06 JST
+
+Artifacts:
+- `results/shortcut_probe_artifacts/e600_peak_seed_jobs_20260606.md`
+- `results/shortcut_probe_artifacts/e600_peak_seed_jobs_20260606.csv`
+- `results/shortcut_probe_artifacts/cosine_coord_jitter_e100_config_audit_20260606.md`
+
+Decision:
+- Adopt the Doc 7 direction.
+- Do not promote the Doc 8 `cosine_coord_jitter_e100 = 0.6219` row to a main
+  paper pillar.
+- Keep `cosine_coord_jitter_e100` as an ablation/enhanced short-budget result
+  only after config audit and seed confirmation.
+
+Submitted FCOS-only seed checks:
+
+| row | finetune seed | job |
+|---|---:|---:|
+| `cosine_e600` | 2 | `1830815.pbs1` |
+| `baseline_e600` | 2 | `1830817.pbs1` |
+| `baseline_e1200` | 2 | `1830818.pbs1` |
+| `cosine_e600` | 3 | `1830819.pbs1` |
+| `baseline_e600` | 3 | `1830820.pbs1` |
+| `baseline_e1200` | 3 | `1830821.pbs1` |
+
+Run settings:
+- Full-label Front3D FCOS, `PERCENT_TRAIN=1.0`
+- `FCOS_NUM_EPOCHS=1000`
+- Existing MAE checkpoints only; no new pretraining
+- `DETERMINISTIC=0`, matching the budget-curve FCOS protocol
+
+`cosine_coord_jitter_e100` audit:
+- Config appears to be clean `cosine_ramp + coord_jitter`, not surface maturation.
+- `PROBE_CURRICULUM=cosine_rgb_ramp`
+- `PROBE_CURRICULUM_EPOCHS=100`
+- `RGB_LOSS_REGION=all_occupied`
+- `ALPHA_LOSS_REGION=removed_patches`
+- Surface maturation fields are empty in `results_table.csv`.
+
+Existing finetune-seed results for `cosine_coord_jitter_e100`:
+
+| finetune seed | AP@50 |
+|---:|---:|
+| 1 | 0.6219 |
+| 2 | 0.5958 |
+| 3 | 0.5443 |
+
+Summary:
+- `cosine_coord_jitter_e100`: AP@50 `0.5873 +/- 0.0395` over 3 finetune seeds.
+- `baseline_coord_jitter_e100`: AP@50 `0.5454 +/- 0.0103` over 3 finetune seeds.
+- The single-seed `0.6219` row shrinks under finetune-seed replication, so it
+  should remain an ablation/enhanced variant rather than a main paper pillar.
