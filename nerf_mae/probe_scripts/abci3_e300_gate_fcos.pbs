@@ -61,7 +61,7 @@ case "${KIND}:${CONDITION}" in
     PRETRAIN_SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     VARIANT_NAME="${CONDITION}"
     ;;
-  mixnerf:mixnerf_lite|mixnerf:mixnerf_lite_zeros|mixnerf:mixnerf_lite_noise|mixnerf:mixnerf_lite_shuffle|mixnerf:mixnerf_lite_masked|mixnerf:mixnerf_lite_zeros_masked|mixnerf:mixnerf_lite_noise_masked|mixnerf:mixnerf_lite_shuffle_masked)
+  mixnerf:mixnerf_lite|mixnerf:mixnerf_lite_zeros|mixnerf:mixnerf_lite_noise|mixnerf:mixnerf_lite_shuffle|mixnerf:mixnerf_lite_shuffle_visible|mixnerf:mixnerf_lite_mean|mixnerf:mixnerf_lite_masked|mixnerf:mixnerf_lite_zeros_masked|mixnerf:mixnerf_lite_noise_masked|mixnerf:mixnerf_lite_shuffle_masked|mixnerf:mixnerf_lite_shuffle_visible_masked|mixnerf:mixnerf_lite_mean_masked)
     PRETRAIN_SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     VARIANT_NAME="${CONDITION}"
     ;;

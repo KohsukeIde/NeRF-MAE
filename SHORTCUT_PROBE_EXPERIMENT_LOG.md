@@ -4576,3 +4576,62 @@ MixNeRF interpretation:
 - The previous public-objective e30 noise-fill result does not scale to e100.
 - Keep MixNeRF / visible-token filling separated from the main paper path unless
   a more targeted future mechanism beats the budget-curve results.
+
+## Experiment 64: Visible-only Dithered MixNeRF e100 Scout Launch
+
+Snapshot:
+- 2026-06-06 JST
+
+Artifacts:
+- `results/shortcut_probe_artifacts/mixnerf/implementation_audit_20260606.md`
+- `results/shortcut_probe_artifacts/mixnerf/mixnerf_dither_e100_jobs_20260606.md`
+
+Reason:
+- The previous same-scene `shuffle` control used all patches, so it was not a
+  clean mask-token-free / visible-only dither test.
+- e30 rankings are not reliable enough for a method branch; previous noise-fill
+  looked good at e30 but collapsed at e100.
+- Need a simple non-zero control before treating same-scene dither as
+  distribution matching rather than merely "anything non-zero is better than
+  zero".
+
+Implementation updates:
+- Added `MIXNERF_FILL_MODE=shuffle_visible`, which samples replacement patches
+  only from same-scene visible patches (`patch_mask == 0`).
+- Added `MIXNERF_FILL_MODE=mean` and `constant` for simple non-zero controls.
+- Added PBS condition support for:
+  - `mixnerf_lite_shuffle_visible_masked`
+  - `mixnerf_lite_mean_masked`
+- Added `submit_mixnerf_dither_e100_scouts.sh`.
+
+Validation:
+- `py_compile` passed for `mixnerf_probe.py` and `run_swin_mixnerf_mae.py`.
+- `bash -n` passed for the dither submitter and gate PBS scripts.
+- Dry-run confirmed distinct `PRETRAIN_MASTER_PORT` values for concurrent
+  pretrains.
+- Local tensor sanity logged:
+  - `same_scene_fill_source=visible_only`
+  - `self_replacement_rate=0.0`
+  - `masked_source_rate=0.0`
+
+Submitted jobs:
+
+| condition | epochs | seed | fill | objective | pretrain | FCOS |
+|---|---:|---:|---|---|---:|---:|
+| `mixnerf_lite_shuffle_visible_masked` | 100 | 1 | `shuffle_visible` | `removed_occupied` RGB / removed alpha | `1830790.pbs1` | `1830791.pbs1` |
+| `mixnerf_lite_zeros_masked` | 100 | 1 | `zeros` | `removed_occupied` RGB / removed alpha | `1830792.pbs1` | `1830793.pbs1` |
+| `mixnerf_lite_shuffle_visible_masked` | 100 | 2 | `shuffle_visible` | `removed_occupied` RGB / removed alpha | `1830794.pbs1` | `1830795.pbs1` |
+| `mixnerf_lite_zeros_masked` | 100 | 2 | `zeros` | `removed_occupied` RGB / removed alpha | `1830796.pbs1` | `1830797.pbs1` |
+| `mixnerf_lite_mean_masked` | 100 | 1 | `mean` | `removed_occupied` RGB / removed alpha | `1830798.pbs1` | `1830799.pbs1` |
+
+Queue status at launch:
+- The five e100 pretrains are running.
+- The five dependent FCOS eval jobs are held on their corresponding pretrains.
+- Existing unrelated SSL jobs remain running; this dither branch should not block
+  the main budget-curve / efficiency paper path.
+
+Decision:
+- `shuffle_visible > zeros` and `shuffle_visible > mean`: keep dither as a
+  separate method candidate.
+- `mean ~= shuffle_visible`: likely simple non-zero filler, weak novelty.
+- `shuffle_visible` collapses at e100: stop this branch.

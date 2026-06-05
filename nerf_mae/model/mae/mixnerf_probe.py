@@ -22,8 +22,12 @@ MIXNERF_MASK_RATIO:
 MIXNERF_PARTNER:
     roll | shuffle. Default: roll.
 MIXNERF_FILL_MODE:
-    partner | zeros | noise | shuffle. Default: partner. `zeros`, `noise`, and
-    same-scene patch `shuffle` are controls.
+    partner | zeros | noise | shuffle | shuffle_visible | mean | constant.
+    Default: partner. `zeros`, `noise`, same-scene patch `shuffle`,
+    visible-only same-scene `shuffle_visible`, and simple non-zero `mean` /
+    `constant` are controls.
+MIXNERF_CONSTANT_VALUE:
+    Scalar used by `constant` fill. Default: 0.5.
 MIXNERF_PATCH_SIZE:
     Patch size used to upsample patch masks to voxel masks. Default: auto, then 4.
 MIXNERF_DISABLE_INTERNAL_MASK:
@@ -85,16 +89,26 @@ class SwinTransformer_MAE3D_MixNeRF(SwinTransformer_MAE3D_Probe):
         self.mixnerf_mask_ratio = _env_float("MIXNERF_MASK_RATIO", 0.75)
         self.mixnerf_partner = _env_str("MIXNERF_PARTNER", "roll")
         self.mixnerf_fill_mode = _env_str("MIXNERF_FILL_MODE", "partner")
+        self.mixnerf_constant_value = _env_float("MIXNERF_CONSTANT_VALUE", 0.5)
         self.mixnerf_patch_size = _env_int_or_none("MIXNERF_PATCH_SIZE")
         self.mixnerf_disable_internal_mask = _env_flag("MIXNERF_DISABLE_INTERNAL_MASK", True)
         self.mixnerf_log_stats = _env_flag("MIXNERF_LOG_STATS", False)
         self.mixnerf_stats: Dict[str, object] = {}
+        self._last_fill_stats: Dict[str, object] = {}
 
         if self.mixnerf_mode not in {"off", "mix"}:
             raise ValueError(f"Unsupported MIXNERF_MODE={self.mixnerf_mode!r}")
         if self.mixnerf_partner not in {"roll", "shuffle"}:
             raise ValueError(f"Unsupported MIXNERF_PARTNER={self.mixnerf_partner!r}")
-        if self.mixnerf_fill_mode not in {"partner", "zeros", "noise", "shuffle"}:
+        if self.mixnerf_fill_mode not in {
+            "partner",
+            "zeros",
+            "noise",
+            "shuffle",
+            "shuffle_visible",
+            "mean",
+            "constant",
+        }:
             raise ValueError(f"Unsupported MIXNERF_FILL_MODE={self.mixnerf_fill_mode!r}")
         if not 0.0 <= self.mixnerf_mask_ratio < 1.0:
             raise ValueError("MIXNERF_MASK_RATIO must be in [0, 1).")
@@ -154,6 +168,7 @@ class SwinTransformer_MAE3D_MixNeRF(SwinTransformer_MAE3D_Probe):
         return mask[:, :, :h, :w, :d].contiguous()
 
     def _mix_input(self, x_target: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        self._last_fill_stats = {}
         patch_size = self._infer_patch_size(x_target)
         patch_mask, patch_grid = self._make_patch_mask(x_target, patch_size)
         voxel_mask = self._patch_mask_to_voxel_mask(
@@ -170,6 +185,17 @@ class SwinTransformer_MAE3D_MixNeRF(SwinTransformer_MAE3D_Probe):
             mean = x_target.mean(dim=(0, 2, 3, 4), keepdim=True)
             std = x_target.std(dim=(0, 2, 3, 4), keepdim=True).clamp_min(1e-6)
             filler = torch.randn_like(x_target) * std + mean
+            partner_idx = torch.arange(x_target.shape[0], device=x_target.device)
+        elif self.mixnerf_fill_mode == "mean":
+            filler = x_target.mean(dim=(0, 2, 3, 4), keepdim=True).expand_as(x_target)
+            partner_idx = torch.arange(x_target.shape[0], device=x_target.device)
+        elif self.mixnerf_fill_mode == "constant":
+            filler = torch.full_like(x_target, float(self.mixnerf_constant_value))
+            partner_idx = torch.arange(x_target.shape[0], device=x_target.device)
+        elif self.mixnerf_fill_mode == "shuffle_visible":
+            filler = self._same_scene_visible_patch_shuffle(
+                x_target, patch_size, patch_grid, patch_mask
+            )
             partner_idx = torch.arange(x_target.shape[0], device=x_target.device)
         else:
             filler = self._same_scene_patch_shuffle(x_target, patch_size, patch_grid)
@@ -188,6 +214,7 @@ class SwinTransformer_MAE3D_MixNeRF(SwinTransformer_MAE3D_Probe):
                         "patch_mask_mean": float(patch_mask.float().mean().detach().cpu()),
                         "voxel_mask_mean": float(voxel_mask.float().mean().detach().cpu()),
                         "partner_mean_self_match": float((partner_idx == torch.arange(x_target.shape[0], device=x_target.device)).float().mean().detach().cpu()),
+                        **self._last_fill_stats,
                     }
                 )
         return x_mixed.contiguous(), patch_mask
@@ -218,6 +245,89 @@ class SwinTransformer_MAE3D_MixNeRF(SwinTransformer_MAE3D_Probe):
             shuffled[batch_idx] = patches[batch_idx, perm]
 
         shuffled = shuffled.reshape(b, gh, gw, gd, c, patch_size, patch_size, patch_size)
+        shuffled = shuffled.permute(0, 4, 1, 5, 2, 6, 3, 7).contiguous()
+        shuffled = shuffled.reshape(b, c, hh, ww, dd)
+        if (hh, ww, dd) == (h, w, d):
+            return shuffled
+        out = x.clone()
+        out[:, :, :hh, :ww, :dd] = shuffled
+        return out
+
+    def _same_scene_visible_patch_shuffle(
+        self,
+        x: torch.Tensor,
+        patch_size: int,
+        patch_grid: Tuple[int, int, int],
+        patch_mask: torch.Tensor,
+    ) -> torch.Tensor:
+        """Build same-scene filler from visible patches only.
+
+        `patch_mask == 1` marks positions to reconstruct.  For each masked
+        location, this method samples a replacement patch from the same scene's
+        visible patch set (`patch_mask == 0`).  This prevents the target masked
+        patch from being copied into its own input location.
+        """
+        b, c, h, w, d = x.shape
+        gh, gw, gd = patch_grid
+        hh, ww, dd = gh * patch_size, gw * patch_size, gd * patch_size
+        cropped = x[:, :, :hh, :ww, :dd]
+        patches = cropped.reshape(
+            b, c, gh, patch_size, gw, patch_size, gd, patch_size
+        )
+        patches = patches.permute(0, 2, 4, 6, 1, 3, 5, 7).contiguous()
+        patches = patches.reshape(b, gh * gw * gd, c, patch_size, patch_size, patch_size)
+
+        flat_mask = patch_mask.reshape(b, gh * gw * gd).to(dtype=torch.bool)
+        filler_patches = patches.clone()
+        visible_counts = []
+        masked_counts = []
+        fallback_count = 0
+
+        for batch_idx in range(b):
+            visible_idx = torch.nonzero(~flat_mask[batch_idx], as_tuple=False).flatten()
+            masked_idx = torch.nonzero(flat_mask[batch_idx], as_tuple=False).flatten()
+            visible_counts.append(int(visible_idx.numel()))
+            masked_counts.append(int(masked_idx.numel()))
+            if masked_idx.numel() == 0:
+                continue
+            if visible_idx.numel() == 0:
+                # Degenerate case only possible with a 100% mask.  Fall back to
+                # all non-identical patches so training does not crash.
+                all_idx = torch.arange(patches.shape[1], device=x.device)
+                source_pos = torch.randint(
+                    low=0, high=max(1, patches.shape[1] - 1),
+                    size=(masked_idx.numel(),),
+                    device=x.device,
+                )
+                source_idx = all_idx[source_pos]
+                source_idx = torch.where(source_idx >= masked_idx, source_idx + 1, source_idx)
+                source_idx = source_idx.clamp_max(patches.shape[1] - 1)
+                fallback_count += int(masked_idx.numel())
+            else:
+                source_pos = torch.randint(
+                    low=0,
+                    high=visible_idx.numel(),
+                    size=(masked_idx.numel(),),
+                    device=x.device,
+                )
+                source_idx = visible_idx[source_pos]
+            filler_patches[batch_idx, masked_idx] = patches[batch_idx, source_idx]
+
+        self._last_fill_stats.update(
+            {
+                "same_scene_fill_source": "visible_only",
+                "self_replacement_rate": 0.0,
+                "masked_source_rate": 0.0 if fallback_count == 0 else "fallback_non_identical",
+                "visible_patch_count_min": min(visible_counts) if visible_counts else 0,
+                "visible_patch_count_mean": float(sum(visible_counts) / max(1, len(visible_counts))),
+                "masked_patch_count_min": min(masked_counts) if masked_counts else 0,
+                "masked_patch_count_mean": float(sum(masked_counts) / max(1, len(masked_counts))),
+            }
+        )
+
+        shuffled = filler_patches.reshape(
+            b, gh, gw, gd, c, patch_size, patch_size, patch_size
+        )
         shuffled = shuffled.permute(0, 4, 1, 5, 2, 6, 3, 7).contiguous()
         shuffled = shuffled.reshape(b, c, hh, ww, dd)
         if (hh, ww, dd) == (h, w, d):

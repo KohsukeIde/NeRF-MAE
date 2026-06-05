@@ -211,7 +211,7 @@ case "${KIND}:${CONDITION}" in
   boundary_sdf:boundary_sdf_aux)
     SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
-  mixnerf:mixnerf_lite|mixnerf:mixnerf_lite_zeros|mixnerf:mixnerf_lite_noise|mixnerf:mixnerf_lite_shuffle|mixnerf:mixnerf_lite_masked|mixnerf:mixnerf_lite_zeros_masked|mixnerf:mixnerf_lite_noise_masked|mixnerf:mixnerf_lite_shuffle_masked)
+  mixnerf:mixnerf_lite|mixnerf:mixnerf_lite_zeros|mixnerf:mixnerf_lite_noise|mixnerf:mixnerf_lite_shuffle|mixnerf:mixnerf_lite_shuffle_visible|mixnerf:mixnerf_lite_mean|mixnerf:mixnerf_lite_masked|mixnerf:mixnerf_lite_zeros_masked|mixnerf:mixnerf_lite_noise_masked|mixnerf:mixnerf_lite_shuffle_masked|mixnerf:mixnerf_lite_shuffle_visible_masked|mixnerf:mixnerf_lite_mean_masked)
     SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
   *)
@@ -897,7 +897,7 @@ case "${KIND}:${CONDITION}" in
       PROBE_ALPHA_WEIGHT=1.0 \
       bash train_mae3d.sh
     ;;
-  mixnerf:mixnerf_lite|mixnerf:mixnerf_lite_zeros|mixnerf:mixnerf_lite_noise|mixnerf:mixnerf_lite_shuffle|mixnerf:mixnerf_lite_masked|mixnerf:mixnerf_lite_zeros_masked|mixnerf:mixnerf_lite_noise_masked|mixnerf:mixnerf_lite_shuffle_masked)
+  mixnerf:mixnerf_lite|mixnerf:mixnerf_lite_zeros|mixnerf:mixnerf_lite_noise|mixnerf:mixnerf_lite_shuffle|mixnerf:mixnerf_lite_shuffle_visible|mixnerf:mixnerf_lite_mean|mixnerf:mixnerf_lite_masked|mixnerf:mixnerf_lite_zeros_masked|mixnerf:mixnerf_lite_noise_masked|mixnerf:mixnerf_lite_shuffle_masked|mixnerf:mixnerf_lite_shuffle_visible_masked|mixnerf:mixnerf_lite_mean_masked)
     mix_fill="${MIXNERF_FILL_MODE:-partner}"
     mix_probe_mode="${MIXNERF_PROBE_MODE:-baseline}"
     mix_rgb_loss="${MIXNERF_PROBE_RGB_LOSS:-occupied}"
@@ -914,6 +914,12 @@ case "${KIND}:${CONDITION}" in
         ;;
       mixnerf_lite_shuffle|mixnerf_lite_shuffle_masked)
         mix_fill="${MIXNERF_FILL_MODE:-shuffle}"
+        ;;
+      mixnerf_lite_shuffle_visible|mixnerf_lite_shuffle_visible_masked)
+        mix_fill="${MIXNERF_FILL_MODE:-shuffle_visible}"
+        ;;
+      mixnerf_lite_mean|mixnerf_lite_mean_masked)
+        mix_fill="${MIXNERF_FILL_MODE:-mean}"
         ;;
     esac
     case "${CONDITION}" in

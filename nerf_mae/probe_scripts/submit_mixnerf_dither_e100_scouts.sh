@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# Submit the next MixNeRF / mask-token-free scouts with dependent FCOS eval.
+# Submit e100 masked-objective dither / mask-token-free MixNeRF scouts.
 #
-# Default launch:
-# - e30 true masked-loss controls: partner / zero / noise / same-scene-shuffle
-# - e100 public-loss controls: noise / zero
-#
-# Run from anywhere inside the repo.
+# This is intentionally separate from the first MixNeRF scout launcher.  The
+# goal here is to test whether the e30 same-scene shuffle result survives a
+# longer budget, and whether it is distribution matching rather than merely a
+# non-zero filler effect.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -48,21 +47,21 @@ PROBE_ENV_PREFIX="${PROBE_ENV_PREFIX:-${ROOT_DIR}/.venv-abci3}"
 USE_WANDB="${USE_WANDB:-0}"
 WANDB_MODE="${WANDB_MODE:-offline}"
 DETERMINISTIC="${DETERMINISTIC:-0}"
-PRETRAIN_MASTER_PORT="${PRETRAIN_MASTER_PORT:-29500}"
-SEED="${SEED:-1}"
+PRETRAIN_MASTER_PORT_BASE="${PRETRAIN_MASTER_PORT_BASE:-29540}"
 MIXNERF_MASK_RATIO="${MIXNERF_MASK_RATIO:-0.75}"
 MIXNERF_PATCH_SIZE="${MIXNERF_PATCH_SIZE:-4}"
 MIXNERF_PARTNER="${MIXNERF_PARTNER:-roll}"
+EPOCHS="${EPOCHS:-100}"
+SEEDS="${SEEDS:-1 2}"
+MEAN_SEEDS="${MEAN_SEEDS:-1}"
 SUBMIT_PRETRAIN="${SUBMIT_PRETRAIN:-1}"
 SUBMIT_FCOS="${SUBMIT_FCOS:-1}"
-SUBMIT_MASKED_E30="${SUBMIT_MASKED_E30:-1}"
-SUBMIT_E100_NOISE_ZERO="${SUBMIT_E100_NOISE_ZERO:-1}"
-SUBMIT_LOG_DIR="${SUBMIT_LOG_DIR:-${ROOT_DIR}/output/launcher/mixnerf_next_$(date +%Y%m%d_%H%M%S)}"
+SUBMIT_LOG_DIR="${SUBMIT_LOG_DIR:-${ROOT_DIR}/output/launcher/mixnerf_dither_e100_$(date +%Y%m%d_%H%M%S)}"
 DRY_RUN="${DRY_RUN:-0}"
 
 mkdir -p "${SUBMIT_LOG_DIR}"
 submitted_tsv="${SUBMIT_LOG_DIR}/submitted.tsv"
-printf "kind\tcondition\tepochs\tfill\tprobe_mode\trgb_loss\talpha_loss\tpretrain_job\tfcos_job\n" > "${submitted_tsv}"
+printf "kind\tcondition\tepochs\tseed\tfill\tprobe_mode\trgb_loss\talpha_loss\tpretrain_job\tfcos_job\n" > "${submitted_tsv}"
 
 run_or_print() {
   if [[ "${DRY_RUN}" == "1" ]]; then
@@ -74,32 +73,41 @@ run_or_print() {
 
 short_condition() {
   case "$1" in
-    mixnerf_lite_masked) printf "mpart" ;;
-    mixnerf_lite_zeros_masked) printf "mzero" ;;
-    mixnerf_lite_noise_masked) printf "mnoise" ;;
-    mixnerf_lite_shuffle_masked) printf "mshuf" ;;
     mixnerf_lite_shuffle_visible_masked) printf "mvis" ;;
+    mixnerf_lite_zeros_masked) printf "mzero" ;;
     mixnerf_lite_mean_masked) printf "mmean" ;;
-    mixnerf_lite_zeros) printf "zero" ;;
-    mixnerf_lite_noise) printf "noise" ;;
     *) printf "%s" "$1" | tr -cd '[:alnum:]_' | cut -c1-8 ;;
   esac
+}
+
+condition_port_offset() {
+  case "$1" in
+    mixnerf_lite_shuffle_visible_masked) printf "1" ;;
+    mixnerf_lite_zeros_masked) printf "2" ;;
+    mixnerf_lite_mean_masked) printf "3" ;;
+    *) printf "9" ;;
+  esac
+}
+
+port_for_job() {
+  local seed="$1"
+  local offset="$2"
+  printf "%d" $((PRETRAIN_MASTER_PORT_BASE + seed * 10 + offset))
 }
 
 submit_one() {
   local condition="$1"
   local epochs="$2"
-  local fill="$3"
-  local run_suffix="$4"
-  local probe_mode="$5"
-  local rgb_loss="$6"
-  local alpha_loss="$7"
-  local short qsub_gpu_ids eval_interval varlist pre_job fcos_job
+  local seed="$3"
+  local fill="$4"
+  local run_suffix="$5"
+  local short qsub_gpu_ids eval_interval master_port varlist pre_job fcos_job
   short="$(short_condition "${condition}")"
   qsub_gpu_ids="${PRETRAIN_GPU_IDS//,/:}"
   eval_interval="${PRETRAIN_EVAL_INTERVAL:-${epochs}}"
+  master_port="$(port_for_job "${seed}" "$(condition_port_offset "${condition}")")"
 
-  varlist="ROOT_DIR=${ROOT_DIR},KIND=mixnerf,CONDITION=${condition},EPOCHS=${epochs},SEED=${SEED},FINETUNE_SEED=${SEED},RUN_SUFFIX=${run_suffix},PROBE_ENV_PREFIX=${PROBE_ENV_PREFIX},PRETRAIN_DATA_ROOT=${PRETRAIN_DATA_ROOT},PRETRAIN_DATA_SRC=${PRETRAIN_DATA_SRC},FCOS_DATA_ROOT=${FCOS_DATA_ROOT},ABCI3_CUDA_MODULE=${ABCI3_CUDA_MODULE},PRETRAIN_NODES=${PRETRAIN_NODES},PRETRAIN_GPU_IDS=${qsub_gpu_ids},PRETRAIN_BATCH_SIZE_PER_GPU=${PRETRAIN_BATCH_SIZE_PER_GPU},PRETRAIN_LR=${PRETRAIN_LR},PRETRAIN_WEIGHT_DECAY=${PRETRAIN_WEIGHT_DECAY},PRETRAIN_EVAL_INTERVAL=${eval_interval},PRETRAIN_CHECKPOINT_INTERVAL=${PRETRAIN_CHECKPOINT_INTERVAL},PRETRAIN_KEEP_CHECKPOINTS=${PRETRAIN_KEEP_CHECKPOINTS},PRETRAIN_LOG_INTERVAL=${PRETRAIN_LOG_INTERVAL},PRETRAIN_PROFILE_STEP_TIME=${PRETRAIN_PROFILE_STEP_TIME},PRETRAIN_TRAIN_NUM_WORKERS=${PRETRAIN_TRAIN_NUM_WORKERS},PRETRAIN_EVAL_NUM_WORKERS=${PRETRAIN_EVAL_NUM_WORKERS},PRETRAIN_PERSISTENT_WORKERS=${PRETRAIN_PERSISTENT_WORKERS},STAGE_PRETRAIN_DATA=${STAGE_PRETRAIN_DATA},LOCAL_STAGE_ROOT=${LOCAL_STAGE_ROOT},STAGE_KEEP=${STAGE_KEEP},STAGE_MIN_FREE_GB=${STAGE_MIN_FREE_GB},USE_WANDB=${USE_WANDB},WANDB_MODE=${WANDB_MODE},DETERMINISTIC=${DETERMINISTIC},PRETRAIN_MASTER_PORT=${PRETRAIN_MASTER_PORT},MIXNERF_MODE=mix,MIXNERF_MASK_RATIO=${MIXNERF_MASK_RATIO},MIXNERF_PARTNER=${MIXNERF_PARTNER},MIXNERF_FILL_MODE=${fill},MIXNERF_PATCH_SIZE=${MIXNERF_PATCH_SIZE},MIXNERF_DISABLE_INTERNAL_MASK=1,MIXNERF_LOG_STATS=1,MIXNERF_PROBE_MODE=${probe_mode},MIXNERF_PROBE_RGB_INPUT=keep,MIXNERF_PROBE_ALPHA_INPUT=keep,MIXNERF_PROBE_ALPHA_TARGET=keep,MIXNERF_PROBE_RGB_LOSS=${rgb_loss},MIXNERF_PROBE_ALPHA_LOSS=${alpha_loss},SKIP_EXISTING=1"
+  varlist="ROOT_DIR=${ROOT_DIR},KIND=mixnerf,CONDITION=${condition},EPOCHS=${epochs},SEED=${seed},FINETUNE_SEED=${seed},RUN_SUFFIX=${run_suffix},PROBE_ENV_PREFIX=${PROBE_ENV_PREFIX},PRETRAIN_DATA_ROOT=${PRETRAIN_DATA_ROOT},PRETRAIN_DATA_SRC=${PRETRAIN_DATA_SRC},FCOS_DATA_ROOT=${FCOS_DATA_ROOT},ABCI3_CUDA_MODULE=${ABCI3_CUDA_MODULE},PRETRAIN_NODES=${PRETRAIN_NODES},PRETRAIN_GPU_IDS=${qsub_gpu_ids},PRETRAIN_BATCH_SIZE_PER_GPU=${PRETRAIN_BATCH_SIZE_PER_GPU},PRETRAIN_LR=${PRETRAIN_LR},PRETRAIN_WEIGHT_DECAY=${PRETRAIN_WEIGHT_DECAY},PRETRAIN_EVAL_INTERVAL=${eval_interval},PRETRAIN_CHECKPOINT_INTERVAL=${PRETRAIN_CHECKPOINT_INTERVAL},PRETRAIN_KEEP_CHECKPOINTS=${PRETRAIN_KEEP_CHECKPOINTS},PRETRAIN_LOG_INTERVAL=${PRETRAIN_LOG_INTERVAL},PRETRAIN_PROFILE_STEP_TIME=${PRETRAIN_PROFILE_STEP_TIME},PRETRAIN_TRAIN_NUM_WORKERS=${PRETRAIN_TRAIN_NUM_WORKERS},PRETRAIN_EVAL_NUM_WORKERS=${PRETRAIN_EVAL_NUM_WORKERS},PRETRAIN_PERSISTENT_WORKERS=${PRETRAIN_PERSISTENT_WORKERS},STAGE_PRETRAIN_DATA=${STAGE_PRETRAIN_DATA},LOCAL_STAGE_ROOT=${LOCAL_STAGE_ROOT},STAGE_KEEP=${STAGE_KEEP},STAGE_MIN_FREE_GB=${STAGE_MIN_FREE_GB},USE_WANDB=${USE_WANDB},WANDB_MODE=${WANDB_MODE},DETERMINISTIC=${DETERMINISTIC},PRETRAIN_MASTER_PORT=${master_port},MIXNERF_MODE=mix,MIXNERF_MASK_RATIO=${MIXNERF_MASK_RATIO},MIXNERF_PARTNER=${MIXNERF_PARTNER},MIXNERF_FILL_MODE=${fill},MIXNERF_PATCH_SIZE=${MIXNERF_PATCH_SIZE},MIXNERF_DISABLE_INTERNAL_MASK=1,MIXNERF_LOG_STATS=1,MIXNERF_PROBE_MODE=custom,MIXNERF_PROBE_RGB_INPUT=keep,MIXNERF_PROBE_ALPHA_INPUT=keep,MIXNERF_PROBE_ALPHA_TARGET=keep,MIXNERF_PROBE_RGB_LOSS=removed_occupied,MIXNERF_PROBE_ALPHA_LOSS=removed,SKIP_EXISTING=1"
 
   pre_job=""
   if [[ "${SUBMIT_PRETRAIN}" == "1" ]]; then
@@ -109,19 +117,19 @@ submit_one() {
       -q "${PRETRAIN_QUEUE}"
       -l "select=${PRETRAIN_NODES}"
       -l "walltime=${PRETRAIN_WALLTIME}"
-      -N "mix${short}e${epochs}p"
+      -N "dith${short}e${epochs}s${seed}p"
       -j oe
-      -o "${SUBMIT_LOG_DIR}/mix_${short}_e${epochs}_pre.pbs.log"
+      -o "${SUBMIT_LOG_DIR}/dither_${short}_e${epochs}_s${seed}_pre.pbs.log"
       -v "${varlist}"
       "${SCRIPT_DIR}/abci3_e300_gate_pretrain.pbs"
     )
     if [[ "${DRY_RUN}" == "1" ]]; then
       run_or_print "${pre_cmd[@]}"
-      pre_job="DRYRUN_PRE_${short}_${epochs}"
+      pre_job="DRYRUN_PRE_${short}_${epochs}_s${seed}"
     else
       pre_job="$("${pre_cmd[@]}")"
       pre_job="${pre_job%% *}"
-      echo "[submitted] pretrain condition=${condition} epochs=${epochs} fill=${fill} job=${pre_job}"
+      echo "[submitted] pretrain condition=${condition} epochs=${epochs} seed=${seed} fill=${fill} job=${pre_job}"
     fi
   fi
 
@@ -134,9 +142,9 @@ submit_one() {
       -q "${FCOS_QUEUE}"
       -l select=1
       -l "walltime=${FCOS_WALLTIME}"
-      -N "mix${short}e${epochs}f"
+      -N "dith${short}e${epochs}s${seed}f"
       -j oe
-      -o "${SUBMIT_LOG_DIR}/mix_${short}_e${epochs}_fcos.pbs.log"
+      -o "${SUBMIT_LOG_DIR}/dither_${short}_e${epochs}_s${seed}_fcos.pbs.log"
       -v "${fcos_varlist}"
     )
     if [[ -n "${pre_job}" ]]; then
@@ -145,28 +153,25 @@ submit_one() {
     fcos_cmd+=("${SCRIPT_DIR}/abci3_e300_gate_fcos.pbs")
     if [[ "${DRY_RUN}" == "1" ]]; then
       run_or_print "${fcos_cmd[@]}"
-      fcos_job="DRYRUN_FCOS_${short}_${epochs}"
+      fcos_job="DRYRUN_FCOS_${short}_${epochs}_s${seed}"
     else
       fcos_job="$("${fcos_cmd[@]}")"
       fcos_job="${fcos_job%% *}"
-      echo "[submitted] fcos condition=${condition} epochs=${epochs} job=${fcos_job} dep=${pre_job:-none}"
+      echo "[submitted] fcos condition=${condition} epochs=${epochs} seed=${seed} job=${fcos_job} dep=${pre_job:-none}"
     fi
   fi
 
-  printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
-    mixnerf "${condition}" "${epochs}" "${fill}" "${probe_mode}" "${rgb_loss}" "${alpha_loss}" "${pre_job}" "${fcos_job}" >> "${submitted_tsv}"
+  printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
+    mixnerf "${condition}" "${epochs}" "${seed}" "${fill}" custom removed_occupied removed "${pre_job}" "${fcos_job}" >> "${submitted_tsv}"
 }
 
-if [[ "${SUBMIT_MASKED_E30}" == "1" ]]; then
-  submit_one mixnerf_lite_masked 30 partner abci3mixmasked custom removed_occupied removed
-  submit_one mixnerf_lite_zeros_masked 30 zeros abci3mixmasked custom removed_occupied removed
-  submit_one mixnerf_lite_noise_masked 30 noise abci3mixmasked custom removed_occupied removed
-  submit_one mixnerf_lite_shuffle_masked 30 shuffle abci3mixmasked custom removed_occupied removed
-fi
+for seed in ${SEEDS}; do
+  submit_one mixnerf_lite_shuffle_visible_masked "${EPOCHS}" "${seed}" shuffle_visible abci3dither_e100
+  submit_one mixnerf_lite_zeros_masked "${EPOCHS}" "${seed}" zeros abci3dither_e100
+done
 
-if [[ "${SUBMIT_E100_NOISE_ZERO}" == "1" ]]; then
-  submit_one mixnerf_lite_noise 100 noise abci3mixctrl_e100 baseline occupied removed
-  submit_one mixnerf_lite_zeros 100 zeros abci3mixctrl_e100 baseline occupied removed
-fi
+for seed in ${MEAN_SEEDS}; do
+  submit_one mixnerf_lite_mean_masked "${EPOCHS}" "${seed}" mean abci3dither_e100
+done
 
 echo "[info] submitted manifest=${submitted_tsv}"
