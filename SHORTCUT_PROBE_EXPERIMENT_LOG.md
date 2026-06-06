@@ -4726,3 +4726,51 @@ Interpretation:
 - Safer framing: use the budget curve as an efficiency observation with
   seed-band caveats, and combine it with low-label stability rather than making
   e600 peak the sole strong-accept pillar.
+
+## Experiment 67: Visible-only Dithered MixNeRF e100 Scout Results
+
+Snapshot:
+- 2026-06-06 JST
+
+Artifact:
+- `results/shortcut_probe_artifacts/mixnerf/mixnerf_dither_e100_results_20260606.md`
+
+Status:
+- All e100 dither pretrain and dependent FCOS jobs completed.
+- `shuffle_visible` logs confirm visible-only source:
+  - `same_scene_fill_source=visible_only`
+  - `self_replacement_rate=0.0`
+  - `masked_source_rate=0.0`
+  - `base_mask_mean=0.0`
+
+Results:
+
+| condition | seed | fill | AP@25 | AP@50 | AP@75 | R@50 top300 |
+|---|---:|---|---:|---:|---:|---:|
+| `mixnerf_lite_shuffle_visible_masked` | 1 | visible-only same-scene shuffle | 0.8425 | 0.5766 | 0.1328 | 0.7206 |
+| `mixnerf_lite_shuffle_visible_masked` | 2 | visible-only same-scene shuffle | 0.8512 | 0.5873 | 0.1344 | 0.7279 |
+| `mixnerf_lite_zeros_masked` | 1 | zero | 0.8480 | 0.6262 | 0.1012 | 0.7426 |
+| `mixnerf_lite_zeros_masked` | 2 | zero | 0.8212 | 0.5587 | 0.1304 | 0.6912 |
+| `mixnerf_lite_mean_masked` | 1 | channel mean | 0.8615 | 0.5670 | 0.0875 | 0.6912 |
+
+AP@50 summary:
+
+| condition | n | mean AP@50 | std AP@50 | mean AP@75 | mean R@50 |
+|---|---:|---:|---:|---:|---:|
+| `shuffle_visible` | 2 | 0.5819 | 0.0076 | 0.1336 | 0.7243 |
+| `zero` | 2 | 0.5925 | 0.0477 | 0.1158 | 0.7169 |
+| `mean` | 1 | 0.5670 | - | 0.0875 | 0.6912 |
+
+Interpretation:
+- Clean visible-only same-scene dither does not beat zero-fill on mean AP@50
+  (`0.5819` vs `0.5925`).
+- `shuffle_visible` is more stable and has better AP@75/R@50 mean, but the
+  planned promotion criterion was AP@50 over zero and mean.
+- The `mean` control is close enough to seed1 `shuffle_visible` that this is not
+  strong evidence for a special scene-distribution matching mechanism.
+
+Decision:
+- Do not move dither / mask-token-free MixNeRF into the AAAI main path.
+- Keep it separated as an appendix/future-method observation.
+- Stop broad MixNeRF/dither exploration unless a reviewer-facing mechanism is
+  specified before launching more jobs.
