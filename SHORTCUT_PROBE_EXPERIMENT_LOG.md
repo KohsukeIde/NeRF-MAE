@@ -4691,3 +4691,38 @@ Summary:
 - `baseline_coord_jitter_e100`: AP@50 `0.5454 +/- 0.0103` over 3 finetune seeds.
 - The single-seed `0.6219` row shrinks under finetune-seed replication, so it
   should remain an ablation/enhanced variant rather than a main paper pillar.
+
+## Experiment 66: e600 Peak Seed Check Results
+
+Snapshot:
+- 2026-06-06 JST
+
+Artifact:
+- `results/shortcut_probe_artifacts/e600_peak_seed_results_20260606.md`
+
+Per-seed AP@50:
+
+| condition | seed1 | seed2 | seed3 | mean±std |
+|---|---:|---:|---:|---:|
+| `cosine_e600` | 0.6196 | 0.4971 | 0.5065 | 0.5410±0.0682 |
+| `baseline_e600` | 0.4994 | 0.4984 | 0.4955 | 0.4978±0.0021 |
+| `baseline_e1200` | 0.5648 | 0.5087 | 0.4807 | 0.5181±0.0428 |
+
+Paired AP@50 differences:
+
+| finetune seed | `cosine_e600 - baseline_e600` | `cosine_e600 - baseline_e1200` |
+|---:|---:|---:|
+| 1 | +0.1202 | +0.0548 |
+| 2 | -0.0014 | -0.0117 |
+| 3 | +0.0110 | +0.0257 |
+| mean | +0.0432 | +0.0229 |
+
+Interpretation:
+- The seed1 e600 peak does not replicate strongly.
+- `cosine_e600` remains above both baselines in mean AP@50, but the margin is
+  high-variance and driven heavily by seed1.
+- This is not strong enough to claim a robust/decisive e600 peak over e1200
+  baseline.
+- Safer framing: use the budget curve as an efficiency observation with
+  seed-band caveats, and combine it with low-label stability rather than making
+  e600 peak the sole strong-accept pillar.
