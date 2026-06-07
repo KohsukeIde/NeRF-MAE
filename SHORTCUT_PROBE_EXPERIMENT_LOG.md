@@ -4947,3 +4947,39 @@ Decision rule:
   gradient attribution, the decoder skip shortcut mechanism remains plausible.
 - If it barely changes either, visibility should stay appendix/future work and
   no cosine+skip or attention-gating branch should be promoted.
+
+Diagnostic result:
+- Retry job `1833070.pbs1` completed.
+- Output:
+  `results/shortcut_probe_artifacts/visibility/masked_skip_shortcut_20260608_gate_retry/masked_skip_shortcut_diagnostic.md`
+
+Key loss deltas vs normal:
+
+| checkpoint | masked skip zero delta | visible skip zero delta | all skip zero delta |
+|---|---:|---:|---:|
+| `baseline_coord_jitter_e100` | +0.0194 | +0.0185 | +0.1211 |
+| `cosine_coord_jitter_e100` | +0.0191 | +0.0202 | +0.1253 |
+| `visibility_cosine_skip_gate_e100` | -0.0492 | +0.3168 | +0.0911 |
+
+Key gradient attribution:
+
+| checkpoint | stage0 masked/visible grad | stage1 masked/visible grad | stage2 masked/visible grad |
+|---|---:|---:|---:|
+| `baseline_coord_jitter_e100` | 2.6337 | 1.4215 | 1.1098 |
+| `cosine_coord_jitter_e100` | 2.4144 | 1.5561 | 1.1133 |
+| `visibility_cosine_skip_gate_e100` | 2.5677 | 1.7738 | 1.3907 |
+
+Interpretation:
+- Decoder skip shortcut mechanism is plausible.
+- In baseline/cosine checkpoints, masked-position skip zeroing worsens
+  reconstruction loss, and masked skip locations receive larger gradients than
+  visible skip locations in early stages.
+- In the existing visibility checkpoint, `normal` evaluation means restoring
+  masked skip features that were gated during training; this hurts
+  reconstruction, while `masked_zero` recovers the trained behavior.
+
+Next action:
+- Isolate pure `visibility_skip_gate` because the previous visibility result
+  was actually cosine-ramp + skip gate.
+- Add a second seed for `visibility_cosine_skip_gate` only after this positive
+  diagnostic.

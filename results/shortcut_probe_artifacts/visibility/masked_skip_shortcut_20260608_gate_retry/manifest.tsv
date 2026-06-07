@@ -1,0 +1,12 @@
+run_name	masked_skip_shortcut_20260608_gate_retry
+root_dir	/groups/gag51404/ide/vgi/NeRF-MAE
+features_dir	/groups/gag51404/ide/vgi/NeRF-MAE/dataset/_downloads/front3d_rpn_extract/front3d_rpn_data/features
+split_file	/groups/gag51404/ide/vgi/NeRF-MAE/dataset/_downloads/front3d_rpn_extract/front3d_rpn_data/3dfront_split.npz
+split_key	val_scenes
+max_scenes	2
+grad_scenes	1
+resolution	160
+masking_prob	0.75
+checkpoint_specs	baseline_coord_jitter_e100=/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_baseline_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0/epoch_100.pt cosine_coord_jitter_e100=/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_cosine_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0/epoch_100.pt visibility_cosine_skip_gate_e100=/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_visibility_skip_gate_p1.0_e100_seed1_abci3vis_e100_20260607_141851/epoch_100.pt
+pbs_jobid	1833070.pbs1
+git_hash	29319111bdffdcd72ad2b36f9ca817eb547a101c

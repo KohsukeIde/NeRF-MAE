@@ -1,0 +1,715 @@
+{
+  "device": "cuda",
+  "features_dir": "/groups/gag51404/ide/vgi/NeRF-MAE/dataset/_downloads/front3d_rpn_extract/front3d_rpn_data/features",
+  "masking_prob": 0.75,
+  "normalize_density": true,
+  "resolution": 160,
+  "results": {
+    "baseline_coord_jitter_e100": {
+      "grad_rows": [
+        {
+          "checkpoint": "baseline_coord_jitter_e100",
+          "loss": 0.03900366276502609,
+          "masked_count": 48640,
+          "masked_grad_mean": 9.171320698442287e-07,
+          "masked_visible_grad_ratio": 2.6337320804595947,
+          "scene": "3dfront_0083_01",
+          "stage": 0,
+          "visible_count": 15360,
+          "visible_grad_mean": 3.482252850517398e-07
+        },
+        {
+          "checkpoint": "baseline_coord_jitter_e100",
+          "loss": 0.03900366276502609,
+          "masked_count": 6080,
+          "masked_grad_mean": 3.6740553355230077e-07,
+          "masked_visible_grad_ratio": 1.4215354919433594,
+          "scene": "3dfront_0083_01",
+          "stage": 1,
+          "visible_count": 1920,
+          "visible_grad_mean": 2.5845682216640853e-07
+        },
+        {
+          "checkpoint": "baseline_coord_jitter_e100",
+          "loss": 0.03900366276502609,
+          "masked_count": 760,
+          "masked_grad_mean": 8.013750552038346e-09,
+          "masked_visible_grad_ratio": 1.1097947359085083,
+          "scene": "3dfront_0083_01",
+          "stage": 2,
+          "visible_count": 240,
+          "visible_grad_mean": 7.220930076101695e-09
+        }
+      ],
+      "grad_summary": [
+        {
+          "loss": 0.03900366276502609,
+          "masked_count": 48640.0,
+          "masked_grad_mean": 9.171320698442287e-07,
+          "masked_visible_grad_ratio": 2.6337320804595947,
+          "n": 1,
+          "stage": 0,
+          "visible_count": 15360.0,
+          "visible_grad_mean": 3.482252850517398e-07
+        },
+        {
+          "loss": 0.03900366276502609,
+          "masked_count": 6080.0,
+          "masked_grad_mean": 3.6740553355230077e-07,
+          "masked_visible_grad_ratio": 1.4215354919433594,
+          "n": 1,
+          "stage": 1,
+          "visible_count": 1920.0,
+          "visible_grad_mean": 2.5845682216640853e-07
+        },
+        {
+          "loss": 0.03900366276502609,
+          "masked_count": 760.0,
+          "masked_grad_mean": 8.013750552038346e-09,
+          "masked_visible_grad_ratio": 1.1097947359085083,
+          "n": 1,
+          "stage": 2,
+          "visible_count": 240.0,
+          "visible_grad_mean": 7.220930076101695e-09
+        }
+      ],
+      "load": {
+        "checkpoint": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_baseline_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0/epoch_100.pt",
+        "epoch": 100,
+        "loaded_keys": 383,
+        "missing": [],
+        "total_model_keys": 383,
+        "unexpected": []
+      },
+      "loss_rows": [
+        {
+          "checkpoint": "baseline_coord_jitter_e100",
+          "loss": 0.03900366276502609,
+          "loss_alpha_removed": 0.022567840293049812,
+          "loss_rgb_occupied": 0.01643582433462143,
+          "loss_rgb_removed_occupied": 0.019954731687903404,
+          "loss_rgb_visible_occupied": 0.004313107114285231,
+          "mode": "normal",
+          "occupied_count": 329714.0,
+          "removed_count": 1078016.0,
+          "scene": "3dfront_0083_01",
+          "visible_count": 342784.0
+        },
+        {
+          "checkpoint": "baseline_coord_jitter_e100",
+          "loss": 0.05302744358778,
+          "loss_alpha_removed": 0.023611420765519142,
+          "loss_rgb_occupied": 0.029416024684906006,
+          "loss_rgb_removed_occupied": 0.04014712944626808,
+          "loss_rgb_visible_occupied": 0.00482768751680851,
+          "mode": "masked_zero",
+          "occupied_count": 329714.0,
+          "removed_count": 1041920.0,
+          "scene": "3dfront_0083_01",
+          "visible_count": 378880.0
+        },
+        {
+          "checkpoint": "baseline_coord_jitter_e100",
+          "loss": 0.053769826889038086,
+          "loss_alpha_removed": 0.02649647556245327,
+          "loss_rgb_occupied": 0.027273353189229965,
+          "loss_rgb_removed_occupied": 0.026010096073150635,
+          "loss_rgb_visible_occupied": 0.03092140145599842,
+          "mode": "visible_zero",
+          "occupied_count": 329714.0,
+          "removed_count": 1084672.0,
+          "scene": "3dfront_0083_01",
+          "visible_count": 336128.0
+        },
+        {
+          "checkpoint": "baseline_coord_jitter_e100",
+          "loss": 0.1565191149711609,
+          "loss_alpha_removed": 0.07181056588888168,
+          "loss_rgb_occupied": 0.0847085565328598,
+          "loss_rgb_removed_occupied": 0.08302610367536545,
+          "loss_rgb_visible_occupied": 0.08921270072460175,
+          "mode": "all_zero",
+          "occupied_count": 329714.0,
+          "removed_count": 1044992.0,
+          "scene": "3dfront_0083_01",
+          "visible_count": 375808.0
+        },
+        {
+          "checkpoint": "baseline_coord_jitter_e100",
+          "loss": 0.028600651770830154,
+          "loss_alpha_removed": 0.019596178084611893,
+          "loss_rgb_occupied": 0.009004472754895687,
+          "loss_rgb_removed_occupied": 0.011620473116636276,
+          "loss_rgb_visible_occupied": 0.002461085794493556,
+          "mode": "normal",
+          "occupied_count": 344818.0,
+          "removed_count": 1047808.0,
+          "scene": "3dfront_0042_01",
+          "visible_count": 415232.0
+        },
+        {
+          "checkpoint": "baseline_coord_jitter_e100",
+          "loss": 0.05345626920461655,
+          "loss_alpha_removed": 0.027218587696552277,
+          "loss_rgb_occupied": 0.02623768337070942,
+          "loss_rgb_removed_occupied": 0.03196702152490616,
+          "loss_rgb_visible_occupied": 0.0033814345952123404,
+          "mode": "masked_zero",
+          "occupied_count": 344818.0,
+          "removed_count": 1081472.0,
+          "scene": "3dfront_0042_01",
+          "visible_count": 381568.0
+        },
+        {
+          "checkpoint": "baseline_coord_jitter_e100",
+          "loss": 0.050850894302129745,
+          "loss_alpha_removed": 0.03046775981783867,
+          "loss_rgb_occupied": 0.020383134484291077,
+          "loss_rgb_removed_occupied": 0.018566470593214035,
+          "loss_rgb_visible_occupied": 0.025199096649885178,
+          "mode": "visible_zero",
+          "occupied_count": 344818.0,
+          "removed_count": 1108096.0,
+          "scene": "3dfront_0042_01",
+          "visible_count": 354944.0
+        },
+        {
+          "checkpoint": "baseline_coord_jitter_e100",
+          "loss": 0.15326134860515594,
+          "loss_alpha_removed": 0.07822826504707336,
+          "loss_rgb_occupied": 0.07503308355808258,
+          "loss_rgb_removed_occupied": 0.07709789276123047,
+          "loss_rgb_visible_occupied": 0.06804786622524261,
+          "mode": "all_zero",
+          "occupied_count": 344818.0,
+          "removed_count": 1101440.0,
+          "scene": "3dfront_0042_01",
+          "visible_count": 361600.0
+        }
+      ],
+      "loss_summary": [
+        {
+          "loss": 0.15489023178815842,
+          "loss_alpha_removed": 0.07501941546797752,
+          "loss_rgb_occupied": 0.07987082004547119,
+          "loss_rgb_removed_occupied": 0.08006199821829796,
+          "loss_rgb_visible_occupied": 0.07863028347492218,
+          "mode": "all_zero",
+          "n": 2,
+          "occupied_count": 337266.0,
+          "removed_count": 1073216.0,
+          "visible_count": 368704.0
+        },
+        {
+          "loss": 0.05324185639619827,
+          "loss_alpha_removed": 0.02541500423103571,
+          "loss_rgb_occupied": 0.027826854027807713,
+          "loss_rgb_removed_occupied": 0.03605707548558712,
+          "loss_rgb_visible_occupied": 0.004104561056010425,
+          "mode": "masked_zero",
+          "n": 2,
+          "occupied_count": 337266.0,
+          "removed_count": 1061696.0,
+          "visible_count": 380224.0
+        },
+        {
+          "loss": 0.033802157267928123,
+          "loss_alpha_removed": 0.021082009188830853,
+          "loss_rgb_occupied": 0.012720148544758558,
+          "loss_rgb_removed_occupied": 0.01578760240226984,
+          "loss_rgb_visible_occupied": 0.0033870964543893933,
+          "mode": "normal",
+          "n": 2,
+          "occupied_count": 337266.0,
+          "removed_count": 1062912.0,
+          "visible_count": 379008.0
+        },
+        {
+          "loss": 0.052310360595583916,
+          "loss_alpha_removed": 0.02848211769014597,
+          "loss_rgb_occupied": 0.02382824383676052,
+          "loss_rgb_removed_occupied": 0.022288283333182335,
+          "loss_rgb_visible_occupied": 0.0280602490529418,
+          "mode": "visible_zero",
+          "n": 2,
+          "occupied_count": 337266.0,
+          "removed_count": 1096384.0,
+          "visible_count": 345536.0
+        }
+      ]
+    },
+    "cosine_coord_jitter_e100": {
+      "grad_rows": [
+        {
+          "checkpoint": "cosine_coord_jitter_e100",
+          "loss": 0.03849373385310173,
+          "masked_count": 48640,
+          "masked_grad_mean": 9.825033657762106e-07,
+          "masked_visible_grad_ratio": 2.4143617153167725,
+          "scene": "3dfront_0083_01",
+          "stage": 0,
+          "visible_count": 15360,
+          "visible_grad_mean": 4.0694123981666053e-07
+        },
+        {
+          "checkpoint": "cosine_coord_jitter_e100",
+          "loss": 0.03849373385310173,
+          "masked_count": 6080,
+          "masked_grad_mean": 5.774476790065819e-07,
+          "masked_visible_grad_ratio": 1.55609929561615,
+          "scene": "3dfront_0083_01",
+          "stage": 1,
+          "visible_count": 1920,
+          "visible_grad_mean": 3.7108665651430783e-07
+        },
+        {
+          "checkpoint": "cosine_coord_jitter_e100",
+          "loss": 0.03849373385310173,
+          "masked_count": 760,
+          "masked_grad_mean": 9.881225615515632e-09,
+          "masked_visible_grad_ratio": 1.1132501363754272,
+          "scene": "3dfront_0083_01",
+          "stage": 2,
+          "visible_count": 240,
+          "visible_grad_mean": 8.8760154781653e-09
+        }
+      ],
+      "grad_summary": [
+        {
+          "loss": 0.03849373385310173,
+          "masked_count": 48640.0,
+          "masked_grad_mean": 9.825033657762106e-07,
+          "masked_visible_grad_ratio": 2.4143617153167725,
+          "n": 1,
+          "stage": 0,
+          "visible_count": 15360.0,
+          "visible_grad_mean": 4.0694123981666053e-07
+        },
+        {
+          "loss": 0.03849373385310173,
+          "masked_count": 6080.0,
+          "masked_grad_mean": 5.774476790065819e-07,
+          "masked_visible_grad_ratio": 1.55609929561615,
+          "n": 1,
+          "stage": 1,
+          "visible_count": 1920.0,
+          "visible_grad_mean": 3.7108665651430783e-07
+        },
+        {
+          "loss": 0.03849373385310173,
+          "masked_count": 760.0,
+          "masked_grad_mean": 9.881225615515632e-09,
+          "masked_visible_grad_ratio": 1.1132501363754272,
+          "n": 1,
+          "stage": 2,
+          "visible_count": 240.0,
+          "visible_grad_mean": 8.8760154781653e-09
+        }
+      ],
+      "load": {
+        "checkpoint": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_cosine_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0/epoch_100.pt",
+        "epoch": 100,
+        "loaded_keys": 383,
+        "missing": [],
+        "total_model_keys": 383,
+        "unexpected": []
+      },
+      "loss_rows": [
+        {
+          "checkpoint": "cosine_coord_jitter_e100",
+          "loss": 0.03849373385310173,
+          "loss_alpha_removed": 0.02184867300093174,
+          "loss_rgb_occupied": 0.01664506085216999,
+          "loss_rgb_removed_occupied": 0.0198059119284153,
+          "loss_rgb_visible_occupied": 0.005755855701863766,
+          "mode": "normal",
+          "occupied_count": 329714.0,
+          "removed_count": 1078016.0,
+          "scene": "3dfront_0083_01",
+          "visible_count": 342784.0
+        },
+        {
+          "checkpoint": "cosine_coord_jitter_e100",
+          "loss": 0.053389772772789,
+          "loss_alpha_removed": 0.023425647988915443,
+          "loss_rgb_occupied": 0.029964126646518707,
+          "loss_rgb_removed_occupied": 0.04080921411514282,
+          "loss_rgb_visible_occupied": 0.0051146200858056545,
+          "mode": "masked_zero",
+          "occupied_count": 329714.0,
+          "removed_count": 1041920.0,
+          "scene": "3dfront_0083_01",
+          "visible_count": 378880.0
+        },
+        {
+          "checkpoint": "cosine_coord_jitter_e100",
+          "loss": 0.059505682438611984,
+          "loss_alpha_removed": 0.024524934589862823,
+          "loss_rgb_occupied": 0.03498074784874916,
+          "loss_rgb_removed_occupied": 0.031583160161972046,
+          "loss_rgb_visible_occupied": 0.044792357832193375,
+          "mode": "visible_zero",
+          "occupied_count": 329714.0,
+          "removed_count": 1084672.0,
+          "scene": "3dfront_0083_01",
+          "visible_count": 336128.0
+        },
+        {
+          "checkpoint": "cosine_coord_jitter_e100",
+          "loss": 0.16043956577777863,
+          "loss_alpha_removed": 0.0731339380145073,
+          "loss_rgb_occupied": 0.08730562776327133,
+          "loss_rgb_removed_occupied": 0.08350180089473724,
+          "loss_rgb_visible_occupied": 0.09748900681734085,
+          "mode": "all_zero",
+          "occupied_count": 329714.0,
+          "removed_count": 1044992.0,
+          "scene": "3dfront_0083_01",
+          "visible_count": 375808.0
+        },
+        {
+          "checkpoint": "cosine_coord_jitter_e100",
+          "loss": 0.02858974039554596,
+          "loss_alpha_removed": 0.01852807030081749,
+          "loss_rgb_occupied": 0.01006167009472847,
+          "loss_rgb_removed_occupied": 0.012783386744558811,
+          "loss_rgb_visible_occupied": 0.0032538536470383406,
+          "mode": "normal",
+          "occupied_count": 344818.0,
+          "removed_count": 1047808.0,
+          "scene": "3dfront_0042_01",
+          "visible_count": 415232.0
+        },
+        {
+          "checkpoint": "cosine_coord_jitter_e100",
+          "loss": 0.05194665491580963,
+          "loss_alpha_removed": 0.026215169578790665,
+          "loss_rgb_occupied": 0.025731483474373817,
+          "loss_rgb_removed_occupied": 0.03132718428969383,
+          "loss_rgb_visible_occupied": 0.0034083437640219927,
+          "mode": "masked_zero",
+          "occupied_count": 344818.0,
+          "removed_count": 1081472.0,
+          "scene": "3dfront_0042_01",
+          "visible_count": 381568.0
+        },
+        {
+          "checkpoint": "cosine_coord_jitter_e100",
+          "loss": 0.04795058071613312,
+          "loss_alpha_removed": 0.02493138425052166,
+          "loss_rgb_occupied": 0.023019196465611458,
+          "loss_rgb_removed_occupied": 0.02097548544406891,
+          "loss_rgb_visible_occupied": 0.028437064960598946,
+          "mode": "visible_zero",
+          "occupied_count": 344818.0,
+          "removed_count": 1108096.0,
+          "scene": "3dfront_0042_01",
+          "visible_count": 354944.0
+        },
+        {
+          "checkpoint": "cosine_coord_jitter_e100",
+          "loss": 0.157247856259346,
+          "loss_alpha_removed": 0.071060910820961,
+          "loss_rgb_occupied": 0.08618694543838501,
+          "loss_rgb_removed_occupied": 0.08533040434122086,
+          "loss_rgb_visible_occupied": 0.08908462524414062,
+          "mode": "all_zero",
+          "occupied_count": 344818.0,
+          "removed_count": 1101440.0,
+          "scene": "3dfront_0042_01",
+          "visible_count": 361600.0
+        }
+      ],
+      "loss_summary": [
+        {
+          "loss": 0.15884371101856232,
+          "loss_alpha_removed": 0.07209742441773415,
+          "loss_rgb_occupied": 0.08674628660082817,
+          "loss_rgb_removed_occupied": 0.08441610261797905,
+          "loss_rgb_visible_occupied": 0.09328681603074074,
+          "mode": "all_zero",
+          "n": 2,
+          "occupied_count": 337266.0,
+          "removed_count": 1073216.0,
+          "visible_count": 368704.0
+        },
+        {
+          "loss": 0.052668213844299316,
+          "loss_alpha_removed": 0.024820408783853054,
+          "loss_rgb_occupied": 0.027847805060446262,
+          "loss_rgb_removed_occupied": 0.03606819920241833,
+          "loss_rgb_visible_occupied": 0.004261481924913824,
+          "mode": "masked_zero",
+          "n": 2,
+          "occupied_count": 337266.0,
+          "removed_count": 1061696.0,
+          "visible_count": 380224.0
+        },
+        {
+          "loss": 0.033541737124323845,
+          "loss_alpha_removed": 0.020188371650874615,
+          "loss_rgb_occupied": 0.01335336547344923,
+          "loss_rgb_removed_occupied": 0.016294649336487055,
+          "loss_rgb_visible_occupied": 0.004504854674451053,
+          "mode": "normal",
+          "n": 2,
+          "occupied_count": 337266.0,
+          "removed_count": 1062912.0,
+          "visible_count": 379008.0
+        },
+        {
+          "loss": 0.05372813157737255,
+          "loss_alpha_removed": 0.02472815942019224,
+          "loss_rgb_occupied": 0.02899997215718031,
+          "loss_rgb_removed_occupied": 0.026279322803020477,
+          "loss_rgb_visible_occupied": 0.03661471139639616,
+          "mode": "visible_zero",
+          "n": 2,
+          "occupied_count": 337266.0,
+          "removed_count": 1096384.0,
+          "visible_count": 345536.0
+        }
+      ]
+    },
+    "visibility_cosine_skip_gate_e100": {
+      "grad_rows": [
+        {
+          "checkpoint": "visibility_cosine_skip_gate_e100",
+          "loss": 0.0964413434267044,
+          "masked_count": 48640,
+          "masked_grad_mean": 3.0596136184612988e-06,
+          "masked_visible_grad_ratio": 2.5677387714385986,
+          "scene": "3dfront_0083_01",
+          "stage": 0,
+          "visible_count": 15360,
+          "visible_grad_mean": 1.1915595905520604e-06
+        },
+        {
+          "checkpoint": "visibility_cosine_skip_gate_e100",
+          "loss": 0.0964413434267044,
+          "masked_count": 6080,
+          "masked_grad_mean": 1.2824775694753043e-06,
+          "masked_visible_grad_ratio": 1.7738423347473145,
+          "scene": "3dfront_0083_01",
+          "stage": 1,
+          "visible_count": 1920,
+          "visible_grad_mean": 7.229941161313036e-07
+        },
+        {
+          "checkpoint": "visibility_cosine_skip_gate_e100",
+          "loss": 0.0964413434267044,
+          "masked_count": 760,
+          "masked_grad_mean": 2.2872749028124417e-08,
+          "masked_visible_grad_ratio": 1.3906631469726562,
+          "scene": "3dfront_0083_01",
+          "stage": 2,
+          "visible_count": 240,
+          "visible_grad_mean": 1.6447367912064692e-08
+        }
+      ],
+      "grad_summary": [
+        {
+          "loss": 0.0964413434267044,
+          "masked_count": 48640.0,
+          "masked_grad_mean": 3.0596136184612988e-06,
+          "masked_visible_grad_ratio": 2.5677387714385986,
+          "n": 1,
+          "stage": 0,
+          "visible_count": 15360.0,
+          "visible_grad_mean": 1.1915595905520604e-06
+        },
+        {
+          "loss": 0.0964413434267044,
+          "masked_count": 6080.0,
+          "masked_grad_mean": 1.2824775694753043e-06,
+          "masked_visible_grad_ratio": 1.7738423347473145,
+          "n": 1,
+          "stage": 1,
+          "visible_count": 1920.0,
+          "visible_grad_mean": 7.229941161313036e-07
+        },
+        {
+          "loss": 0.0964413434267044,
+          "masked_count": 760.0,
+          "masked_grad_mean": 2.2872749028124417e-08,
+          "masked_visible_grad_ratio": 1.3906631469726562,
+          "n": 1,
+          "stage": 2,
+          "visible_count": 240.0,
+          "visible_grad_mean": 1.6447367912064692e-08
+        }
+      ],
+      "load": {
+        "checkpoint": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_visibility_skip_gate_p1.0_e100_seed1_abci3vis_e100_20260607_141851/epoch_100.pt",
+        "epoch": 100,
+        "loaded_keys": 383,
+        "missing": [],
+        "total_model_keys": 383,
+        "unexpected": []
+      },
+      "loss_rows": [
+        {
+          "checkpoint": "visibility_cosine_skip_gate_e100",
+          "loss": 0.0964413434267044,
+          "loss_alpha_removed": 0.03877467289566994,
+          "loss_rgb_occupied": 0.05766666680574417,
+          "loss_rgb_removed_occupied": 0.06796200573444366,
+          "loss_rgb_visible_occupied": 0.02219901978969574,
+          "mode": "normal",
+          "occupied_count": 329714.0,
+          "removed_count": 1078016.0,
+          "scene": "3dfront_0083_01",
+          "visible_count": 342784.0
+        },
+        {
+          "checkpoint": "visibility_cosine_skip_gate_e100",
+          "loss": 0.03972189128398895,
+          "loss_alpha_removed": 0.020932219922542572,
+          "loss_rgb_occupied": 0.01878967136144638,
+          "loss_rgb_removed_occupied": 0.025004636496305466,
+          "loss_rgb_visible_occupied": 0.004549231380224228,
+          "mode": "masked_zero",
+          "occupied_count": 329714.0,
+          "removed_count": 1041920.0,
+          "scene": "3dfront_0083_01",
+          "visible_count": 378880.0
+        },
+        {
+          "checkpoint": "visibility_cosine_skip_gate_e100",
+          "loss": 0.3646976947784424,
+          "loss_alpha_removed": 0.1460113674402237,
+          "loss_rgb_occupied": 0.2186863124370575,
+          "loss_rgb_removed_occupied": 0.20953106880187988,
+          "loss_rgb_visible_occupied": 0.24512498080730438,
+          "mode": "visible_zero",
+          "occupied_count": 329714.0,
+          "removed_count": 1084672.0,
+          "scene": "3dfront_0083_01",
+          "visible_count": 336128.0
+        },
+        {
+          "checkpoint": "visibility_cosine_skip_gate_e100",
+          "loss": 0.19102394580841064,
+          "loss_alpha_removed": 0.0656968355178833,
+          "loss_rgb_occupied": 0.12532711029052734,
+          "loss_rgb_removed_occupied": 0.12416785955429077,
+          "loss_rgb_visible_occupied": 0.1284305453300476,
+          "mode": "all_zero",
+          "occupied_count": 329714.0,
+          "removed_count": 1044992.0,
+          "scene": "3dfront_0083_01",
+          "visible_count": 375808.0
+        },
+        {
+          "checkpoint": "visibility_cosine_skip_gate_e100",
+          "loss": 0.07923103123903275,
+          "loss_alpha_removed": 0.03157397359609604,
+          "loss_rgb_occupied": 0.04765705764293671,
+          "loss_rgb_removed_occupied": 0.05931328609585762,
+          "loss_rgb_visible_occupied": 0.01850139908492565,
+          "mode": "normal",
+          "occupied_count": 344818.0,
+          "removed_count": 1047808.0,
+          "scene": "3dfront_0042_01",
+          "visible_count": 415232.0
+        },
+        {
+          "checkpoint": "visibility_cosine_skip_gate_e100",
+          "loss": 0.03745280206203461,
+          "loss_alpha_removed": 0.022127771750092506,
+          "loss_rgb_occupied": 0.015325031243264675,
+          "loss_rgb_removed_occupied": 0.018431909382343292,
+          "loss_rgb_visible_occupied": 0.0029306509532034397,
+          "mode": "masked_zero",
+          "occupied_count": 344818.0,
+          "removed_count": 1081472.0,
+          "scene": "3dfront_0042_01",
+          "visible_count": 381568.0
+        },
+        {
+          "checkpoint": "visibility_cosine_skip_gate_e100",
+          "loss": 0.4445057809352875,
+          "loss_alpha_removed": 0.12348828464746475,
+          "loss_rgb_occupied": 0.3210175037384033,
+          "loss_rgb_removed_occupied": 0.3332713544368744,
+          "loss_rgb_visible_occupied": 0.288532555103302,
+          "mode": "visible_zero",
+          "occupied_count": 344818.0,
+          "removed_count": 1108096.0,
+          "scene": "3dfront_0042_01",
+          "visible_count": 354944.0
+        },
+        {
+          "checkpoint": "visibility_cosine_skip_gate_e100",
+          "loss": 0.16692876815795898,
+          "loss_alpha_removed": 0.0635419562458992,
+          "loss_rgb_occupied": 0.10338681191205978,
+          "loss_rgb_removed_occupied": 0.11082584410905838,
+          "loss_rgb_visible_occupied": 0.07822063565254211,
+          "mode": "all_zero",
+          "occupied_count": 344818.0,
+          "removed_count": 1101440.0,
+          "scene": "3dfront_0042_01",
+          "visible_count": 361600.0
+        }
+      ],
+      "loss_summary": [
+        {
+          "loss": 0.17897635698318481,
+          "loss_alpha_removed": 0.06461939588189125,
+          "loss_rgb_occupied": 0.11435696110129356,
+          "loss_rgb_removed_occupied": 0.11749685183167458,
+          "loss_rgb_visible_occupied": 0.10332559049129486,
+          "mode": "all_zero",
+          "n": 2,
+          "occupied_count": 337266.0,
+          "removed_count": 1073216.0,
+          "visible_count": 368704.0
+        },
+        {
+          "loss": 0.03858734667301178,
+          "loss_alpha_removed": 0.02152999583631754,
+          "loss_rgb_occupied": 0.017057351302355528,
+          "loss_rgb_removed_occupied": 0.02171827293932438,
+          "loss_rgb_visible_occupied": 0.003739941166713834,
+          "mode": "masked_zero",
+          "n": 2,
+          "occupied_count": 337266.0,
+          "removed_count": 1061696.0,
+          "visible_count": 380224.0
+        },
+        {
+          "loss": 0.08783618733286858,
+          "loss_alpha_removed": 0.03517432324588299,
+          "loss_rgb_occupied": 0.05266186222434044,
+          "loss_rgb_removed_occupied": 0.06363764591515064,
+          "loss_rgb_visible_occupied": 0.020350209437310696,
+          "mode": "normal",
+          "n": 2,
+          "occupied_count": 337266.0,
+          "removed_count": 1062912.0,
+          "visible_count": 379008.0
+        },
+        {
+          "loss": 0.40460173785686493,
+          "loss_alpha_removed": 0.13474982604384422,
+          "loss_rgb_occupied": 0.2698519080877304,
+          "loss_rgb_removed_occupied": 0.27140121161937714,
+          "loss_rgb_visible_occupied": 0.2668287679553032,
+          "mode": "visible_zero",
+          "n": 2,
+          "occupied_count": 337266.0,
+          "removed_count": 1096384.0,
+          "visible_count": 345536.0
+        }
+      ]
+    }
+  },
+  "scenes": [
+    "3dfront_0083_01",
+    "3dfront_0042_01"
+  ],
+  "script": "nerf_mae/probe_scripts/masked_skip_shortcut_diagnostic.py",
+  "split_file": "/groups/gag51404/ide/vgi/NeRF-MAE/dataset/_downloads/front3d_rpn_extract/front3d_rpn_data/3dfront_split.npz",
+  "split_key": "val_scenes"
+}
