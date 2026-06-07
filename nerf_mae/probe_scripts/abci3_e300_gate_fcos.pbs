@@ -65,7 +65,7 @@ case "${KIND}:${CONDITION}" in
     PRETRAIN_SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     VARIANT_NAME="${CONDITION}"
     ;;
-  visibility:visibility_feature_reset|visibility:visibility_skip_gate|visibility:visibility_reset_skip)
+  visibility:visibility_feature_reset|visibility:visibility_skip_gate|visibility:visibility_cosine_skip_gate|visibility:visibility_reset_skip)
     PRETRAIN_SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     VARIANT_NAME="${CONDITION}"
     ;;

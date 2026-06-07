@@ -218,7 +218,7 @@ case "${KIND}:${CONDITION}" in
   mixnerf:mixnerf_lite|mixnerf:mixnerf_lite_zeros|mixnerf:mixnerf_lite_noise|mixnerf:mixnerf_lite_shuffle|mixnerf:mixnerf_lite_shuffle_visible|mixnerf:mixnerf_lite_mean|mixnerf:mixnerf_lite_masked|mixnerf:mixnerf_lite_zeros_masked|mixnerf:mixnerf_lite_noise_masked|mixnerf:mixnerf_lite_shuffle_masked|mixnerf:mixnerf_lite_shuffle_visible_masked|mixnerf:mixnerf_lite_mean_masked)
     SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
-  visibility:visibility_feature_reset|visibility:visibility_skip_gate|visibility:visibility_reset_skip)
+  visibility:visibility_feature_reset|visibility:visibility_skip_gate|visibility:visibility_cosine_skip_gate|visibility:visibility_reset_skip)
     SAVE_NAME="nerfmae_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
   *)
@@ -959,14 +959,19 @@ case "${KIND}:${CONDITION}" in
       PROBE_ALPHA_WEIGHT=1.0 \
       bash train_mae3d.sh
     ;;
-  visibility:visibility_feature_reset|visibility:visibility_skip_gate|visibility:visibility_reset_skip)
+  visibility:visibility_feature_reset|visibility:visibility_skip_gate|visibility:visibility_cosine_skip_gate|visibility:visibility_reset_skip)
     vis_mode="${VISGATE_MODE:-skip_gate}"
+    vis_probe_curriculum="${VISGATE_PROBE_CURRICULUM:-none}"
     case "${CONDITION}" in
       visibility_feature_reset)
         vis_mode="${VISGATE_MODE:-feature_reset}"
         ;;
       visibility_skip_gate)
         vis_mode="${VISGATE_MODE:-skip_gate}"
+        ;;
+      visibility_cosine_skip_gate)
+        vis_mode="${VISGATE_MODE:-skip_gate}"
+        vis_probe_curriculum="${VISGATE_PROBE_CURRICULUM:-cosine_rgb_ramp}"
         ;;
       visibility_reset_skip)
         vis_mode="${VISGATE_MODE:-reset_skip}"
@@ -986,11 +991,11 @@ case "${KIND}:${CONDITION}" in
       PROBE_ALPHA_LOSS=removed \
       PROBE_RGB_WEIGHT=1.0 \
       PROBE_ALPHA_WEIGHT=1.0 \
-      PROBE_CURRICULUM=cosine_rgb_ramp \
-      PROBE_CURRICULUM_EPOCHS="${EPOCHS}" \
-      PROBE_CURRICULUM_RGB_START_WEIGHT=0.0 \
-      PROBE_CURRICULUM_RGB_END_WEIGHT=1.0 \
-      PROBE_CURRICULUM_ALPHA_WEIGHT=1.0 \
+      PROBE_CURRICULUM="${vis_probe_curriculum}" \
+      PROBE_CURRICULUM_EPOCHS="${VISGATE_PROBE_CURRICULUM_EPOCHS:-${EPOCHS}}" \
+      PROBE_CURRICULUM_RGB_START_WEIGHT="${VISGATE_PROBE_CURRICULUM_RGB_START_WEIGHT:-0.0}" \
+      PROBE_CURRICULUM_RGB_END_WEIGHT="${VISGATE_PROBE_CURRICULUM_RGB_END_WEIGHT:-1.0}" \
+      PROBE_CURRICULUM_ALPHA_WEIGHT="${VISGATE_PROBE_CURRICULUM_ALPHA_WEIGHT:-1.0}" \
       bash train_mae3d.sh
     ;;
 esac

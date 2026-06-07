@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+#PBS -q rt_HG
+#PBS -l select=1
+#PBS -l walltime=02:00:00
+#PBS -P gag51404
+#PBS -j oe
+#PBS -N skip_diag
+
+set -euo pipefail
+
+cd "${PBS_O_WORKDIR:?PBS_O_WORKDIR is not set}"
+
+ROOT_DIR="${ROOT_DIR:-${PBS_O_WORKDIR}}"
+PROBE_ENV_PREFIX="${PROBE_ENV_PREFIX:-${ROOT_DIR}/.venv-abci3}"
+ABCI3_CUDA_MODULE="${ABCI3_CUDA_MODULE:-cuda/11.8/11.8.0}"
+RUN_NAME="${RUN_NAME:-masked_skip_shortcut_$(date +%Y%m%d_%H%M%S)}"
+GPU_ID="${GPU_ID:-0}"
+MAX_SCENES="${MAX_SCENES:-2}"
+GRAD_SCENES="${GRAD_SCENES:-1}"
+RESOLUTION="${RESOLUTION:-160}"
+MASKING_PROB="${MASKING_PROB:-0.75}"
+SPLIT_KEY="${SPLIT_KEY:-val_scenes}"
+FEATURES_DIR="${FEATURES_DIR:-${ROOT_DIR}/dataset/_downloads/front3d_rpn_extract/front3d_rpn_data/features}"
+SPLIT_FILE="${SPLIT_FILE:-${ROOT_DIR}/dataset/_downloads/front3d_rpn_extract/front3d_rpn_data/3dfront_split.npz}"
+OUT_DIR="${OUT_DIR:-${ROOT_DIR}/results/shortcut_probe_artifacts/visibility/${RUN_NAME}}"
+
+CHECKPOINT_SPECS="${CHECKPOINT_SPECS:-baseline_coord_jitter_e100=${ROOT_DIR}/output/nerf_mae/results/nerfmae_baseline_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0/epoch_100.pt cosine_coord_jitter_e100=${ROOT_DIR}/output/nerf_mae/results/nerfmae_cosine_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0/epoch_100.pt visibility_cosine_skip_gate_e100=${ROOT_DIR}/output/nerf_mae/results/nerfmae_visibility_skip_gate_p1.0_e100_seed1_abci3vis_e100_20260607_141851/epoch_100.pt}"
+
+source /etc/profile.d/modules.sh
+module load "${ABCI3_CUDA_MODULE}"
+
+export PYTHONPATH="${ROOT_DIR}:${ROOT_DIR}/nerf_mae:${PYTHONPATH:-}"
+export PATH="${PROBE_ENV_PREFIX}/bin:${PATH}"
+export CUDA_VISIBLE_DEVICES="${GPU_ID}"
+export TMPDIR="${TMPDIR:-${ROOT_DIR}/runtime/tmp}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-${ROOT_DIR}/runtime/cache}"
+export TORCH_HOME="${TORCH_HOME:-${ROOT_DIR}/runtime/torch_home}"
+mkdir -p "${OUT_DIR}" "${TMPDIR}" "${XDG_CACHE_HOME}" "${TORCH_HOME}"
+
+checkpoint_args=()
+for spec in ${CHECKPOINT_SPECS}; do
+  checkpoint_args+=(--checkpoint "${spec}")
+done
+
+python "${ROOT_DIR}/nerf_mae/probe_scripts/masked_skip_shortcut_diagnostic.py" \
+  --repo "${ROOT_DIR}" \
+  --features-dir "${FEATURES_DIR}" \
+  --split-file "${SPLIT_FILE}" \
+  --split-key "${SPLIT_KEY}" \
+  --max-scenes "${MAX_SCENES}" \
+  --grad-scenes "${GRAD_SCENES}" \
+  --resolution "${RESOLUTION}" \
+  --masking-prob "${MASKING_PROB}" \
+  --device cuda \
+  --out-json "${OUT_DIR}/masked_skip_shortcut_diagnostic.json" \
+  --out-md "${OUT_DIR}/masked_skip_shortcut_diagnostic.md" \
+  --loss-csv "${OUT_DIR}/masked_skip_shortcut_loss.csv" \
+  --grad-csv "${OUT_DIR}/masked_skip_shortcut_grad.csv" \
+  "${checkpoint_args[@]}"
+
+cat > "${OUT_DIR}/manifest.tsv" <<EOF
+run_name	${RUN_NAME}
+root_dir	${ROOT_DIR}
+features_dir	${FEATURES_DIR}
+split_file	${SPLIT_FILE}
+split_key	${SPLIT_KEY}
+max_scenes	${MAX_SCENES}
+grad_scenes	${GRAD_SCENES}
+resolution	${RESOLUTION}
+masking_prob	${MASKING_PROB}
+checkpoint_specs	${CHECKPOINT_SPECS}
+pbs_jobid	${PBS_JOBID:-}
+git_hash	$(git -C "${ROOT_DIR}" rev-parse HEAD)
+EOF
