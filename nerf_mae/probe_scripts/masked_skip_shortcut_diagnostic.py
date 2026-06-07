@@ -275,15 +275,15 @@ def grad_ratios_for_scene(model: torch.nn.Module, volume: torch.Tensor, scene: s
         norm = grad.float().pow(2).sum(dim=1).sqrt()
         masked = mask
         visible = ~mask
-        masked_mean = norm[masked].mean() if masked.any() else torch.tensor(float("nan"), device=device)
-        visible_mean = norm[visible].mean() if visible.any() else torch.tensor(float("nan"), device=device)
+        masked_grad_mean = norm[masked].mean() if masked.any() else torch.tensor(float("nan"), device=device)
+        visible_grad_mean = norm[visible].mean() if visible.any() else torch.tensor(float("nan"), device=device)
         rows.append(
             {
                 "scene": scene,
                 "stage": stage_idx,
-                "masked_grad_mean": float(masked_mean.detach().cpu()),
-                "visible_grad_mean": float(visible_mean.detach().cpu()),
-                "masked_visible_grad_ratio": float((masked_mean / visible_mean.clamp_min(1e-12)).detach().cpu()),
+                "masked_grad_mean": float(masked_grad_mean.detach().cpu()),
+                "visible_grad_mean": float(visible_grad_mean.detach().cpu()),
+                "masked_visible_grad_ratio": float((masked_grad_mean / visible_grad_mean.clamp_min(1e-12)).detach().cpu()),
                 "masked_count": int(masked.sum().detach().cpu()),
                 "visible_count": int(visible.sum().detach().cpu()),
                 "loss": float(loss.detach().cpu()),
