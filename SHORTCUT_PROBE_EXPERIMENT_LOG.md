@@ -4886,3 +4886,64 @@ Decision:
 - Keep `visibility_skip_gate` as appendix/future-method evidence unless a
   stronger reviewer-facing mechanism is specified.
 - Do not escalate to attention KV-gating from these results alone.
+
+## Experiment 71: Visibility Audit and Masked Skip Shortcut Diagnostic
+
+Snapshot:
+- 2026-06-08 JST
+
+Artifacts:
+- `results/shortcut_probe_artifacts/visibility/visibility_implementation_audit_20260608.md`
+- pending diagnostic output:
+  `results/shortcut_probe_artifacts/visibility/masked_skip_shortcut_20260608_gate/`
+
+Code:
+- `nerf_mae/probe_scripts/masked_skip_shortcut_diagnostic.py`
+- `nerf_mae/probe_scripts/abci3_masked_skip_shortcut_diagnostic.pbs`
+
+Audit correction:
+- The completed `visibility_skip_gate` e100 job was launched with
+  `PROBE_CURRICULUM=cosine_rgb_ramp`.
+- Therefore the existing AP@50 `0.5869` result is more precisely
+  `cosine-ramp + decoder skip gate`, not pure skip-gate.
+- Launchers now separate:
+  - `visibility_skip_gate`: pure decoder skip gate, default curriculum `none`
+  - `visibility_cosine_skip_gate`: decoder skip gate plus cosine RGB-ramp
+
+Implementation audit:
+- `skip_gate` leaves encoder stage propagation unchanged.
+- It gates stage0/1/2 features before appending them to the decoder skip list.
+- Gate is applied before decoder concat, not after concat.
+- `nerf_rpn` has no visibility/skip-gate integration, so downstream FCOS is
+  not changed by the pretraining wrapper.
+
+Submitted diagnostic:
+
+| diagnostic | job |
+|---|---|
+| `masked_skip_shortcut_20260608_gate` | `1833050.pbs1` |
+
+Diagnostic protocol:
+- Existing checkpoints only; no new pretraining.
+- Checkpoints:
+  - `baseline_coord_jitter_e100`
+  - `cosine_coord_jitter_e100`
+  - existing `visibility_cosine_skip_gate_e100`
+- Reconstruction forward modes:
+  - normal skip
+  - masked-position skip zeroed
+  - visible-position skip zeroed
+  - all skip zeroed
+- Metrics:
+  - public reconstruction loss
+  - RGB occupied loss
+  - RGB removed-occupied loss
+  - RGB visible-occupied loss
+  - alpha removed loss
+  - masked/visible skip gradient ratio on one scene
+
+Decision rule:
+- If masked-position skip zeroing materially changes reconstruction loss or
+  gradient attribution, the decoder skip shortcut mechanism remains plausible.
+- If it barely changes either, visibility should stay appendix/future work and
+  no cosine+skip or attention-gating branch should be promoted.
