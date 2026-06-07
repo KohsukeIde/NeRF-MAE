@@ -4983,3 +4983,14 @@ Next action:
   was actually cosine-ramp + skip gate.
 - Add a second seed for `visibility_cosine_skip_gate` only after this positive
   diagnostic.
+
+Submitted follow-up jobs:
+
+| condition | seed | pretrain job | dependent FCOS job | note |
+|---|---:|---|---|---|
+| `visibility_skip_gate` | 1 | `1833071.pbs1` | `1833072.pbs1` | pure skip gate; no cosine curriculum |
+| `visibility_cosine_skip_gate` | 2 | `1833073.pbs1` | `1833074.pbs1` | cosine-ramp + skip gate stability check |
+
+Manifests:
+- `output/launcher/visibility_gated_abci3vis_pure_e100_20260608/submitted.tsv`
+- `output/launcher/visibility_gated_abci3vis_cosineskip_e100_20260608/submitted.tsv`
