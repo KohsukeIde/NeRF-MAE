@@ -4774,3 +4774,73 @@ Decision:
 - Keep it separated as an appendix/future-method observation.
 - Stop broad MixNeRF/dither exploration unless a reviewer-facing mechanism is
   specified before launching more jobs.
+
+## Experiment 68: Visibility-Gated Feasibility Gate Setup
+
+Snapshot:
+- 2026-06-07 JST
+
+Artifacts:
+- `results/shortcut_probe_artifacts/mixnerf/dither_branch_decision_20260607.md`
+- `results/shortcut_probe_artifacts/visibility/visibility_gating_feasibility_report_20260607.md`
+- `nerf_mae/probe_scripts/encoder_mask_participation_report.py`
+- `nerf_mae/probe_scripts/abci3_encoder_mask_participation.pbs`
+
+Decision:
+- MixNeRF/dither remains closed as a main-paper method path.
+- Visibility-Gated MAE is not implemented yet.
+- The next required action is a masked-token participation measurement on real
+  checkpoints/data.
+
+Measurement outputs:
+- `feature_norm_by_stage.csv`
+- `patch_merge_mask_stats.csv`
+- `skip_feature_mask_stats.csv`
+- `attention_mass_by_block.csv`
+- `encoder_mask_participation_report.md/json`
+
+Gate:
+- Proceed to V0/V1 only if stage0/1 masked-visible feature norm ratio is >=
+  0.25, or if patch-merge/skip stats show persistent masked-placeholder
+  participation.
+- Do not implement attention KV-gating unless simpler gates are positive.
+
+Guardrail:
+- Closed MixNeRF launchers now require `ALLOW_CLOSED_MIXNERF=1` before
+  submission to avoid accidental jobs on the closed branch.
+
+## Experiment 69: Encoder Mask Participation Gate Result
+
+Snapshot:
+- 2026-06-07 JST
+
+Artifact:
+- `results/shortcut_probe_artifacts/visibility/encoder_mask_participation_20260607_141908_thr001/encoder_mask_participation_report.md`
+- `results/shortcut_probe_artifacts/visibility/visibility_gate_decision_20260607.md`
+
+Result:
+- Gate is positive.
+- Stage0/1 masked-visible feature norm ratios exceed the 0.25 threshold for all
+  measured checkpoints.
+
+Key AP-agnostic mechanism numbers:
+
+| checkpoint | stage0 ratio | stage1 ratio | stage2 ratio |
+|---|---:|---:|---:|
+| `baseline_e300` | 0.7578 | 0.6989 | 0.6995 |
+| `cosine_ramp_e300` | 0.7303 | 0.7463 | 0.7872 |
+| `cosine_coord_jitter_e100` | 0.6071 | 0.7066 | 0.5134 |
+| `dither_shuffle_visible_e100` | 1.2778 | 1.3940 | 0.7603 |
+
+Interpretation:
+- Masked placeholders materially participate in encoder/skip features.
+- Visibility-Gated V0/V1 scouts are justified.
+- Attention KV-gating remains out of scope until V0/V1 results justify higher
+  implementation risk.
+
+Submitted scouts:
+
+| condition | seed | pretrain job | dependent FCOS job |
+|---|---:|---|---|
+| `visibility_skip_gate` | 1 | `1832027.pbs1` | `1832028.pbs1` |
+| `visibility_feature_reset` | 1 | `1832029.pbs1` | `1832030.pbs1` |

@@ -1,0 +1,2 @@
+status,reason,next_step
+not_measured_non_intrusive_probe,shifted_window_attention does not accept or expose a visibility mask/attention tensor in the current implementation,only implement attention-mass logging if feature/skip/merge gates are positive

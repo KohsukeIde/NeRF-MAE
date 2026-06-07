@@ -58,6 +58,16 @@ SUBMIT_PRETRAIN="${SUBMIT_PRETRAIN:-1}"
 SUBMIT_FCOS="${SUBMIT_FCOS:-1}"
 SUBMIT_LOG_DIR="${SUBMIT_LOG_DIR:-${ROOT_DIR}/output/launcher/mixnerf_dither_e100_$(date +%Y%m%d_%H%M%S)}"
 DRY_RUN="${DRY_RUN:-0}"
+ALLOW_CLOSED_MIXNERF="${ALLOW_CLOSED_MIXNERF:-0}"
+
+if [[ "${ALLOW_CLOSED_MIXNERF}" != "1" ]]; then
+  cat >&2 <<'EOF'
+[closed] MixNeRF/dither e100 branch is closed as a main-paper path.
+Set ALLOW_CLOSED_MIXNERF=1 only if you intentionally want to reproduce or audit
+the closed dither scouts.  Use DRY_RUN=1 for manifest checks.
+EOF
+  exit 2
+fi
 
 mkdir -p "${SUBMIT_LOG_DIR}"
 submitted_tsv="${SUBMIT_LOG_DIR}/submitted.tsv"

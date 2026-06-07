@@ -59,6 +59,16 @@ SUBMIT_MASKED_E30="${SUBMIT_MASKED_E30:-1}"
 SUBMIT_E100_NOISE_ZERO="${SUBMIT_E100_NOISE_ZERO:-1}"
 SUBMIT_LOG_DIR="${SUBMIT_LOG_DIR:-${ROOT_DIR}/output/launcher/mixnerf_next_$(date +%Y%m%d_%H%M%S)}"
 DRY_RUN="${DRY_RUN:-0}"
+ALLOW_CLOSED_MIXNERF="${ALLOW_CLOSED_MIXNERF:-0}"
+
+if [[ "${ALLOW_CLOSED_MIXNERF}" != "1" ]]; then
+  cat >&2 <<'EOF'
+[closed] MixNeRF/dither follow-up branch is closed as a main-paper path.
+Set ALLOW_CLOSED_MIXNERF=1 only if you intentionally want to reproduce or audit
+the closed MixNeRF scouts.  Use DRY_RUN=1 for manifest checks.
+EOF
+  exit 2
+fi
 
 mkdir -p "${SUBMIT_LOG_DIR}"
 submitted_tsv="${SUBMIT_LOG_DIR}/submitted.tsv"

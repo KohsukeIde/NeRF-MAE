@@ -1,0 +1,1200 @@
+{
+  "device": "cuda",
+  "features_dir": "/groups/gag51404/ide/vgi/NeRF-MAE/dataset/_downloads/front3d_rpn_extract/front3d_rpn_data/features",
+  "masking_prob": 0.75,
+  "normalize_density": true,
+  "resolution": 160,
+  "results": {
+    "baseline_e300": {
+      "aggregate": {
+        "mask_mean": 0.7475000321865082,
+        "merges": {
+          "merge0_to_1": {
+            "all_masked_ratio": 0.7475000321865082,
+            "all_visible_ratio": 0.2525000125169754,
+            "groups": 8000.0,
+            "mixed_ratio": 0.0
+          },
+          "merge1_to_2": {
+            "all_masked_ratio": 0.7475000321865082,
+            "all_visible_ratio": 0.2525000125169754,
+            "groups": 1000.0,
+            "mixed_ratio": 0.0
+          },
+          "merge2_to_3": {
+            "all_masked_ratio": 0.08800000697374344,
+            "all_visible_ratio": 0.0,
+            "groups": 125.0,
+            "mixed_ratio": 0.9120000600814819
+          }
+        },
+        "occupied_patch_frac": 0.14766407012939453,
+        "stages": {
+          "stage0": {
+            "all_masked_count": 47840.0,
+            "all_masked_mean": 15.847440242767334,
+            "all_masked_visible_ratio": 0.7577736514591847,
+            "all_visible_count": 16160.0,
+            "all_visible_mean": 20.917497634887695,
+            "empty_masked_count": 40813.0,
+            "empty_masked_mean": 15.972468852996826,
+            "empty_masked_visible_ratio": 0.7846814283822516,
+            "empty_visible_count": 13736.5,
+            "empty_visible_mean": 20.359943389892578,
+            "occupied_masked_count": 7027.0,
+            "occupied_masked_mean": 15.119349002838135,
+            "occupied_masked_visible_ratio": 0.6278110101905474,
+            "occupied_visible_count": 2423.5,
+            "occupied_visible_mean": 24.0889310836792
+          },
+          "stage1": {
+            "all_masked_count": 5980.0,
+            "all_masked_mean": 173.40174865722656,
+            "all_masked_visible_ratio": 0.6989282867282138,
+            "all_visible_count": 2020.0,
+            "all_visible_mean": 248.18087768554688,
+            "empty_masked_count": 4739.0,
+            "empty_masked_mean": 163.98775482177734,
+            "empty_masked_visible_ratio": 0.7770966080146486,
+            "empty_visible_count": 1580.5,
+            "empty_visible_mean": 211.0521469116211,
+            "occupied_masked_count": 1241.0,
+            "occupied_masked_mean": 209.5768051147461,
+            "occupied_masked_visible_ratio": 0.5488611288571472,
+            "occupied_visible_count": 439.5,
+            "occupied_visible_mean": 381.8427429199219
+          },
+          "stage2": {
+            "all_masked_count": 747.5,
+            "all_masked_mean": 17071.0595703125,
+            "all_masked_visible_ratio": 0.6995210679648665,
+            "all_visible_count": 252.5,
+            "all_visible_mean": 24405.353515625,
+            "empty_masked_count": 516.0,
+            "empty_masked_mean": 16376.0615234375,
+            "empty_masked_visible_ratio": 0.6466533417018674,
+            "empty_visible_count": 171.5,
+            "empty_visible_mean": 25327.4208984375,
+            "occupied_masked_count": 231.5,
+            "occupied_masked_mean": 18614.986328125,
+            "occupied_masked_visible_ratio": 0.8304222185175227,
+            "occupied_visible_count": 81.0,
+            "occupied_visible_mean": 22410.162109375
+          },
+          "stage3": {
+            "all_masked_count": 125.0,
+            "all_masked_mean": NaN,
+            "all_masked_visible_ratio": NaN,
+            "all_visible_count": 0.0,
+            "all_visible_mean": NaN,
+            "empty_masked_count": 65.5,
+            "empty_masked_mean": NaN,
+            "empty_masked_visible_ratio": NaN,
+            "empty_visible_count": 0.0,
+            "empty_visible_mean": NaN,
+            "occupied_masked_count": 59.5,
+            "occupied_masked_mean": NaN,
+            "occupied_masked_visible_ratio": NaN,
+            "occupied_visible_count": 0.0,
+            "occupied_visible_mean": NaN
+          }
+        }
+      },
+      "load": {
+        "checkpoint": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_all_p1.0_e300_seed1/epoch_300.pt",
+        "epoch": 300,
+        "loaded_keys": 383,
+        "missing": [],
+        "total_model_keys": 383,
+        "unexpected": []
+      },
+      "scene_results": [
+        {
+          "mask_mean": 0.7600000500679016,
+          "merge_metrics": {
+            "merge0_to_1": {
+              "all_masked_ratio": 0.7600000500679016,
+              "all_visible_ratio": 0.24000000953674316,
+              "groups": 8000,
+              "mixed_ratio": 0.0
+            },
+            "merge1_to_2": {
+              "all_masked_ratio": 0.7600000500679016,
+              "all_visible_ratio": 0.24000000953674316,
+              "groups": 1000,
+              "mixed_ratio": 0.0
+            },
+            "merge2_to_3": {
+              "all_masked_ratio": 0.08800000697374344,
+              "all_visible_ratio": 0.0,
+              "groups": 125,
+              "mixed_ratio": 0.9120000600814819
+            }
+          },
+          "occupied_patch_frac": 0.1511250138282776,
+          "scene": "3dfront_0083_01",
+          "stage_metrics": {
+            "stage0": {
+              "all_masked_count": 48640,
+              "all_masked_mean": 15.853327751159668,
+              "all_masked_visible_ratio": 0.7469990251465808,
+              "all_visible_count": 15360,
+              "all_visible_mean": 21.222688674926758,
+              "empty_masked_count": 41179,
+              "empty_masked_mean": 15.979846000671387,
+              "empty_masked_visible_ratio": 0.7730811755204846,
+              "empty_visible_count": 13149,
+              "empty_visible_mean": 20.670333862304688,
+              "occupied_masked_count": 7461,
+              "occupied_masked_mean": 15.155040740966797,
+              "occupied_masked_visible_ratio": 0.6183822579465205,
+              "occupied_visible_count": 2211,
+              "occupied_visible_mean": 24.50756072998047
+            },
+            "stage1": {
+              "all_masked_count": 6080,
+              "all_masked_mean": 172.8498992919922,
+              "all_masked_visible_ratio": 0.7107422050851058,
+              "all_visible_count": 1920,
+              "all_visible_mean": 243.1963348388672,
+              "empty_masked_count": 4754,
+              "empty_masked_mean": 163.69232177734375,
+              "empty_masked_visible_ratio": 0.7850391676568318,
+              "empty_visible_count": 1519,
+              "empty_visible_mean": 208.5148468017578,
+              "occupied_masked_count": 1326,
+              "occupied_masked_mean": 205.68179321289062,
+              "occupied_masked_visible_ratio": 0.5491133039241286,
+              "occupied_visible_count": 401,
+              "occupied_visible_mean": 374.5707702636719
+            },
+            "stage2": {
+              "all_masked_count": 760,
+              "all_masked_mean": 16771.537109375,
+              "all_masked_visible_ratio": 0.6852421473906776,
+              "all_visible_count": 240,
+              "all_visible_mean": 24475.34375,
+              "empty_masked_count": 527,
+              "empty_masked_mean": 16228.71484375,
+              "empty_masked_visible_ratio": 0.6360295403734486,
+              "empty_visible_count": 168,
+              "empty_visible_mean": 25515.662109375,
+              "occupied_masked_count": 233,
+              "occupied_masked_mean": 17999.291015625,
+              "occupied_masked_visible_ratio": 0.816370738334368,
+              "occupied_visible_count": 72,
+              "occupied_visible_mean": 22047.9375
+            },
+            "stage3": {
+              "all_masked_count": 125,
+              "all_masked_mean": NaN,
+              "all_masked_visible_ratio": NaN,
+              "all_visible_count": 0,
+              "all_visible_mean": NaN,
+              "empty_masked_count": 66,
+              "empty_masked_mean": NaN,
+              "empty_masked_visible_ratio": NaN,
+              "empty_visible_count": 0,
+              "empty_visible_mean": NaN,
+              "occupied_masked_count": 59,
+              "occupied_masked_mean": NaN,
+              "occupied_masked_visible_ratio": NaN,
+              "occupied_visible_count": 0,
+              "occupied_visible_mean": NaN
+            }
+          }
+        },
+        {
+          "mask_mean": 0.7350000143051147,
+          "merge_metrics": {
+            "merge0_to_1": {
+              "all_masked_ratio": 0.7350000143051147,
+              "all_visible_ratio": 0.26500001549720764,
+              "groups": 8000,
+              "mixed_ratio": 0.0
+            },
+            "merge1_to_2": {
+              "all_masked_ratio": 0.7350000143051147,
+              "all_visible_ratio": 0.26500001549720764,
+              "groups": 1000,
+              "mixed_ratio": 0.0
+            },
+            "merge2_to_3": {
+              "all_masked_ratio": 0.08800000697374344,
+              "all_visible_ratio": 0.0,
+              "groups": 125,
+              "mixed_ratio": 0.9120000600814819
+            }
+          },
+          "occupied_patch_frac": 0.14420312643051147,
+          "scene": "3dfront_0042_01",
+          "stage_metrics": {
+            "stage0": {
+              "all_masked_count": 47040,
+              "all_masked_mean": 15.841552734375,
+              "all_masked_visible_ratio": 0.7685482777717887,
+              "all_visible_count": 16960,
+              "all_visible_mean": 20.612306594848633,
+              "empty_masked_count": 40447,
+              "empty_masked_mean": 15.965091705322266,
+              "empty_masked_visible_ratio": 0.7962816812440185,
+              "empty_visible_count": 14324,
+              "empty_visible_mean": 20.04955291748047,
+              "occupied_masked_count": 6593,
+              "occupied_masked_mean": 15.083657264709473,
+              "occupied_masked_visible_ratio": 0.6372397624345743,
+              "occupied_visible_count": 2636,
+              "occupied_visible_mean": 23.67030143737793
+            },
+            "stage1": {
+              "all_masked_count": 5880,
+              "all_masked_mean": 173.95359802246094,
+              "all_masked_visible_ratio": 0.6871143683713219,
+              "all_visible_count": 2120,
+              "all_visible_mean": 253.16542053222656,
+              "empty_masked_count": 4724,
+              "empty_masked_mean": 164.28318786621094,
+              "empty_masked_visible_ratio": 0.7691540483724655,
+              "empty_visible_count": 1642,
+              "empty_visible_mean": 213.58944702148438,
+              "occupied_masked_count": 1156,
+              "occupied_masked_mean": 213.47181701660156,
+              "occupied_masked_visible_ratio": 0.5486089537901657,
+              "occupied_visible_count": 478,
+              "occupied_visible_mean": 389.1147155761719
+            },
+            "stage2": {
+              "all_masked_count": 735,
+              "all_masked_mean": 17370.58203125,
+              "all_masked_visible_ratio": 0.7137999885390555,
+              "all_visible_count": 265,
+              "all_visible_mean": 24335.36328125,
+              "empty_masked_count": 505,
+              "empty_masked_mean": 16523.408203125,
+              "empty_masked_visible_ratio": 0.6572771430302861,
+              "empty_visible_count": 175,
+              "empty_visible_mean": 25139.1796875,
+              "occupied_masked_count": 230,
+              "occupied_masked_mean": 19230.681640625,
+              "occupied_masked_visible_ratio": 0.8444736987006776,
+              "occupied_visible_count": 90,
+              "occupied_visible_mean": 22772.38671875
+            },
+            "stage3": {
+              "all_masked_count": 125,
+              "all_masked_mean": NaN,
+              "all_masked_visible_ratio": NaN,
+              "all_visible_count": 0,
+              "all_visible_mean": NaN,
+              "empty_masked_count": 65,
+              "empty_masked_mean": NaN,
+              "empty_masked_visible_ratio": NaN,
+              "empty_visible_count": 0,
+              "empty_visible_mean": NaN,
+              "occupied_masked_count": 60,
+              "occupied_masked_mean": NaN,
+              "occupied_masked_visible_ratio": NaN,
+              "occupied_visible_count": 0,
+              "occupied_visible_mean": NaN
+            }
+          }
+        }
+      ]
+    },
+    "cosine_coord_jitter_e100": {
+      "aggregate": {
+        "mask_mean": 0.7475000321865082,
+        "merges": {
+          "merge0_to_1": {
+            "all_masked_ratio": 0.7475000321865082,
+            "all_visible_ratio": 0.2525000125169754,
+            "groups": 8000.0,
+            "mixed_ratio": 0.0
+          },
+          "merge1_to_2": {
+            "all_masked_ratio": 0.7475000321865082,
+            "all_visible_ratio": 0.2525000125169754,
+            "groups": 1000.0,
+            "mixed_ratio": 0.0
+          },
+          "merge2_to_3": {
+            "all_masked_ratio": 0.08800000697374344,
+            "all_visible_ratio": 0.0,
+            "groups": 125.0,
+            "mixed_ratio": 0.9120000600814819
+          }
+        },
+        "occupied_patch_frac": 0.14766407012939453,
+        "stages": {
+          "stage0": {
+            "all_masked_count": 47840.0,
+            "all_masked_mean": 7.349192380905151,
+            "all_masked_visible_ratio": 0.6070944550947646,
+            "all_visible_count": 16160.0,
+            "all_visible_mean": 12.108777046203613,
+            "empty_masked_count": 40813.0,
+            "empty_masked_mean": 7.324778079986572,
+            "empty_masked_visible_ratio": 0.6366845240601553,
+            "empty_visible_count": 13736.5,
+            "empty_visible_mean": 11.509000301361084,
+            "occupied_masked_count": 7027.0,
+            "occupied_masked_mean": 7.49241042137146,
+            "occupied_masked_visible_ratio": 0.4830299219041592,
+            "occupied_visible_count": 2423.5,
+            "occupied_visible_mean": 15.514032363891602
+          },
+          "stage1": {
+            "all_masked_count": 5980.0,
+            "all_masked_mean": 52.082698822021484,
+            "all_masked_visible_ratio": 0.7066220175517569,
+            "all_visible_count": 2020.0,
+            "all_visible_mean": 73.74366760253906,
+            "empty_masked_count": 4739.0,
+            "empty_masked_mean": 49.36852264404297,
+            "empty_masked_visible_ratio": 0.8735773140249117,
+            "empty_visible_count": 1580.5,
+            "empty_visible_mean": 56.53443145751953,
+            "occupied_masked_count": 1241.0,
+            "occupied_masked_mean": 62.54836845397949,
+            "occupied_masked_visible_ratio": 0.46061195397283516,
+            "occupied_visible_count": 439.5,
+            "occupied_visible_mean": 135.76363372802734
+          },
+          "stage2": {
+            "all_masked_count": 747.5,
+            "all_masked_mean": 3913.99560546875,
+            "all_masked_visible_ratio": 0.5133935866376509,
+            "all_visible_count": 252.5,
+            "all_visible_mean": 7628.031005859375,
+            "empty_masked_count": 516.0,
+            "empty_masked_mean": 3597.457275390625,
+            "empty_masked_visible_ratio": 0.45788561067565364,
+            "empty_visible_count": 171.5,
+            "empty_visible_mean": 7861.213623046875,
+            "occupied_masked_count": 231.5,
+            "occupied_masked_mean": 4617.79541015625,
+            "occupied_masked_visible_ratio": 0.6483454405791815,
+            "occupied_visible_count": 81.0,
+            "occupied_visible_mean": 7121.874755859375
+          },
+          "stage3": {
+            "all_masked_count": 125.0,
+            "all_masked_mean": NaN,
+            "all_masked_visible_ratio": NaN,
+            "all_visible_count": 0.0,
+            "all_visible_mean": NaN,
+            "empty_masked_count": 65.5,
+            "empty_masked_mean": NaN,
+            "empty_masked_visible_ratio": NaN,
+            "empty_visible_count": 0.0,
+            "empty_visible_mean": NaN,
+            "occupied_masked_count": 59.5,
+            "occupied_masked_mean": NaN,
+            "occupied_masked_visible_ratio": NaN,
+            "occupied_visible_count": 0.0,
+            "occupied_visible_mean": NaN
+          }
+        }
+      },
+      "load": {
+        "checkpoint": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_cosine_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0/epoch_100.pt",
+        "epoch": 100,
+        "loaded_keys": 383,
+        "missing": [],
+        "total_model_keys": 383,
+        "unexpected": []
+      },
+      "scene_results": [
+        {
+          "mask_mean": 0.7600000500679016,
+          "merge_metrics": {
+            "merge0_to_1": {
+              "all_masked_ratio": 0.7600000500679016,
+              "all_visible_ratio": 0.24000000953674316,
+              "groups": 8000,
+              "mixed_ratio": 0.0
+            },
+            "merge1_to_2": {
+              "all_masked_ratio": 0.7600000500679016,
+              "all_visible_ratio": 0.24000000953674316,
+              "groups": 1000,
+              "mixed_ratio": 0.0
+            },
+            "merge2_to_3": {
+              "all_masked_ratio": 0.08800000697374344,
+              "all_visible_ratio": 0.0,
+              "groups": 125,
+              "mixed_ratio": 0.9120000600814819
+            }
+          },
+          "occupied_patch_frac": 0.1511250138282776,
+          "scene": "3dfront_0083_01",
+          "stage_metrics": {
+            "stage0": {
+              "all_masked_count": 48640,
+              "all_masked_mean": 7.294417381286621,
+              "all_masked_visible_ratio": 0.5946180995545467,
+              "all_visible_count": 15360,
+              "all_visible_mean": 12.267398834228516,
+              "empty_masked_count": 41179,
+              "empty_masked_mean": 7.273112773895264,
+              "empty_masked_visible_ratio": 0.6217403600388448,
+              "empty_visible_count": 13149,
+              "empty_visible_mean": 11.697990417480469,
+              "occupied_masked_count": 7461,
+              "occupied_masked_mean": 7.411996841430664,
+              "occupied_masked_visible_ratio": 0.4734977918989669,
+              "occupied_visible_count": 2211,
+              "occupied_visible_mean": 15.653709411621094
+            },
+            "stage1": {
+              "all_masked_count": 6080,
+              "all_masked_mean": 51.681148529052734,
+              "all_masked_visible_ratio": 0.7199763513603282,
+              "all_visible_count": 1920,
+              "all_visible_mean": 71.78173065185547,
+              "empty_masked_count": 4754,
+              "empty_masked_mean": 49.18423843383789,
+              "empty_masked_visible_ratio": 0.8890123958431517,
+              "empty_visible_count": 1519,
+              "empty_visible_mean": 55.324581146240234,
+              "occupied_masked_count": 1326,
+              "occupied_masked_mean": 60.633121490478516,
+              "occupied_masked_visible_ratio": 0.45207471990587283,
+              "occupied_visible_count": 401,
+              "occupied_visible_mean": 134.1219024658203
+            },
+            "stage2": {
+              "all_masked_count": 760,
+              "all_masked_mean": 3824.027099609375,
+              "all_masked_visible_ratio": 0.4940077427861919,
+              "all_visible_count": 240,
+              "all_visible_mean": 7740.82421875,
+              "empty_masked_count": 527,
+              "empty_masked_mean": 3558.19384765625,
+              "empty_masked_visible_ratio": 0.44410341361815053,
+              "empty_visible_count": 168,
+              "empty_visible_mean": 8012.083984375,
+              "occupied_masked_count": 233,
+              "occupied_masked_mean": 4425.2890625,
+              "occupied_masked_visible_ratio": 0.6225889170144503,
+              "occupied_visible_count": 72,
+              "occupied_visible_mean": 7107.8828125
+            },
+            "stage3": {
+              "all_masked_count": 125,
+              "all_masked_mean": NaN,
+              "all_masked_visible_ratio": NaN,
+              "all_visible_count": 0,
+              "all_visible_mean": NaN,
+              "empty_masked_count": 66,
+              "empty_masked_mean": NaN,
+              "empty_masked_visible_ratio": NaN,
+              "empty_visible_count": 0,
+              "empty_visible_mean": NaN,
+              "occupied_masked_count": 59,
+              "occupied_masked_mean": NaN,
+              "occupied_masked_visible_ratio": NaN,
+              "occupied_visible_count": 0,
+              "occupied_visible_mean": NaN
+            }
+          }
+        },
+        {
+          "mask_mean": 0.7350000143051147,
+          "merge_metrics": {
+            "merge0_to_1": {
+              "all_masked_ratio": 0.7350000143051147,
+              "all_visible_ratio": 0.26500001549720764,
+              "groups": 8000,
+              "mixed_ratio": 0.0
+            },
+            "merge1_to_2": {
+              "all_masked_ratio": 0.7350000143051147,
+              "all_visible_ratio": 0.26500001549720764,
+              "groups": 1000,
+              "mixed_ratio": 0.0
+            },
+            "merge2_to_3": {
+              "all_masked_ratio": 0.08800000697374344,
+              "all_visible_ratio": 0.0,
+              "groups": 125,
+              "mixed_ratio": 0.9120000600814819
+            }
+          },
+          "occupied_patch_frac": 0.14420312643051147,
+          "scene": "3dfront_0042_01",
+          "stage_metrics": {
+            "stage0": {
+              "all_masked_count": 47040,
+              "all_masked_mean": 7.403967380523682,
+              "all_masked_visible_ratio": 0.6195708106349824,
+              "all_visible_count": 16960,
+              "all_visible_mean": 11.950155258178711,
+              "empty_masked_count": 40447,
+              "empty_masked_mean": 7.376443386077881,
+              "empty_masked_visible_ratio": 0.6516286880814659,
+              "empty_visible_count": 14324,
+              "empty_visible_mean": 11.3200101852417,
+              "occupied_masked_count": 6593,
+              "occupied_masked_mean": 7.572824001312256,
+              "occupied_masked_visible_ratio": 0.49256205190935154,
+              "occupied_visible_count": 2636,
+              "occupied_visible_mean": 15.37435531616211
+            },
+            "stage1": {
+              "all_masked_count": 5880,
+              "all_masked_mean": 52.484249114990234,
+              "all_masked_visible_ratio": 0.6932676837431856,
+              "all_visible_count": 2120,
+              "all_visible_mean": 75.70560455322266,
+              "empty_masked_count": 4724,
+              "empty_masked_mean": 49.55280685424805,
+              "empty_masked_visible_ratio": 0.8581422322066717,
+              "empty_visible_count": 1642,
+              "empty_visible_mean": 57.74428176879883,
+              "occupied_masked_count": 1156,
+              "occupied_masked_mean": 64.46361541748047,
+              "occupied_masked_visible_ratio": 0.46914918803979744,
+              "occupied_visible_count": 478,
+              "occupied_visible_mean": 137.40536499023438
+            },
+            "stage2": {
+              "all_masked_count": 735,
+              "all_masked_mean": 4003.964111328125,
+              "all_masked_visible_ratio": 0.5327794304891098,
+              "all_visible_count": 265,
+              "all_visible_mean": 7515.23779296875,
+              "empty_masked_count": 505,
+              "empty_masked_mean": 3636.720703125,
+              "empty_masked_visible_ratio": 0.47166780773315675,
+              "empty_visible_count": 175,
+              "empty_visible_mean": 7710.34326171875,
+              "occupied_masked_count": 230,
+              "occupied_masked_mean": 4810.3017578125,
+              "occupied_masked_visible_ratio": 0.6741019641439129,
+              "occupied_visible_count": 90,
+              "occupied_visible_mean": 7135.86669921875
+            },
+            "stage3": {
+              "all_masked_count": 125,
+              "all_masked_mean": NaN,
+              "all_masked_visible_ratio": NaN,
+              "all_visible_count": 0,
+              "all_visible_mean": NaN,
+              "empty_masked_count": 65,
+              "empty_masked_mean": NaN,
+              "empty_masked_visible_ratio": NaN,
+              "empty_visible_count": 0,
+              "empty_visible_mean": NaN,
+              "occupied_masked_count": 60,
+              "occupied_masked_mean": NaN,
+              "occupied_masked_visible_ratio": NaN,
+              "occupied_visible_count": 0,
+              "occupied_visible_mean": NaN
+            }
+          }
+        }
+      ]
+    },
+    "cosine_ramp_e300": {
+      "aggregate": {
+        "mask_mean": 0.7475000321865082,
+        "merges": {
+          "merge0_to_1": {
+            "all_masked_ratio": 0.7475000321865082,
+            "all_visible_ratio": 0.2525000125169754,
+            "groups": 8000.0,
+            "mixed_ratio": 0.0
+          },
+          "merge1_to_2": {
+            "all_masked_ratio": 0.7475000321865082,
+            "all_visible_ratio": 0.2525000125169754,
+            "groups": 1000.0,
+            "mixed_ratio": 0.0
+          },
+          "merge2_to_3": {
+            "all_masked_ratio": 0.08800000697374344,
+            "all_visible_ratio": 0.0,
+            "groups": 125.0,
+            "mixed_ratio": 0.9120000600814819
+          }
+        },
+        "occupied_patch_frac": 0.14766407012939453,
+        "stages": {
+          "stage0": {
+            "all_masked_count": 47840.0,
+            "all_masked_mean": 17.876001358032227,
+            "all_masked_visible_ratio": 0.7303278838797561,
+            "all_visible_count": 16160.0,
+            "all_visible_mean": 24.47871494293213,
+            "empty_masked_count": 40813.0,
+            "empty_masked_mean": 17.872177124023438,
+            "empty_masked_visible_ratio": 0.7600126393456677,
+            "empty_visible_count": 13736.5,
+            "empty_visible_mean": 23.52047061920166,
+            "occupied_masked_count": 7027.0,
+            "occupied_masked_mean": 17.900029182434082,
+            "occupied_masked_visible_ratio": 0.598653552015601,
+            "occupied_visible_count": 2423.5,
+            "occupied_visible_mean": 29.901333808898926
+          },
+          "stage1": {
+            "all_masked_count": 5980.0,
+            "all_masked_mean": 148.2904510498047,
+            "all_masked_visible_ratio": 0.746341675280833,
+            "all_visible_count": 2020.0,
+            "all_visible_mean": 198.74869537353516,
+            "empty_masked_count": 4739.0,
+            "empty_masked_mean": 142.93421936035156,
+            "empty_masked_visible_ratio": 0.8139365465600669,
+            "empty_visible_count": 1580.5,
+            "empty_visible_mean": 175.6082305908203,
+            "occupied_masked_count": 1241.0,
+            "occupied_masked_mean": 169.04914093017578,
+            "occupied_masked_visible_ratio": 0.6003215540710587,
+            "occupied_visible_count": 439.5,
+            "occupied_visible_mean": 281.70655822753906
+          },
+          "stage2": {
+            "all_masked_count": 747.5,
+            "all_masked_mean": 16769.759765625,
+            "all_masked_visible_ratio": 0.7871931052399388,
+            "all_visible_count": 252.5,
+            "all_visible_mean": 21305.4599609375,
+            "empty_masked_count": 516.0,
+            "empty_masked_mean": 16013.328125,
+            "empty_masked_visible_ratio": 0.7171817353956089,
+            "empty_visible_count": 171.5,
+            "empty_visible_mean": 22330.787109375,
+            "occupied_masked_count": 231.5,
+            "occupied_masked_mean": 18455.419921875,
+            "occupied_masked_visible_ratio": 0.965901021536163,
+            "occupied_visible_count": 81.0,
+            "occupied_visible_mean": 19107.0595703125
+          },
+          "stage3": {
+            "all_masked_count": 125.0,
+            "all_masked_mean": NaN,
+            "all_masked_visible_ratio": NaN,
+            "all_visible_count": 0.0,
+            "all_visible_mean": NaN,
+            "empty_masked_count": 65.5,
+            "empty_masked_mean": NaN,
+            "empty_masked_visible_ratio": NaN,
+            "empty_visible_count": 0.0,
+            "empty_visible_mean": NaN,
+            "occupied_masked_count": 59.5,
+            "occupied_masked_mean": NaN,
+            "occupied_masked_visible_ratio": NaN,
+            "occupied_visible_count": 0.0,
+            "occupied_visible_mean": NaN
+          }
+        }
+      },
+      "load": {
+        "checkpoint": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1/epoch_300.pt",
+        "epoch": 300,
+        "loaded_keys": 383,
+        "missing": [],
+        "total_model_keys": 383,
+        "unexpected": []
+      },
+      "scene_results": [
+        {
+          "mask_mean": 0.7600000500679016,
+          "merge_metrics": {
+            "merge0_to_1": {
+              "all_masked_ratio": 0.7600000500679016,
+              "all_visible_ratio": 0.24000000953674316,
+              "groups": 8000,
+              "mixed_ratio": 0.0
+            },
+            "merge1_to_2": {
+              "all_masked_ratio": 0.7600000500679016,
+              "all_visible_ratio": 0.24000000953674316,
+              "groups": 1000,
+              "mixed_ratio": 0.0
+            },
+            "merge2_to_3": {
+              "all_masked_ratio": 0.08800000697374344,
+              "all_visible_ratio": 0.0,
+              "groups": 125,
+              "mixed_ratio": 0.9120000600814819
+            }
+          },
+          "occupied_patch_frac": 0.1511250138282776,
+          "scene": "3dfront_0083_01",
+          "stage_metrics": {
+            "stage0": {
+              "all_masked_count": 48640,
+              "all_masked_mean": 17.8448429107666,
+              "all_masked_visible_ratio": 0.7230010134245916,
+              "all_visible_count": 15360,
+              "all_visible_mean": 24.681629180908203,
+              "empty_masked_count": 41179,
+              "empty_masked_mean": 17.846675872802734,
+              "empty_masked_visible_ratio": 0.7485556372368428,
+              "empty_visible_count": 13149,
+              "empty_visible_mean": 23.841482162475586,
+              "occupied_masked_count": 7461,
+              "occupied_masked_mean": 17.834726333618164,
+              "occupied_masked_visible_ratio": 0.6009399450354457,
+              "occupied_visible_count": 2211,
+              "occupied_visible_mean": 29.678050994873047
+            },
+            "stage1": {
+              "all_masked_count": 6080,
+              "all_masked_mean": 145.80831909179688,
+              "all_masked_visible_ratio": 0.7543856782129423,
+              "all_visible_count": 1920,
+              "all_visible_mean": 193.28086853027344,
+              "empty_masked_count": 4754,
+              "empty_masked_mean": 141.30165100097656,
+              "empty_masked_visible_ratio": 0.813803723654855,
+              "empty_visible_count": 1519,
+              "empty_visible_mean": 173.63111877441406,
+              "occupied_masked_count": 1326,
+              "occupied_masked_mean": 161.96572875976562,
+              "occupied_masked_visible_ratio": 0.604994077495383,
+              "occupied_visible_count": 401,
+              "occupied_visible_mean": 267.7145690917969
+            },
+            "stage2": {
+              "all_masked_count": 760,
+              "all_masked_mean": 16728.474609375,
+              "all_masked_visible_ratio": 0.7781217430551215,
+              "all_visible_count": 240,
+              "all_visible_mean": 21498.53125,
+              "empty_masked_count": 527,
+              "empty_masked_mean": 15978.607421875,
+              "empty_masked_visible_ratio": 0.7085448844279947,
+              "empty_visible_count": 168,
+              "empty_visible_mean": 22551.298828125,
+              "occupied_masked_count": 233,
+              "occupied_masked_mean": 18424.521484375,
+              "occupied_masked_visible_ratio": 0.9675694376492506,
+              "occupied_visible_count": 72,
+              "occupied_visible_mean": 19042.06640625
+            },
+            "stage3": {
+              "all_masked_count": 125,
+              "all_masked_mean": NaN,
+              "all_masked_visible_ratio": NaN,
+              "all_visible_count": 0,
+              "all_visible_mean": NaN,
+              "empty_masked_count": 66,
+              "empty_masked_mean": NaN,
+              "empty_masked_visible_ratio": NaN,
+              "empty_visible_count": 0,
+              "empty_visible_mean": NaN,
+              "occupied_masked_count": 59,
+              "occupied_masked_mean": NaN,
+              "occupied_masked_visible_ratio": NaN,
+              "occupied_visible_count": 0,
+              "occupied_visible_mean": NaN
+            }
+          }
+        },
+        {
+          "mask_mean": 0.7350000143051147,
+          "merge_metrics": {
+            "merge0_to_1": {
+              "all_masked_ratio": 0.7350000143051147,
+              "all_visible_ratio": 0.26500001549720764,
+              "groups": 8000,
+              "mixed_ratio": 0.0
+            },
+            "merge1_to_2": {
+              "all_masked_ratio": 0.7350000143051147,
+              "all_visible_ratio": 0.26500001549720764,
+              "groups": 1000,
+              "mixed_ratio": 0.0
+            },
+            "merge2_to_3": {
+              "all_masked_ratio": 0.08800000697374344,
+              "all_visible_ratio": 0.0,
+              "groups": 125,
+              "mixed_ratio": 0.9120000600814819
+            }
+          },
+          "occupied_patch_frac": 0.14420312643051147,
+          "scene": "3dfront_0042_01",
+          "stage_metrics": {
+            "stage0": {
+              "all_masked_count": 47040,
+              "all_masked_mean": 17.90715980529785,
+              "all_masked_visible_ratio": 0.7376547543349207,
+              "all_visible_count": 16960,
+              "all_visible_mean": 24.275800704956055,
+              "empty_masked_count": 40447,
+              "empty_masked_mean": 17.89767837524414,
+              "empty_masked_visible_ratio": 0.7714696414544925,
+              "empty_visible_count": 14324,
+              "empty_visible_mean": 23.199459075927734,
+              "occupied_masked_count": 6593,
+              "occupied_masked_mean": 17.96533203125,
+              "occupied_masked_visible_ratio": 0.5963671589957563,
+              "occupied_visible_count": 2636,
+              "occupied_visible_mean": 30.124616622924805
+            },
+            "stage1": {
+              "all_masked_count": 5880,
+              "all_masked_mean": 150.7725830078125,
+              "all_masked_visible_ratio": 0.7382976723487235,
+              "all_visible_count": 2120,
+              "all_visible_mean": 204.21652221679688,
+              "empty_masked_count": 4724,
+              "empty_masked_mean": 144.56678771972656,
+              "empty_masked_visible_ratio": 0.8140693694652787,
+              "empty_visible_count": 1642,
+              "empty_visible_mean": 177.58534240722656,
+              "occupied_masked_count": 1156,
+              "occupied_masked_mean": 176.13255310058594,
+              "occupied_masked_visible_ratio": 0.5956490306467344,
+              "occupied_visible_count": 478,
+              "occupied_visible_mean": 295.69854736328125
+            },
+            "stage2": {
+              "all_masked_count": 735,
+              "all_masked_mean": 16811.044921875,
+              "all_masked_visible_ratio": 0.7962644674247561,
+              "all_visible_count": 265,
+              "all_visible_mean": 21112.388671875,
+              "empty_masked_count": 505,
+              "empty_masked_mean": 16048.048828125,
+              "empty_masked_visible_ratio": 0.7258185863632232,
+              "empty_visible_count": 175,
+              "empty_visible_mean": 22110.275390625,
+              "occupied_masked_count": 230,
+              "occupied_masked_mean": 18486.318359375,
+              "occupied_masked_visible_ratio": 0.9642326054230752,
+              "occupied_visible_count": 90,
+              "occupied_visible_mean": 19172.052734375
+            },
+            "stage3": {
+              "all_masked_count": 125,
+              "all_masked_mean": NaN,
+              "all_masked_visible_ratio": NaN,
+              "all_visible_count": 0,
+              "all_visible_mean": NaN,
+              "empty_masked_count": 65,
+              "empty_masked_mean": NaN,
+              "empty_masked_visible_ratio": NaN,
+              "empty_visible_count": 0,
+              "empty_visible_mean": NaN,
+              "occupied_masked_count": 60,
+              "occupied_masked_mean": NaN,
+              "occupied_masked_visible_ratio": NaN,
+              "occupied_visible_count": 0,
+              "occupied_visible_mean": NaN
+            }
+          }
+        }
+      ]
+    },
+    "dither_shuffle_visible_e100": {
+      "aggregate": {
+        "mask_mean": 0.7475000321865082,
+        "merges": {
+          "merge0_to_1": {
+            "all_masked_ratio": 0.7475000321865082,
+            "all_visible_ratio": 0.2525000125169754,
+            "groups": 8000.0,
+            "mixed_ratio": 0.0
+          },
+          "merge1_to_2": {
+            "all_masked_ratio": 0.7475000321865082,
+            "all_visible_ratio": 0.2525000125169754,
+            "groups": 1000.0,
+            "mixed_ratio": 0.0
+          },
+          "merge2_to_3": {
+            "all_masked_ratio": 0.08800000697374344,
+            "all_visible_ratio": 0.0,
+            "groups": 125.0,
+            "mixed_ratio": 0.9120000600814819
+          }
+        },
+        "occupied_patch_frac": 0.14766407012939453,
+        "stages": {
+          "stage0": {
+            "all_masked_count": 47840.0,
+            "all_masked_mean": 12.462379455566406,
+            "all_masked_visible_ratio": 1.2778176133047203,
+            "all_visible_count": 16160.0,
+            "all_visible_mean": 9.756253719329834,
+            "empty_masked_count": 40813.0,
+            "empty_masked_mean": 12.251643657684326,
+            "empty_masked_visible_ratio": 1.5300742107850547,
+            "empty_visible_count": 13736.5,
+            "empty_visible_mean": 8.007493257522583,
+            "occupied_masked_count": 7027.0,
+            "occupied_masked_mean": 13.683455467224121,
+            "occupied_masked_visible_ratio": 0.6959190655207161,
+            "occupied_visible_count": 2423.5,
+            "occupied_visible_mean": 19.675338745117188
+          },
+          "stage1": {
+            "all_masked_count": 5980.0,
+            "all_masked_mean": 78.37231826782227,
+            "all_masked_visible_ratio": 1.3940292563302195,
+            "all_visible_count": 2020.0,
+            "all_visible_mean": 56.402029037475586,
+            "empty_masked_count": 4739.0,
+            "empty_masked_mean": 78.02320098876953,
+            "empty_masked_visible_ratio": 1.6674920381029006,
+            "empty_visible_count": 1580.5,
+            "empty_visible_mean": 46.921592712402344,
+            "occupied_masked_count": 1241.0,
+            "occupied_masked_mean": 79.71532440185547,
+            "occupied_masked_visible_ratio": 0.8825123425850592,
+            "occupied_visible_count": 439.5,
+            "occupied_visible_mean": 90.51233673095703
+          },
+          "stage2": {
+            "all_masked_count": 747.5,
+            "all_masked_mean": 1903.1453247070312,
+            "all_masked_visible_ratio": 0.7602798657437322,
+            "all_visible_count": 252.5,
+            "all_visible_mean": 2503.4697265625,
+            "empty_masked_count": 516.0,
+            "empty_masked_mean": 1915.440673828125,
+            "empty_masked_visible_ratio": 0.8039766732398662,
+            "empty_visible_count": 171.5,
+            "empty_visible_mean": 2382.7232666015625,
+            "occupied_masked_count": 231.5,
+            "occupied_masked_mean": 1876.0198974609375,
+            "occupied_masked_visible_ratio": 0.6790122557617884,
+            "occupied_visible_count": 81.0,
+            "occupied_visible_mean": 2762.7762451171875
+          },
+          "stage3": {
+            "all_masked_count": 125.0,
+            "all_masked_mean": NaN,
+            "all_masked_visible_ratio": NaN,
+            "all_visible_count": 0.0,
+            "all_visible_mean": NaN,
+            "empty_masked_count": 65.5,
+            "empty_masked_mean": NaN,
+            "empty_masked_visible_ratio": NaN,
+            "empty_visible_count": 0.0,
+            "empty_visible_mean": NaN,
+            "occupied_masked_count": 59.5,
+            "occupied_masked_mean": NaN,
+            "occupied_masked_visible_ratio": NaN,
+            "occupied_visible_count": 0.0,
+            "occupied_visible_mean": NaN
+          }
+        }
+      },
+      "load": {
+        "checkpoint": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_mixnerf_lite_shuffle_visible_masked_p1.0_e100_seed1_abci3dither_e100/epoch_100.pt",
+        "epoch": 100,
+        "loaded_keys": 383,
+        "missing": [],
+        "total_model_keys": 383,
+        "unexpected": []
+      },
+      "scene_results": [
+        {
+          "mask_mean": 0.7600000500679016,
+          "merge_metrics": {
+            "merge0_to_1": {
+              "all_masked_ratio": 0.7600000500679016,
+              "all_visible_ratio": 0.24000000953674316,
+              "groups": 8000,
+              "mixed_ratio": 0.0
+            },
+            "merge1_to_2": {
+              "all_masked_ratio": 0.7600000500679016,
+              "all_visible_ratio": 0.24000000953674316,
+              "groups": 1000,
+              "mixed_ratio": 0.0
+            },
+            "merge2_to_3": {
+              "all_masked_ratio": 0.08800000697374344,
+              "all_visible_ratio": 0.0,
+              "groups": 125,
+              "mixed_ratio": 0.9120000600814819
+            }
+          },
+          "occupied_patch_frac": 0.1511250138282776,
+          "scene": "3dfront_0083_01",
+          "stage_metrics": {
+            "stage0": {
+              "all_masked_count": 48640,
+              "all_masked_mean": 12.499849319458008,
+              "all_masked_visible_ratio": 1.3036387387636488,
+              "all_visible_count": 15360,
+              "all_visible_mean": 9.588430404663086,
+              "empty_masked_count": 41179,
+              "empty_masked_mean": 12.26673412322998,
+              "empty_masked_visible_ratio": 1.5399740232856576,
+              "empty_visible_count": 13149,
+              "empty_visible_mean": 7.965546131134033,
+              "occupied_masked_count": 7461,
+              "occupied_masked_mean": 13.786460876464844,
+              "occupied_masked_visible_ratio": 0.7165576409441569,
+              "occupied_visible_count": 2211,
+              "occupied_visible_mean": 19.239849090576172
+            },
+            "stage1": {
+              "all_masked_count": 6080,
+              "all_masked_mean": 78.35931396484375,
+              "all_masked_visible_ratio": 1.473109546644315,
+              "all_visible_count": 1920,
+              "all_visible_mean": 53.19313430786133,
+              "empty_masked_count": 4754,
+              "empty_masked_mean": 78.02556610107422,
+              "empty_masked_visible_ratio": 1.7555722906043707,
+              "empty_visible_count": 1519,
+              "empty_visible_mean": 44.44451904296875,
+              "occupied_masked_count": 1326,
+              "occupied_masked_mean": 79.55586242675781,
+              "occupied_masked_visible_ratio": 0.9214984032586478,
+              "occupied_visible_count": 401,
+              "occupied_visible_mean": 86.3331527709961
+            },
+            "stage2": {
+              "all_masked_count": 760,
+              "all_masked_mean": 1906.9605712890625,
+              "all_masked_visible_ratio": 0.7687217784790276,
+              "all_visible_count": 240,
+              "all_visible_mean": 2480.690185546875,
+              "empty_masked_count": 527,
+              "empty_masked_mean": 1910.867919921875,
+              "empty_masked_visible_ratio": 0.811553844387967,
+              "empty_visible_count": 168,
+              "empty_visible_mean": 2354.579345703125,
+              "occupied_masked_count": 233,
+              "occupied_masked_mean": 1898.122802734375,
+              "occupied_masked_visible_ratio": 0.6840208548335018,
+              "occupied_visible_count": 72,
+              "occupied_visible_mean": 2774.94873046875
+            },
+            "stage3": {
+              "all_masked_count": 125,
+              "all_masked_mean": NaN,
+              "all_masked_visible_ratio": NaN,
+              "all_visible_count": 0,
+              "all_visible_mean": NaN,
+              "empty_masked_count": 66,
+              "empty_masked_mean": NaN,
+              "empty_masked_visible_ratio": NaN,
+              "empty_visible_count": 0,
+              "empty_visible_mean": NaN,
+              "occupied_masked_count": 59,
+              "occupied_masked_mean": NaN,
+              "occupied_masked_visible_ratio": NaN,
+              "occupied_visible_count": 0,
+              "occupied_visible_mean": NaN
+            }
+          }
+        },
+        {
+          "mask_mean": 0.7350000143051147,
+          "merge_metrics": {
+            "merge0_to_1": {
+              "all_masked_ratio": 0.7350000143051147,
+              "all_visible_ratio": 0.26500001549720764,
+              "groups": 8000,
+              "mixed_ratio": 0.0
+            },
+            "merge1_to_2": {
+              "all_masked_ratio": 0.7350000143051147,
+              "all_visible_ratio": 0.26500001549720764,
+              "groups": 1000,
+              "mixed_ratio": 0.0
+            },
+            "merge2_to_3": {
+              "all_masked_ratio": 0.08800000697374344,
+              "all_visible_ratio": 0.0,
+              "groups": 125,
+              "mixed_ratio": 0.9120000600814819
+            }
+          },
+          "occupied_patch_frac": 0.14420312643051147,
+          "scene": "3dfront_0042_01",
+          "stage_metrics": {
+            "stage0": {
+              "all_masked_count": 47040,
+              "all_masked_mean": 12.424909591674805,
+              "all_masked_visible_ratio": 1.2519964878457919,
+              "all_visible_count": 16960,
+              "all_visible_mean": 9.924077033996582,
+              "empty_masked_count": 40447,
+              "empty_masked_mean": 12.236553192138672,
+              "empty_masked_visible_ratio": 1.5201743982844516,
+              "empty_visible_count": 14324,
+              "empty_visible_mean": 8.049440383911133,
+              "occupied_masked_count": 6593,
+              "occupied_masked_mean": 13.580450057983398,
+              "occupied_masked_visible_ratio": 0.6752804900972755,
+              "occupied_visible_count": 2636,
+              "occupied_visible_mean": 20.110828399658203
+            },
+            "stage1": {
+              "all_masked_count": 5880,
+              "all_masked_mean": 78.38532257080078,
+              "all_masked_visible_ratio": 1.314948966016124,
+              "all_visible_count": 2120,
+              "all_visible_mean": 59.610923767089844,
+              "empty_masked_count": 4724,
+              "empty_masked_mean": 78.02083587646484,
+              "empty_masked_visible_ratio": 1.5794117856014303,
+              "empty_visible_count": 1642,
+              "empty_visible_mean": 49.39866638183594,
+              "occupied_masked_count": 1156,
+              "occupied_masked_mean": 79.87478637695312,
+              "occupied_masked_visible_ratio": 0.8435262819114706,
+              "occupied_visible_count": 478,
+              "occupied_visible_mean": 94.69152069091797
+            },
+            "stage2": {
+              "all_masked_count": 735,
+              "all_masked_mean": 1899.330078125,
+              "all_masked_visible_ratio": 0.7518379530084367,
+              "all_visible_count": 265,
+              "all_visible_mean": 2526.249267578125,
+              "empty_masked_count": 505,
+              "empty_masked_mean": 1920.013427734375,
+              "empty_masked_visible_ratio": 0.7963995020917655,
+              "empty_visible_count": 175,
+              "empty_visible_mean": 2410.8671875,
+              "occupied_masked_count": 230,
+              "occupied_masked_mean": 1853.9169921875,
+              "occupied_masked_visible_ratio": 0.674003656690075,
+              "occupied_visible_count": 90,
+              "occupied_visible_mean": 2750.603759765625
+            },
+            "stage3": {
+              "all_masked_count": 125,
+              "all_masked_mean": NaN,
+              "all_masked_visible_ratio": NaN,
+              "all_visible_count": 0,
+              "all_visible_mean": NaN,
+              "empty_masked_count": 65,
+              "empty_masked_mean": NaN,
+              "empty_masked_visible_ratio": NaN,
+              "empty_visible_count": 0,
+              "empty_visible_mean": NaN,
+              "occupied_masked_count": 60,
+              "occupied_masked_mean": NaN,
+              "occupied_masked_visible_ratio": NaN,
+              "occupied_visible_count": 0,
+              "occupied_visible_mean": NaN
+            }
+          }
+        }
+      ]
+    }
+  },
+  "scenes": [
+    "3dfront_0083_01",
+    "3dfront_0042_01"
+  ],
+  "script": "nerf_mae/probe_scripts/encoder_mask_participation_report.py",
+  "split_file": "/groups/gag51404/ide/vgi/NeRF-MAE/dataset/_downloads/front3d_rpn_extract/front3d_rpn_data/3dfront_split.npz",
+  "split_key": "val_scenes"
+}

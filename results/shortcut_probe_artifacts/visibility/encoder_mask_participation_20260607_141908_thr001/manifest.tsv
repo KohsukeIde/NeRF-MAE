@@ -1,0 +1,11 @@
+run_name	encoder_mask_participation_20260607_141908_thr001
+root_dir	/groups/gag51404/ide/vgi/NeRF-MAE
+features_dir	/groups/gag51404/ide/vgi/NeRF-MAE/dataset/_downloads/front3d_rpn_extract/front3d_rpn_data/features
+split_file	/groups/gag51404/ide/vgi/NeRF-MAE/dataset/_downloads/front3d_rpn_extract/front3d_rpn_data/3dfront_split.npz
+split_key	val_scenes
+max_scenes	2
+resolution	160
+masking_prob	0.75
+checkpoint_specs	baseline_e300=/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_all_p1.0_e300_seed1_abci3clean/epoch_300.pt cosine_ramp_e300=/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1_abci3clean/epoch_300.pt cosine_coord_jitter_e100=/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_cosine_coord_jitter_p1.0_e100_seed1_abci3diag_opt1n8g_det0/epoch_100.pt dither_shuffle_visible_e100=/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_mixnerf_lite_shuffle_visible_masked_p1.0_e100_seed1_abci3dither_e100/epoch_100.pt
+pbs_jobid	1832036.pbs1
+git_hash	ebbcaff69e7e3a1b2b9e73d913aea4e7644a1c6c
