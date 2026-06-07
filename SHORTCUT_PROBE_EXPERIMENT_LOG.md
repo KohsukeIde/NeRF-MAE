@@ -4844,3 +4844,45 @@ Submitted scouts:
 |---|---:|---|---|
 | `visibility_skip_gate` | 1 | `1832027.pbs1` | `1832028.pbs1` |
 | `visibility_feature_reset` | 1 | `1832029.pbs1` | `1832030.pbs1` |
+
+## Experiment 70: Visibility-Gated MAE e100 Scout Results
+
+Snapshot:
+- 2026-06-08 JST
+
+Artifact:
+- `results/shortcut_probe_artifacts/visibility/visibility_gated_e100_results_20260608.md`
+
+Status:
+- Both visibility-gated e100 pretrain jobs completed.
+- Both dependent FCOS eval jobs completed.
+
+Results:
+
+| condition | seed | AP@25 | AP@50 | AP@75 | R@50 top300 | R@25 top300 | AR top300 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `visibility_skip_gate` | 1 | 0.8173 | 0.5869 | 0.1039 | 0.7279 | 0.9632 | 0.4971 |
+| `visibility_feature_reset` | 1 | 0.8026 | 0.4992 | 0.0552 | 0.6618 | 0.9632 | 0.4613 |
+
+Reference context:
+
+| condition | n | AP@50 mean | AP@50 std | AP@75 mean |
+|---|---:|---:|---:|---:|
+| `baseline_coord_jitter_e100` | 3 | 0.5454 | 0.0103 | 0.1073 |
+| `cosine_coord_jitter_e100` | 3 | 0.5873 | 0.0395 | 0.0872 |
+| `mixnerf_lite_shuffle_visible_e100` | 2 | 0.5819 | 0.0076 | 0.1336 |
+| `budgetcurve_cosine_ramp_e100` | 1 | 0.5711 | - | 0.0940 |
+
+Interpretation:
+- `visibility_skip_gate` survives as a scout. It beats the
+  `baseline_coord_jitter_e100` 3-seed mean and essentially ties the
+  `cosine_coord_jitter_e100` 3-seed mean on AP@50.
+- `visibility_skip_gate` does not clearly beat the strongest existing e100
+  references, so it should not replace the main efficiency / low-label branch.
+- `visibility_feature_reset` is a no-go. Hard feature reset damages transfer.
+
+Decision:
+- Stop `visibility_feature_reset`.
+- Keep `visibility_skip_gate` as appendix/future-method evidence unless a
+  stronger reviewer-facing mechanism is specified.
+- Do not escalate to attention KV-gating from these results alone.
