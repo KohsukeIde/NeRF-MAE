@@ -4994,3 +4994,51 @@ Submitted follow-up jobs:
 Manifests:
 - `output/launcher/visibility_gated_abci3vis_pure_e100_20260608/submitted.tsv`
 - `output/launcher/visibility_gated_abci3vis_cosineskip_e100_20260608/submitted.tsv`
+
+## Experiment 72: Visibility Follow-up Results
+
+Snapshot:
+- 2026-06-08 JST
+
+Artifact:
+- `results/shortcut_probe_artifacts/visibility/visibility_followup_results_20260608.md`
+
+Status:
+- `visibility_skip_gate` pure seed1 completed.
+- `visibility_cosine_skip_gate` seed2 completed.
+
+Important naming correction:
+- The earlier 2026-06-07 `visibility_skip_gate` result used
+  `PROBE_CURRICULUM=cosine_rgb_ramp`; it is treated here as
+  `visibility_cosine_skip_gate` seed1.
+- The 2026-06-08 `visibility_skip_gate` result is the pure skip-gate isolation
+  with `PROBE_CURRICULUM=none`.
+
+Results:
+
+| condition | seed | AP@25 | AP@50 | AP@75 | R@50 top300 | R@25 top300 | AR top300 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `visibility_skip_gate` pure | 1 | 0.7844 | 0.5480 | 0.0687 | 0.6912 | 0.9559 | 0.4775 |
+| `visibility_cosine_skip_gate` | 1 | 0.8173 | 0.5869 | 0.1039 | 0.7279 | 0.9632 | 0.4971 |
+| `visibility_cosine_skip_gate` | 2 | 0.7931 | 0.5492 | 0.0787 | 0.7353 | 0.9485 | 0.4966 |
+
+Reference context:
+
+| condition | n | AP@50 mean | AP@50 std | AP@75 mean | R@50 mean | AR mean |
+|---|---:|---:|---:|---:|---:|---:|
+| `baseline_coord_jitter_e100` | 3 | 0.5454 | 0.0103 | 0.1073 | 0.6912 | 0.4953 |
+| `cosine_coord_jitter_e100` | 3 | 0.5873 | 0.0395 | 0.0872 | 0.7181 | 0.4897 |
+| `visibility_cosine_skip_gate_e100` | 2 | 0.5681 | 0.0267 | 0.0913 | 0.7316 | 0.4968 |
+
+Interpretation:
+- The pure skip-gate isolation is essentially baseline-level, not a method win.
+- The cosine+skip combination is not stable: seed2 drops from seed1 AP@50
+  0.5869 to 0.5492.
+- The mechanism diagnostic remains positive, but the downstream intervention is
+  not strong enough to promote.
+
+Decision:
+- Do not promote visibility gating to the main AAAI path.
+- Do not launch attention KV-gating from these results.
+- Stop visibility method exploration unless a new reviewer-facing mechanism is
+  specified before running jobs.
