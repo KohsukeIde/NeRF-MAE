@@ -5117,3 +5117,56 @@ Decision:
   evidence unless a different protocol issue is identified.
 - Do not spend compute on ScanNet `normalize_density` on/off reruns unless we
   intentionally implement a raw-density ScanNet dataset ablation.
+
+## Experiment 74: e600 Peak Stdout Closure
+
+Snapshot:
+- 2026-06-11 JST
+
+Artifact:
+- `results/shortcut_probe_artifacts/e600_peak_stdout_audit_20260611.md`
+
+Purpose:
+- Close the final stdout/eval provenance check for the six e600 peak seed-check
+  FCOS jobs before using the numbers in paper-facing tables.
+
+Checked jobs:
+- `1830815.pbs1`: `cosine_e600`, finetune seed 2
+- `1830817.pbs1`: `baseline_e600`, finetune seed 2
+- `1830818.pbs1`: `baseline_e1200`, finetune seed 2
+- `1830819.pbs1`: `cosine_e600`, finetune seed 3
+- `1830820.pbs1`: `baseline_e600`, finetune seed 3
+- `1830821.pbs1`: `baseline_e1200`, finetune seed 3
+
+Stdout status:
+- All six stdout logs exist under
+  `output/launcher/e600_peak_seed_check_20260606/`.
+- All six logs end with `[info] FCOS complete eval=.../eval.json`.
+- All six logs include the expected Front3D p1.0 FCOS protocol:
+  `FCOS_NUM_EPOCHS=1000`, `FCOS_LR=1e-4`, `batch_size=2`,
+  `--lr_scheduler onecycle_epoch`, `deterministic=False`, and eval-time
+  augmentation disabled.
+- All six logs load the intended MAE checkpoint:
+  `cosine_e600` uses `epoch_600.pt` from the cosine e600 pretrain,
+  `baseline_e600` uses baseline `epoch_600.pt`, and `baseline_e1200` uses
+  baseline `epoch_1200.pt`.
+- No checked stdout contains `Traceback`, `Exception`, `ERROR`, or
+  `RuntimeError`.
+
+Eval consistency:
+- All six expected `eval.json` files exist.
+- The stdout final AP@50 values match the parsed `eval.json` values:
+  - `cosine_e600`: seed2 `0.4971`, seed3 `0.5065`
+  - `baseline_e600`: seed2 `0.4984`, seed3 `0.4955`
+  - `baseline_e1200`: seed2 `0.5087`, seed3 `0.4807`
+
+Confirmed summary:
+- `cosine_e600`: AP@50 `0.5410±0.0682`
+- `baseline_e600`: AP@50 `0.4978±0.0021`
+- `baseline_e1200`: AP@50 `0.5181±0.0428`
+
+Decision:
+- The stdout/eval provenance blocker for the e600 peak check is closed.
+- Keep the scientific conclusion qualified: the seed1 e600 AP@50 peak does not
+  replicate strongly, and `cosine_e600` should not be described as a decisive
+  robust win over the e1200 baseline.
