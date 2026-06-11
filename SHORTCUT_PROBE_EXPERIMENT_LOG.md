@@ -5051,6 +5051,7 @@ Snapshot:
 Artifacts:
 - `results/shortcut_probe_artifacts/scannet_normalize_density_audit_20260611.md`
 - `results/shortcut_probe_artifacts/scannet_nonorm_jobs_20260611.csv`
+- `results/shortcut_probe_artifacts/scannet_nonorm_retry_jobs_20260611.csv`
 
 Finding:
 - Existing ScanNet transfer triage runs used `--normalize_density` in both train
@@ -5082,6 +5083,30 @@ Submitted jobs:
 | `cosine_ramp_e300` | `1897281.pbs1` | 0 |
 | `cosine_coord_jitter_e100` | `1897282.pbs1` | 0 |
 | `surface_cosine_jitter_e300` | `1897283.pbs1` | 0 |
+
+Path-fix retry:
+- Initial jobs `1897280.pbs1`-`1897283.pbs1` failed immediately before
+  training with `AssertionError: The checkpoint does not exist`.
+- Cause: `MAE_CHECKPOINT=output/...` was validated from repo root in the PBS
+  wrapper, but then passed unchanged after `cd nerf_rpn`, where it resolved as
+  `nerf_rpn/output/...`.
+- Fix: `run_fcos_probe_variant.sh` now canonicalizes `PRETRAIN_CHECKPOINT`
+  before changing into `nerf_rpn`, accepting repo-root relative paths,
+  `nerf_rpn`-relative paths, and absolute paths.
+
+Retry jobs:
+
+| condition | failed job | retry job | normalize_density |
+|---|---:|---:|---:|
+| `baseline_e300` | `1897280.pbs1` | `1897293.pbs1` | 0 |
+| `cosine_ramp_e300` | `1897281.pbs1` | `1897294.pbs1` | 0 |
+| `cosine_coord_jitter_e100` | `1897282.pbs1` | `1897295.pbs1` | 0 |
+| `surface_cosine_jitter_e300` | `1897283.pbs1` | `1897296.pbs1` | 0 |
+
+Status:
+- Retry jobs are running on `rt_HG` as of 2026-06-11 16:39 JST.
+- Worker logs show training has reached epoch 1-2, so checkpoint loading is past
+  the previous failure point.
 
 Decision:
 - Treat the existing ScanNet table as legacy normalized-density triage until the

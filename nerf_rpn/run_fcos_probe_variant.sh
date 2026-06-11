@@ -30,6 +30,16 @@ SAVE_PATH="${SAVE_PATH:-../output/nerf_rpn/results/${SAVE_NAME}}"
 EVAL_SAVE_NAME="${EVAL_SAVE_NAME:-${SAVE_NAME}_eval}"
 EVAL_SAVE_PATH="${EVAL_SAVE_PATH:-../output/nerf_rpn/results/${EVAL_SAVE_NAME}}"
 
+if [[ "${PRETRAIN_CHECKPOINT}" != /* ]]; then
+  if [[ -f "${PRETRAIN_CHECKPOINT}" ]]; then
+    PRETRAIN_CHECKPOINT="$(realpath "${PRETRAIN_CHECKPOINT}")"
+  elif [[ -f "${ROOT_DIR}/${PRETRAIN_CHECKPOINT}" ]]; then
+    PRETRAIN_CHECKPOINT="$(realpath "${ROOT_DIR}/${PRETRAIN_CHECKPOINT}")"
+  elif [[ -f "${SCRIPT_DIR}/${PRETRAIN_CHECKPOINT}" ]]; then
+    PRETRAIN_CHECKPOINT="$(realpath "${SCRIPT_DIR}/${PRETRAIN_CHECKPOINT}")"
+  fi
+fi
+
 cd "${SCRIPT_DIR}"
 
 export PATH="${PROBE_ENV_PREFIX}/bin:${PATH}"
