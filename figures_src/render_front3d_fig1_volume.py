@@ -161,6 +161,7 @@ def composite_tile(
     depth_values: torch.Tensor,
     alpha_threshold: float,
     opacity_scale: float,
+    rgb_mode: str,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     # samples: `[4, S, H, W]`, sampled front-to-back.
     rgb = samples[:3].permute(1, 2, 3, 0).clamp(0.0, 1.0)
@@ -174,9 +175,89 @@ def composite_tile(
     trans_exclusive = torch.cat([torch.ones_like(trans_inclusive[:1]), trans_inclusive[:-1]], dim=0)
     weights = trans_exclusive * a
     opacity = weights.sum(dim=0).clamp(0.0, 1.0)
-    color = (weights[..., None] * rgb).sum(dim=0)
+    if rgb_mode == "surface":
+        idx = weights.argmax(dim=0)
+        surface_color = torch.gather(
+            rgb,
+            dim=0,
+            index=idx[None, ..., None].expand(1, idx.shape[0], idx.shape[1], 3),
+        ).squeeze(0)
+        color = surface_color * opacity[..., None]
+    else:
+        color = (weights[..., None] * rgb).sum(dim=0)
     depth = (weights * depth_values[:, None, None]).sum(dim=0) / opacity.clamp_min(1e-6)
     return color, opacity, depth
+
+
+def parse_crop(crop: str | None) -> tuple[float, float, float, float] | None:
+    if not crop:
+        return None
+    values = [float(v.strip()) for v in crop.split(",")]
+    if len(values) != 4:
+        raise ValueError("--image-crop must have four comma-separated fractions: x0,y0,x1,y1")
+    x0, y0, x1, y1 = values
+    if not (0.0 <= x0 < x1 <= 1.0 and 0.0 <= y0 < y1 <= 1.0):
+        raise ValueError("--image-crop fractions must satisfy 0 <= x0 < x1 <= 1 and 0 <= y0 < y1 <= 1")
+    return x0, y0, x1, y1
+
+
+def crop_and_resize(img: np.ndarray, crop: tuple[float, float, float, float] | None) -> np.ndarray:
+    if crop is None:
+        return img
+    h, w = img.shape[:2]
+    x0, y0, x1, y1 = crop
+    ix0 = max(0, min(w - 1, int(round(x0 * w))))
+    ix1 = max(ix0 + 1, min(w, int(round(x1 * w))))
+    iy0 = max(0, min(h - 1, int(round(y0 * h))))
+    iy1 = max(iy0 + 1, min(h, int(round(y1 * h))))
+    sub = img[iy0:iy1, ix0:ix1]
+    tensor = torch.from_numpy(sub).permute(2, 0, 1).unsqueeze(0).float()
+    resized = F.interpolate(tensor, size=(h, w), mode="bilinear", align_corners=False)
+    return resized.squeeze(0).permute(1, 2, 0).numpy()
+
+
+def trim_pair_to_content(
+    rgb_img: np.ndarray,
+    alpha_img: np.ndarray,
+    threshold: float,
+    margin: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Trim pair using alpha/structure non-white support, then resize back."""
+    if threshold >= 1.0:
+        return rgb_img, alpha_img
+    h, w = alpha_img.shape[:2]
+    support = np.min(alpha_img, axis=-1) < threshold
+    if not support.any():
+        return rgb_img, alpha_img
+    ys, xs = np.where(support)
+    x0, x1 = int(xs.min()), int(xs.max()) + 1
+    y0, y1 = int(ys.min()), int(ys.max()) + 1
+    pad_x = int(round(margin * max(x1 - x0, 1)))
+    pad_y = int(round(margin * max(y1 - y0, 1)))
+    x0 = max(0, x0 - pad_x)
+    x1 = min(w, x1 + pad_x)
+    y0 = max(0, y0 - pad_y)
+    y1 = min(h, y1 + pad_y)
+    crop = (x0 / w, y0 / h, x1 / w, y1 / h)
+    return crop_and_resize(rgb_img, crop), crop_and_resize(alpha_img, crop)
+
+
+def smooth_image(img: np.ndarray, sigma: float) -> np.ndarray:
+    if sigma <= 0.0:
+        return img
+    radius = max(1, int(math.ceil(3.0 * sigma)))
+    coords = torch.arange(-radius, radius + 1, dtype=torch.float32)
+    kernel_1d = torch.exp(-(coords**2) / (2.0 * sigma * sigma))
+    kernel_1d = kernel_1d / kernel_1d.sum()
+    c = img.shape[-1]
+    tensor = torch.from_numpy(img).permute(2, 0, 1).unsqueeze(0).float()
+    kernel_x = kernel_1d.view(1, 1, 1, -1).repeat(c, 1, 1, 1)
+    kernel_y = kernel_1d.view(1, 1, -1, 1).repeat(c, 1, 1, 1)
+    tensor = F.pad(tensor, (radius, radius, 0, 0), mode="reflect")
+    tensor = F.conv2d(tensor, kernel_x, groups=c)
+    tensor = F.pad(tensor, (0, 0, radius, radius), mode="reflect")
+    tensor = F.conv2d(tensor, kernel_y, groups=c)
+    return tensor.squeeze(0).permute(1, 2, 0).numpy().clip(0.0, 1.0)
 
 
 def boost_saturation(img: np.ndarray, factor: float) -> np.ndarray:
@@ -191,6 +272,12 @@ def boost_saturation(img: np.ndarray, factor: float) -> np.ndarray:
     return np.clip(luma[..., None] + factor * (img - luma[..., None]), 0.0, 1.0)
 
 
+def adjust_contrast(img: np.ndarray, factor: float) -> np.ndarray:
+    if abs(factor - 1.0) < 1e-6:
+        return img
+    return np.clip((img - 0.5) * factor + 0.5, 0.0, 1.0)
+
+
 def render_volume(
     volume: torch.Tensor,
     native_shape_xyz: np.ndarray,
@@ -203,12 +290,27 @@ def render_volume(
     opacity_scale: float,
     padding: float,
     saturation: float,
+    rgb_contrast: float,
+    crop: tuple[float, float, float, float] | None,
+    trim_threshold: float,
+    trim_margin: float,
+    smooth_sigma: float,
+    rgb_mode: str,
+    depth_min: float,
+    depth_max: float,
 ) -> tuple[np.ndarray, np.ndarray]:
     lo, hi, aspect, rot = camera_bounds(native_shape_xyz, view, padding)
     x = torch.linspace(float(lo[0]), float(hi[0]), width)
     y = torch.linspace(float(hi[1]), float(lo[1]), height)
-    z = torch.linspace(float(hi[2]), float(lo[2]), samples)  # front-to-back
-    depth_norm = torch.linspace(0.0, 1.0, samples)
+    depth_min = float(np.clip(depth_min, 0.0, 1.0))
+    depth_max = float(np.clip(depth_max, 0.0, 1.0))
+    if depth_min >= depth_max:
+        raise ValueError("--depth-min must be smaller than --depth-max")
+    z_span = float(hi[2] - lo[2])
+    z_front = float(hi[2]) - depth_min * z_span
+    z_back = float(hi[2]) - depth_max * z_span
+    z = torch.linspace(z_front, z_back, samples)  # front-to-back
+    depth_norm = torch.linspace(depth_min, depth_max, samples)
     rot_t = torch.from_numpy(rot.astype(np.float32))
     aspect_t = torch.from_numpy(aspect.astype(np.float32))
 
@@ -231,12 +333,13 @@ def render_volume(
                 padding_mode="zeros",
                 align_corners=True,
             ).squeeze(0)
-        color, opacity, depth = composite_tile(sampled, depth_norm, alpha_threshold, opacity_scale)
+        color, opacity, depth = composite_tile(sampled, depth_norm, alpha_threshold, opacity_scale, rgb_mode)
         rgb_out[y0:y1] = color + (1.0 - opacity[..., None])
         opacity_out[y0:y1] = opacity
         depth_out[y0:y1] = depth
 
-    rgb_img = boost_saturation(rgb_out.clamp(0.0, 1.0).numpy(), saturation)
+    rgb_img = rgb_out.clamp(0.0, 1.0).numpy()
+    rgb_img = adjust_contrast(boost_saturation(rgb_img, saturation), rgb_contrast)
     opacity_np = opacity_out.clamp(0.0, 1.0).numpy()
     depth_np = depth_out.clamp(0.0, 1.0).numpy()
     alpha_strength = np.clip(opacity_np**0.75, 0.0, 1.0)
@@ -245,7 +348,10 @@ def render_volume(
     gray_far = np.array([0.70, 0.70, 0.70], dtype=np.float32)
     structure_color = gray_far[None, None, :] * (1.0 - front_shade[..., None]) + gray_near[None, None, :] * front_shade[..., None]
     alpha_img = (1.0 - alpha_strength[..., None]) + alpha_strength[..., None] * structure_color
-    return rgb_img, np.clip(alpha_img, 0.0, 1.0)
+    rgb_img = crop_and_resize(rgb_img, crop)
+    alpha_img = crop_and_resize(np.clip(alpha_img, 0.0, 1.0), crop)
+    rgb_img, alpha_img = trim_pair_to_content(rgb_img, alpha_img, trim_threshold, trim_margin)
+    return smooth_image(rgb_img, smooth_sigma), smooth_image(alpha_img, smooth_sigma)
 
 
 def save_image(img: np.ndarray, out_path: Path, dpi: int) -> None:
@@ -261,7 +367,7 @@ def save_image(img: np.ndarray, out_path: Path, dpi: int) -> None:
 
 def make_pair(alpha_path: Path, rgb_path: Path, out_path: Path, dpi: int, labeled: bool) -> None:
     imgs = [plt.imread(alpha_path), plt.imread(rgb_path)]
-    labels = ["alpha / structure view", "opacity-composited RGB view"]
+    labels = ["alpha / structure view", "RGB appearance view"]
     fig, axes = plt.subplots(1, 2, figsize=(8.0, 4.0), dpi=dpi)
     for ax, img, label in zip(axes, imgs, labels):
         ax.imshow(img)
@@ -291,7 +397,7 @@ def make_contact_sheet(rows: list[tuple[str, Path, Path]], out_path: Path, dpi: 
         for col, path in enumerate([alpha_path, rgb_path]):
             axes[row, col].imshow(plt.imread(path))
             axes[row, col].axis("off")
-            axes[row, col].set_title(f"{label} / {'alpha' if col == 0 else 'RGB composite'}", fontsize=8)
+            axes[row, col].set_title(f"{label} / {'alpha' if col == 0 else 'RGB view'}", fontsize=8)
     fig.tight_layout(pad=0.2)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=dpi)
@@ -340,9 +446,18 @@ def main() -> None:
     parser.add_argument("--dpi", type=int, default=240)
     parser.add_argument("--gamma", type=float, default=1.25)
     parser.add_argument("--saturation", type=float, default=2.2)
+    parser.add_argument("--rgb-contrast", type=float, default=1.0)
+    parser.add_argument("--image-crop", type=str, default=None, help="Optional crop fractions x0,y0,x1,y1, resized back to output size.")
+    parser.add_argument("--trim-threshold", type=float, default=1.0, help="If < 1, auto-trim non-white structure support before saving.")
+    parser.add_argument("--trim-margin", type=float, default=0.08)
+    parser.add_argument("--smooth-sigma", type=float, default=0.0)
+    parser.add_argument("--rgb-mode", choices=("composite", "surface"), default="composite")
+    parser.add_argument("--depth-min", type=float, default=0.0)
+    parser.add_argument("--depth-max", type=float, default=1.0)
     parser.add_argument("--no-auto-exposure", action="store_true")
     parser.add_argument("--render-view-candidates", action="store_true")
     args = parser.parse_args()
+    crop = parse_crop(args.image_crop)
 
     rendered: list[tuple[str, Path, Path]] = []
     for feature_path in choose_feature_paths(args):
@@ -360,6 +475,14 @@ def main() -> None:
             args.opacity_scale,
             args.padding,
             args.saturation,
+            args.rgb_contrast,
+            crop,
+            args.trim_threshold,
+            args.trim_margin,
+            args.smooth_sigma,
+            args.rgb_mode,
+            args.depth_min,
+            args.depth_max,
         )
         alpha_path = args.out_dir / f"{feature_path.stem}_alpha.png"
         rgb_path = args.out_dir / f"{feature_path.stem}_rgb.png"
@@ -384,6 +507,14 @@ def main() -> None:
                     args.opacity_scale,
                     args.padding,
                     args.saturation,
+                    args.rgb_contrast,
+                    crop,
+                    args.trim_threshold,
+                    args.trim_margin,
+                    args.smooth_sigma,
+                    args.rgb_mode,
+                    args.depth_min,
+                    args.depth_max,
                 )
                 alpha_v_path = view_dir / f"{feature_path.stem}_{view.name}_alpha.png"
                 rgb_v_path = view_dir / f"{feature_path.stem}_{view.name}_rgb.png"
