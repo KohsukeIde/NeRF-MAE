@@ -33,6 +33,7 @@ SCHEDULER_TOTAL_STEPS="${SCHEDULER_TOTAL_STEPS:-}"
 SCHEDULER_MIN_LR="${SCHEDULER_MIN_LR:-}"
 FREEZE_BACKBONE_EPOCHS="${FREEZE_BACKBONE_EPOCHS:-}"
 BACKBONE_LR_SCALE="${BACKBONE_LR_SCALE:-}"
+NORMALIZE_DENSITY="${NORMALIZE_DENSITY:-1}"
 
 if [[ -z "${resolution}" ]]; then
   resolution=160
@@ -72,7 +73,6 @@ cmd=(
   --batch_size "${BATCH_SIZE}"
   --gpus "${GPU_IDS}"
   --percent_train "${PERCENT_TRAIN}"
-  --normalize_density
   --tags "${RUN_TAG}"
   --dataset "${dataset_name}"
   --dataset_split "${DATA_ROOT}/${split_name}_split.npz"
@@ -83,6 +83,9 @@ cmd=(
   --rot_scale_prob "${ROT_SCALE_PROB}"
 )
 
+if [[ "${NORMALIZE_DENSITY}" == "1" ]]; then
+  cmd+=(--normalize_density)
+fi
 if [[ "${USE_WANDB}" == "1" ]]; then
   cmd+=(--wandb)
 fi

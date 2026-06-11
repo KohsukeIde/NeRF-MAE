@@ -5042,3 +5042,49 @@ Decision:
 - Do not launch attention KV-gating from these results.
 - Stop visibility method exploration unless a new reviewer-facing mechanism is
   specified before running jobs.
+
+## Experiment 73: ScanNet normalize_density Audit and Non-normalized Rerun
+
+Snapshot:
+- 2026-06-11 JST
+
+Artifacts:
+- `results/shortcut_probe_artifacts/scannet_normalize_density_audit_20260611.md`
+- `results/shortcut_probe_artifacts/scannet_nonorm_jobs_20260611.csv`
+
+Finding:
+- Existing ScanNet transfer triage runs used `--normalize_density` in both train
+  and eval.
+- Evidence appears in logs such as `scn_basee300.o1811879`,
+  `scn_cose300.o1811887`, `scn_cj_e100.o1811881`, and
+  `scn_smcj_e300.o1811882`.
+- The wrapper path was `abci3_scannet_transfer_fcos.pbs ->
+  run_fcos_probe_variant.sh -> train_fcos_pretrained.sh /
+  test_fcos_pretrained.sh`; the train/test wrappers previously appended
+  `--normalize_density` unconditionally.
+
+Patch:
+- Added a `NORMALIZE_DENSITY` env switch to `train_fcos_pretrained.sh` and
+  `test_fcos_pretrained.sh`.
+- Set `NORMALIZE_DENSITY=0` by default in `abci3_scannet_transfer_fcos.pbs`.
+- Front3D/default behavior remains normalized unless explicitly overridden.
+
+Rationale:
+- This is not eval-only because existing ScanNet FCOS checkpoints were trained
+  with normalized density. Eval-only off would create a train/eval mismatch.
+- Re-run train+eval for ScanNet with `NORMALIZE_DENSITY=0`.
+
+Submitted jobs:
+
+| condition | job | normalize_density |
+|---|---:|---:|
+| `baseline_e300` | `1897280.pbs1` | 0 |
+| `cosine_ramp_e300` | `1897281.pbs1` | 0 |
+| `cosine_coord_jitter_e100` | `1897282.pbs1` | 0 |
+| `surface_cosine_jitter_e300` | `1897283.pbs1` | 0 |
+
+Decision:
+- Treat the existing ScanNet table as legacy normalized-density triage until the
+  non-normalized reruns finish.
+- Use the non-normalized table for paper-facing ScanNet claims if the official
+  ScanNet protocol requires density normalization off.

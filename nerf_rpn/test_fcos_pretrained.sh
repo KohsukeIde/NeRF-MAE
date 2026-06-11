@@ -19,6 +19,7 @@ FLIP_PROB="${FLIP_PROB:-0.0}"
 ROT_SCALE_PROB="${ROT_SCALE_PROB:-0.0}"
 COORD_SHIFT_PROB="${COORD_SHIFT_PROB:-0.0}"
 COORD_SHIFT_MAX_VOXELS="${COORD_SHIFT_MAX_VOXELS:-0}"
+NORMALIZE_DENSITY="${NORMALIZE_DENSITY:-1}"
 
 cmd=(
 python3 -u run_fcos_pretrained.py
@@ -28,7 +29,6 @@ python3 -u run_fcos_pretrained.py
 --features_path "${DATA_ROOT}/features"
 --boxes_path "${DATA_ROOT}/obb"
 --norm_reg_targets
---normalize_density
 --centerness_on_reg
 --rotated_bbox
 --output_proposals
@@ -42,6 +42,9 @@ python3 -u run_fcos_pretrained.py
 --checkpoint "${CHECKPOINT}"
 )
 
+if [[ "${NORMALIZE_DENSITY}" == "1" ]]; then
+  cmd+=(--normalize_density)
+fi
 if [[ -n "${SEED}" ]]; then
   cmd+=(--seed "${SEED}")
 fi
