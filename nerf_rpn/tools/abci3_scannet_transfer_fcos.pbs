@@ -30,7 +30,10 @@ FCOS_EVAL_INTERVAL="${FCOS_EVAL_INTERVAL:-10}"
 USE_WANDB="${USE_WANDB:-0}"
 WANDB_MODE="${WANDB_MODE:-offline}"
 DETERMINISTIC="${DETERMINISTIC:-1}"
-NORMALIZE_DENSITY="${NORMALIZE_DENSITY:-0}"
+# For dataset=scannet, run_fcos(_pretrained).py instantiates ScanNetRPNDataset,
+# which always converts raw density to alpha with the ScanNet-specific ReLU
+# formula. This flag is retained for command provenance and non-ScanNet wrappers.
+NORMALIZE_DENSITY="${NORMALIZE_DENSITY:-1}"
 
 [[ -f "${MAE_CHECKPOINT}" ]] || { echo "[error] missing MAE checkpoint: ${MAE_CHECKPOINT}" >&2; exit 1; }
 [[ -d "${SCANNET_DATA_ROOT}/features" ]] || { echo "[error] missing ScanNet features: ${SCANNET_DATA_ROOT}/features" >&2; exit 1; }

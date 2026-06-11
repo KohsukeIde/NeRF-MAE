@@ -5043,7 +5043,7 @@ Decision:
 - Stop visibility method exploration unless a new reviewer-facing mechanism is
   specified before running jobs.
 
-## Experiment 73: ScanNet normalize_density Audit and Non-normalized Rerun
+## Experiment 73: ScanNet normalize_density Audit
 
 Snapshot:
 - 2026-06-11 JST
@@ -5054,28 +5054,32 @@ Artifacts:
 - `results/shortcut_probe_artifacts/scannet_nonorm_retry_jobs_20260611.csv`
 
 Finding:
-- Existing ScanNet transfer triage runs used `--normalize_density` in both train
-  and eval.
-- Evidence appears in logs such as `scn_basee300.o1811879`,
-  `scn_cose300.o1811887`, `scn_cj_e100.o1811881`, and
-  `scn_smcj_e300.o1811882`.
-- The wrapper path was `abci3_scannet_transfer_fcos.pbs ->
-  run_fcos_probe_variant.sh -> train_fcos_pretrained.sh /
-  test_fcos_pretrained.sh`; the train/test wrappers previously appended
-  `--normalize_density` unconditionally.
+- Existing ScanNet transfer triage logs include `--normalize_density`, but this
+  flag is not operational in the ScanNet dataset branch.
+- For `dataset=scannet`, `run_fcos_pretrained.py`, `run_fcos.py`, and
+  `run_rpn.py` instantiate `ScanNetRPNDataset` without passing
+  `args.normalize_density`.
+- `ScanNetRPNDataset` always converts the ScanNet density channel to alpha with
+  its ReLU-based formula after loading the scene data.
+- The public NeRF-RPN and public NeRF-MAE releases show the same pattern:
+  Front3D example scripts include `--normalize_density`, while the ScanNet
+  dataset class performs a ScanNet-specific conversion independent of the CLI
+  flag.
 
 Patch:
 - Added a `NORMALIZE_DENSITY` env switch to `train_fcos_pretrained.sh` and
   `test_fcos_pretrained.sh`.
-- Set `NORMALIZE_DENSITY=0` by default in `abci3_scannet_transfer_fcos.pbs`.
-- Front3D/default behavior remains normalized unless explicitly overridden.
+- Kept `NORMALIZE_DENSITY=1` as the ScanNet PBS default for provenance
+  consistency; the flag is retained for non-ScanNet/general wrappers where it
+  is operational.
 
 Rationale:
-- This is not eval-only because existing ScanNet FCOS checkpoints were trained
-  with normalized density. Eval-only off would create a train/eval mismatch.
-- Re-run train+eval for ScanNet with `NORMALIZE_DENSITY=0`.
+- The earlier concern that ScanNet needed a non-normalized rerun was too strong.
+- A true raw-density ScanNet ablation would require changing
+  `ScanNetRPNDataset`; simply omitting `--normalize_density` from the CLI does
+  not create a distinct ScanNet protocol.
 
-Submitted jobs:
+Submitted and canceled jobs:
 
 | condition | job | normalize_density |
 |---|---:|---:|
@@ -5104,12 +5108,12 @@ Retry jobs:
 | `surface_cosine_jitter_e300` | `1897283.pbs1` | `1897296.pbs1` | 0 |
 
 Status:
-- Retry jobs are running on `rt_HG` as of 2026-06-11 16:39 JST.
-- Worker logs show training has reached epoch 1-2, so checkpoint loading is past
-  the previous failure point.
+- Retry jobs reached epoch 1-2, confirming the checkpoint path fix, but were
+  canceled after the corrected audit showed the CLI flag does not change
+  ScanNet density handling.
 
 Decision:
-- Treat the existing ScanNet table as legacy normalized-density triage until the
-  non-normalized reruns finish.
-- Use the non-normalized table for paper-facing ScanNet claims if the official
-  ScanNet protocol requires density normalization off.
+- Use the existing ScanNet triage table as the current paper-facing ScanNet
+  evidence unless a different protocol issue is identified.
+- Do not spend compute on ScanNet `normalize_density` on/off reruns unless we
+  intentionally implement a raw-density ScanNet dataset ablation.
