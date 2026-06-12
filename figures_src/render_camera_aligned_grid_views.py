@@ -73,7 +73,9 @@ def world_to_grid(world_points: torch.Tensor, meta: dict[str, np.ndarray | float
     bbox_max = torch.as_tensor(meta["bbox_max"], dtype=world_points.dtype, device=world_points.device)
     scale = torch.as_tensor(float(meta["scale"]), dtype=world_points.dtype, device=world_points.device)
     offset = torch.as_tensor(meta["offset"], dtype=world_points.dtype, device=world_points.device)
-    # world = ([pos_x, pos_y, pos_z] - [offset_y, offset_z, offset_x]) / scale
+    # Inverse of the point-position part of proposals2ngp.py's non-mitsuba
+    # path. The y/z sign flip there applies to orientation columns, not to
+    # the translation column used for point locations.
     off = torch.stack([offset[1], offset[2], offset[0]])
     pos = world_points * scale + off
     diag = bbox_max - bbox_min
@@ -162,7 +164,14 @@ def render_camera_aligned(
         opacity = weights.sum(dim=1).clamp(0.0, 1.0)
         color = (weights[..., None] * sampled[..., :3].clamp(0.0, 1.0)).sum(dim=1)
         depth = (weights * ts_base[None, :]).sum(dim=1) / opacity.clamp_min(1e-6)
-        rgb = color + (1.0 - opacity[:, None])
+        surface_rgb = color / opacity[:, None].clamp_min(1e-4)
+        # Figure-facing grid view: the extracted radiance-density grid is much
+        # sparser than the original NGP render. Compositing directly over white
+        # makes far/low-density structure disappear, so use an opacity matte
+        # over a very light cool background while preserving sampled RGB.
+        matte = (opacity * 1.75).clamp(0.0, 1.0).pow(0.55)
+        bg = torch.tensor([0.93, 0.95, 0.97], dtype=torch.float32)
+        rgb = surface_rgb.clamp(0.0, 1.0) * matte[:, None] + bg[None, :] * (1.0 - matte[:, None])
         rgb_out[y0:y1] = rgb.reshape(y1 - y0, width, 3)
         opacity_out[y0:y1] = opacity.reshape(y1 - y0, width)
         depth_out[y0:y1] = depth.reshape(y1 - y0, width)
@@ -175,14 +184,20 @@ def save_rgb(path: Path, arr: np.ndarray) -> None:
 
 
 def save_alpha(path: Path, opacity: np.ndarray, depth: np.ndarray) -> None:
-    # Figure-friendly blue structure view with depth shading. Near opaque
-    # surfaces become saturated blue; farther surfaces fade to pale blue.
-    alpha_strength = 0.92 * (np.clip(opacity, 0.0, 1.0) ** 0.58)
+    # Figure-friendly blue structure view with depth shading. Keep far surfaces
+    # blue instead of fading them to white; otherwise the room depth disappears
+    # in the camera-aligned view.
+    alpha_strength = np.clip(1.65 * (np.clip(opacity, 0.0, 1.0) ** 0.46), 0.0, 1.0)
     depth = np.clip(depth, 0.0, 1.0)
-    near = np.array([0.04, 0.22, 0.68], dtype=np.float32)
-    far = np.array([0.62, 0.82, 1.00], dtype=np.float32)
+    valid = opacity > 0.015
+    if np.any(valid):
+        lo, hi = np.percentile(depth[valid], [2, 98])
+        depth = np.clip((depth - lo) / max(hi - lo, 1e-6), 0.0, 1.0)
+    near = np.array([0.03, 0.19, 0.62], dtype=np.float32)
+    far = np.array([0.18, 0.55, 1.00], dtype=np.float32)
     structure_color = near[None, None, :] * (1.0 - depth[..., None]) + far[None, None, :] * depth[..., None]
-    img = (1.0 - alpha_strength[..., None]) + alpha_strength[..., None] * structure_color
+    bg = np.array([0.93, 0.97, 1.00], dtype=np.float32)
+    img = bg[None, None, :] * (1.0 - alpha_strength[..., None]) + alpha_strength[..., None] * structure_color
     save_rgb(path, img)
 
 
@@ -208,6 +223,60 @@ def make_quad(render_rgb_path: Path, grid_rgba_path: Path, alpha_path: Path, bbo
     sheet.save(out_path)
 
 
+def save_crop_set(
+    render_rgb_path: Path,
+    grid_rgba_path: Path,
+    alpha_path: Path,
+    bbox_path: Path,
+    scene: str,
+    frame: str,
+    crop: tuple[int, int, int, int],
+    out: Path,
+) -> None:
+    """Save a paper-facing crop that keeps the render/grid panels aligned."""
+    source_paths = {
+        "render_rgb": render_rgb_path,
+        "grid_rgba": grid_rgba_path,
+        "grid_alpha": alpha_path,
+        "bbox": bbox_path,
+    }
+    cropped = {}
+    for key, path in source_paths.items():
+        crop_path = out / f"fig1_{scene}_{frame}_{key}_crop_sofa_wall.png"
+        Image.open(path).convert("RGB").crop(crop).save(crop_path)
+        cropped[key] = crop_path
+
+    thumb_w, thumb_h = 260, 320
+    margin, label_h = 16, 30
+    labels = [
+        ("render_rgb", "rendered RGB crop"),
+        ("grid_rgba", "grid RGBA crop"),
+        ("grid_alpha", "grid alpha / structure crop"),
+        ("bbox", "rendered RGB + boxes crop"),
+    ]
+    sheet = Image.new("RGB", (thumb_w * 2 + margin * 3, (thumb_h + label_h) * 2 + margin * 3), "white")
+    draw = ImageDraw.Draw(sheet)
+    for i, (key, label) in enumerate(labels):
+        img = Image.open(cropped[key]).convert("RGB")
+        img = ImageOps.contain(img, (thumb_w, thumb_h), Image.BILINEAR)
+        row, col = divmod(i, 2)
+        x = margin + col * (thumb_w + margin)
+        y = margin + row * (thumb_h + label_h + margin)
+        bg = Image.new("RGB", (thumb_w, thumb_h), (248, 248, 248))
+        bg.paste(img, ((thumb_w - img.width) // 2, (thumb_h - img.height) // 2))
+        sheet.paste(bg, (x, y))
+        draw.rectangle([x, y, x + thumb_w - 1, y + thumb_h - 1], outline=(210, 210, 210), width=1)
+        draw.text((x + 4, y + thumb_h + 7), label, fill=(25, 25, 25))
+    sheet.save(out / f"fig1_{scene}_{frame}_render_rgb_grid_rgba_alpha_bbox_quad_crop_sofa_wall.png")
+
+
+def parse_crop(raw: str) -> tuple[int, int, int, int]:
+    vals = [int(v.strip()) for v in raw.split(",")]
+    if len(vals) != 4:
+        raise ValueError("--crop must be formatted as left,top,right,bottom")
+    return vals[0], vals[1], vals[2], vals[3]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--scene", default="3dfront_0131_00")
@@ -224,6 +293,11 @@ def main() -> None:
     parser.add_argument("--tile-rows", type=int, default=24)
     parser.add_argument("--opacity-scale", type=float, default=0.45)
     parser.add_argument("--alpha-threshold", type=float, default=0.015)
+    parser.add_argument(
+        "--crop",
+        default="370,25,640,385",
+        help="Aligned crop for paper-facing panels, formatted left,top,right,bottom. Empty string disables crops.",
+    )
     args = parser.parse_args()
 
     scene_root = Path(args.render_root) / args.scene
@@ -263,6 +337,17 @@ def main() -> None:
             bbox_path,
             out / f"fig1_{args.scene}_{args.frame}_render_rgb_grid_rgba_alpha_bbox_quad.png",
         )
+        if args.crop:
+            save_crop_set(
+                render_rgb_path=render_rgb_path,
+                grid_rgba_path=rgba_path,
+                alpha_path=alpha_path,
+                bbox_path=bbox_path,
+                scene=args.scene,
+                frame=args.frame,
+                crop=parse_crop(args.crop),
+                out=out,
+            )
     print(f"wrote {rgba_path}")
     print(f"wrote {alpha_path}")
 

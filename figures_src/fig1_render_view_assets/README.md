@@ -43,6 +43,11 @@ final/fig1_3dfront_0131_00_0180_grid_alpha_same_camera.png  # blue, depth-shaded
 final/fig1_3dfront_0131_00_0180_render_rgb_bbox_furniture.png
 final/fig1_3dfront_0131_00_0180_render_rgb_and_bbox_furniture_pair.png
 final/fig1_3dfront_0131_00_0180_render_rgb_grid_rgba_alpha_bbox_quad.png
+final/fig1_3dfront_0131_00_0180_render_rgb_crop_sofa_wall.png
+final/fig1_3dfront_0131_00_0180_grid_rgba_crop_sofa_wall.png
+final/fig1_3dfront_0131_00_0180_grid_alpha_crop_sofa_wall.png
+final/fig1_3dfront_0131_00_0180_bbox_crop_sofa_wall.png
+final/fig1_3dfront_0131_00_0180_render_rgb_grid_rgba_alpha_bbox_quad_crop_sofa_wall.png
 ```
 
 Backup assets:
@@ -96,9 +101,10 @@ camera as the selected rendered RGB view:
 python figures_src/render_camera_aligned_grid_views.py \
   --scene 3dfront_0131_00 \
   --frame 0180 \
-  --samples 192 \
-  --opacity-scale 0.18 \
-  --alpha-threshold 0.012
+  --samples 256 \
+  --opacity-scale 1.15 \
+  --alpha-threshold 0.0 \
+  --crop 370,25,640,385
 ```
 
 ## Notes
@@ -114,6 +120,11 @@ python figures_src/render_camera_aligned_grid_views.py \
   strongly structure appears, while expected ray depth changes the blue tone.
   This avoids reading voxel/grid texture as the main signal and makes the
   structure-first concept clearer.
+- The paper-facing Fig. 1 asset should use the `crop_sofa_wall` outputs. The
+  full camera view is kept for auditability, but the extracted grid contains
+  low-density artifacts on the left wall of this frame. Cropping to the sofa and
+  back-wall region follows the NeRF-MAE teaser/Fig. 5 style: show a clean
+  interpretable part of the actual scene rather than the whole room.
 - For predicted proposal visualization exactly like NeRF-RPN, use `nerf_rpn/scripts/proposals2ngp.py` to inject proposal boxes into `transforms.json`, then render through the instant-ngp fork referenced in the NeRF-MAE README. That is heavier and not needed for the Fig. 1 conceptual render.
 - Candidate sheets are under `candidates/`; raw grid render assets remain under
   `debug/grid_volume_views/` for debugging and structure/alpha illustrations
