@@ -55,18 +55,29 @@ nerf_rpn/model/rotated_iou/cuda_op/build/
 *.egg-info/
 
 # --- Paper figure assets (figures_src/) ---
-# Track only */final/ outputs; ignore candidates, debug, source renders, staging.
+# Ignore intermediate/source assets; keep result-ready image dirs tracked.
 figures_src/**/candidates/
+figures_src/**/candidates_*/
 figures_src/**/debug/
 figures_src/**/nerf_rpn_front3d_nerf_data/
 figures_src/**/front3d_render_data/
-figures_src/**/final_frame*/
+figures_src/**/scannet_render_data/
 
 figures_src/**/*.jpg
 figures_src/**/*.jpeg
 figures_src/**/*.png
+# Result-ready outputs (paper figures, shortlists, clear-win panels)
 !figures_src/**/final/**/*.jpg
 !figures_src/**/final/**/*.jpeg
 !figures_src/**/final/**/*.png
+!figures_src/**/final_*/**/*.jpg
+!figures_src/**/final_*/**/*.jpeg
+!figures_src/**/final_*/**/*.png
+!figures_src/**/paper_shortlist_*/**/*.jpg
+!figures_src/**/paper_shortlist_*/**/*.jpeg
+!figures_src/**/paper_shortlist_*/**/*.png
+!figures_src/**/readable_win_candidates/**/*.jpg
+!figures_src/**/readable_win_candidates/**/*.jpeg
+!figures_src/**/readable_win_candidates/**/*.png
 
 figures_src/**/transforms.json
