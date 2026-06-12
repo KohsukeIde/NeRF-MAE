@@ -1,4 +1,10 @@
-# Fig. 1 Front3D Volume Render Asset
+# Fig. 1 Front3D Grid Visualization Asset
+
+Status: **superseded for the main Fig. 1 render panel**.
+
+Use `../fig1_render_view_assets/final/` for the NeRF-MAE-style rendered RGB
+view and bbox overlay. The assets in this directory visualize the extracted
+`rgbsigma` grid and are kept only as auxiliary structure/alpha/debug material.
 
 Selected scene:
 - `3dfront_0131_00`
@@ -25,17 +31,17 @@ Rendered assets:
   panel included in the NeRF-MAE demo assets.
 
 View policy:
-- This directory currently contains the **external partial-volume view**: a
-  clean, cropped view from outside the released `rgbsigma` grid. It is intended
-  for the Fig. 1 concept panel.
+- This directory contains an **external partial-volume grid view**: a cropped
+  view from outside the released `rgbsigma` grid. It is no longer intended as
+  the main Fig. 1 rendered RGB panel.
 - A second **test-render-aligned view** would be useful for side-by-side
   comparison with GT/test RGB renders. It is not generated here because the
   current workspace does not contain the required rendered RGB image,
   `transforms.json`, or trained Instant-NGP checkpoint for this Front3D scene.
   If those artifacts become available, generate that view as a separate asset
   rather than replacing this external view.
-- If a real rendered RGB view is available, use it for the Fig. 1 visual panel
-  and keep this grid visualization as an auxiliary structure/alpha illustration.
+- A real rendered RGB view is now available from the NeRF-RPN `front3d_nerf_data`
+  release, so the main Fig. 1 panel should use `../fig1_render_view_assets/`.
   The released-grid visualization is visibly noisier than the NeRF-MAE
   render-style panel and should not be treated as a photorealistic render.
 
