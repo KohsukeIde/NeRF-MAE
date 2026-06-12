@@ -24,7 +24,53 @@ def density_to_alpha(density: np.ndarray) -> np.ndarray:
     return np.clip(1.0 - np.exp(-np.exp(density) / 100.0), 0.0, 1.0)
 
 
-def load_rgba_volume(feature_path: Path) -> tuple[torch.Tensor, dict[str, np.ndarray | float | bool]]:
+def connect_rgba_volume(
+    volume: torch.Tensor,
+    kernel_size: int,
+    iterations: int,
+    alpha_gain: float,
+    rgb_fill_kernel: int,
+) -> torch.Tensor:
+    """Connect sparse neighboring voxels for figure-facing grid rendering.
+
+    The released `rgbsigma` grid is an extracted radiance-density grid, not a
+    full instant-ngp render. Thin walls/furniture may have small holes at the
+    voxel level; direct alpha compositing over a white background makes those
+    gaps look like missing depth. We close those small gaps in the 3D volume
+    before ray marching, and fill RGB in newly occupied voxels from nearby
+    alpha-weighted colors.
+    """
+    if iterations <= 0:
+        return volume
+    if kernel_size % 2 != 1 or rgb_fill_kernel % 2 != 1:
+        raise ValueError("connection kernels must be odd")
+
+    rgb = volume[:, :3]
+    alpha = volume[:, 3:4]
+
+    connected = alpha
+    padding = kernel_size // 2
+    for _ in range(iterations):
+        connected = F.max_pool3d(connected, kernel_size=kernel_size, stride=1, padding=padding)
+    connected = torch.maximum(alpha, (connected * alpha_gain).clamp(0.0, 1.0))
+
+    fill_padding = rgb_fill_kernel // 2
+    color_num = F.avg_pool3d(rgb * alpha, kernel_size=rgb_fill_kernel, stride=1, padding=fill_padding)
+    color_den = F.avg_pool3d(alpha, kernel_size=rgb_fill_kernel, stride=1, padding=fill_padding)
+    local_rgb = color_num / color_den.clamp_min(1e-6)
+    fill_mask = ((connected > alpha) & (color_den > 1e-5)).expand_as(rgb)
+    rgb = torch.where(fill_mask, local_rgb, rgb)
+    return torch.cat([rgb.clamp(0.0, 1.0), connected.clamp(0.0, 1.0)], dim=1)
+
+
+def load_rgba_volume(
+    feature_path: Path,
+    connect_voxels: bool = True,
+    connect_kernel: int = 5,
+    connect_iterations: int = 2,
+    connect_alpha_gain: float = 0.75,
+    rgb_fill_kernel: int = 7,
+) -> tuple[torch.Tensor, dict[str, np.ndarray | float | bool]]:
     with np.load(feature_path) as z:
         rgbsigma = z["rgbsigma"].astype(np.float32)
         meta = {
@@ -41,7 +87,16 @@ def load_rgba_volume(feature_path: Path) -> tuple[torch.Tensor, dict[str, np.nda
     # grid_sample expects [N, C, D, H, W], with normalized grid order x, y, z.
     # The source rgbsigma is [W, L, H, C], so spatial dims become [H, L, W].
     volume = torch.from_numpy(rgba).permute(3, 2, 1, 0).unsqueeze(0).contiguous()
-    return volume.float(), meta
+    volume = volume.float()
+    if connect_voxels:
+        volume = connect_rgba_volume(
+            volume,
+            kernel_size=connect_kernel,
+            iterations=connect_iterations,
+            alpha_gain=connect_alpha_gain,
+            rgb_fill_kernel=rgb_fill_kernel,
+        )
+    return volume, meta
 
 
 def grid_to_world(grid_points: np.ndarray, meta: dict[str, np.ndarray | float | bool]) -> np.ndarray:
@@ -178,6 +233,46 @@ def render_camera_aligned(
     return rgb_out.numpy(), opacity_out.numpy(), depth_out.numpy()
 
 
+def connect_screen_gaps(
+    rgb: np.ndarray,
+    opacity: np.ndarray,
+    depth: np.ndarray,
+    kernel_size: int,
+    iterations: int,
+    opacity_gain: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Fill screen-space gaps left by sparse voxel footprints."""
+    if iterations <= 0:
+        return rgb, opacity, depth
+    if kernel_size % 2 != 1:
+        raise ValueError("screen connection kernel must be odd")
+
+    rgb_t = torch.from_numpy(rgb).permute(2, 0, 1).unsqueeze(0).float()
+    op_t = torch.from_numpy(opacity).unsqueeze(0).unsqueeze(0).float()
+    depth_t = torch.from_numpy(depth).unsqueeze(0).unsqueeze(0).float()
+
+    padding = kernel_size // 2
+    connected = op_t
+    for _ in range(iterations):
+        connected = F.max_pool2d(connected, kernel_size=kernel_size, stride=1, padding=padding)
+    connected = torch.maximum(op_t, (connected * opacity_gain).clamp(0.0, 1.0))
+
+    color_num = F.avg_pool2d(rgb_t * op_t, kernel_size=kernel_size, stride=1, padding=padding)
+    color_den = F.avg_pool2d(op_t, kernel_size=kernel_size, stride=1, padding=padding)
+    local_rgb = color_num / color_den.clamp_min(1e-6)
+    depth_num = F.avg_pool2d(depth_t * op_t, kernel_size=kernel_size, stride=1, padding=padding)
+    local_depth = depth_num / color_den.clamp_min(1e-6)
+
+    fill = ((connected > op_t) & (color_den > 1e-4)).expand_as(rgb_t)
+    rgb_t = torch.where(fill, local_rgb, rgb_t)
+    depth_t = torch.where(fill[:, :1], local_depth, depth_t)
+    return (
+        rgb_t.squeeze(0).permute(1, 2, 0).numpy().clip(0.0, 1.0),
+        connected.squeeze(0).squeeze(0).numpy().clip(0.0, 1.0),
+        depth_t.squeeze(0).squeeze(0).numpy().clip(0.0, 1.0),
+    )
+
+
 def save_rgb(path: Path, arr: np.ndarray) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     Image.fromarray((np.clip(arr, 0.0, 1.0) * 255).astype(np.uint8)).save(path)
@@ -291,11 +386,19 @@ def main() -> None:
     parser.add_argument("--height", type=int, default=480)
     parser.add_argument("--samples", type=int, default=192)
     parser.add_argument("--tile-rows", type=int, default=24)
-    parser.add_argument("--opacity-scale", type=float, default=0.45)
-    parser.add_argument("--alpha-threshold", type=float, default=0.015)
+    parser.add_argument("--opacity-scale", type=float, default=0.75)
+    parser.add_argument("--alpha-threshold", type=float, default=0.0)
+    parser.add_argument("--connect-voxels", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--connect-kernel", type=int, default=5)
+    parser.add_argument("--connect-iterations", type=int, default=2)
+    parser.add_argument("--connect-alpha-gain", type=float, default=0.75)
+    parser.add_argument("--rgb-fill-kernel", type=int, default=7)
+    parser.add_argument("--screen-connect-kernel", type=int, default=41)
+    parser.add_argument("--screen-connect-iterations", type=int, default=2)
+    parser.add_argument("--screen-connect-opacity-gain", type=float, default=1.0)
     parser.add_argument(
         "--crop",
-        default="370,25,640,385",
+        default="",
         help="Aligned crop for paper-facing panels, formatted left,top,right,bottom. Empty string disables crops.",
     )
     args = parser.parse_args()
@@ -307,7 +410,14 @@ def main() -> None:
             f"Missing {transforms_path}. Run figures_src/download_front3d_render_scene.py --scene {args.scene} first."
         )
     transforms = json.loads(transforms_path.read_text())
-    volume, meta = load_rgba_volume(Path(args.feature_dir) / f"{args.scene}.npz")
+    volume, meta = load_rgba_volume(
+        Path(args.feature_dir) / f"{args.scene}.npz",
+        connect_voxels=args.connect_voxels,
+        connect_kernel=args.connect_kernel,
+        connect_iterations=args.connect_iterations,
+        connect_alpha_gain=args.connect_alpha_gain,
+        rgb_fill_kernel=args.rgb_fill_kernel,
+    )
     grid_rgb, opacity, depth = render_camera_aligned(
         volume=volume,
         meta=meta,
@@ -319,6 +429,14 @@ def main() -> None:
         tile_rows=args.tile_rows,
         opacity_scale=args.opacity_scale,
         alpha_threshold=args.alpha_threshold,
+    )
+    grid_rgb, opacity, depth = connect_screen_gaps(
+        grid_rgb,
+        opacity,
+        depth,
+        kernel_size=args.screen_connect_kernel,
+        iterations=args.screen_connect_iterations,
+        opacity_gain=args.screen_connect_opacity_gain,
     )
 
     out = Path(args.output_dir)

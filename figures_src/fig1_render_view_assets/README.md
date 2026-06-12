@@ -43,11 +43,6 @@ final/fig1_3dfront_0131_00_0180_grid_alpha_same_camera.png  # blue, depth-shaded
 final/fig1_3dfront_0131_00_0180_render_rgb_bbox_furniture.png
 final/fig1_3dfront_0131_00_0180_render_rgb_and_bbox_furniture_pair.png
 final/fig1_3dfront_0131_00_0180_render_rgb_grid_rgba_alpha_bbox_quad.png
-final/fig1_3dfront_0131_00_0180_render_rgb_crop_sofa_wall.png
-final/fig1_3dfront_0131_00_0180_grid_rgba_crop_sofa_wall.png
-final/fig1_3dfront_0131_00_0180_grid_alpha_crop_sofa_wall.png
-final/fig1_3dfront_0131_00_0180_bbox_crop_sofa_wall.png
-final/fig1_3dfront_0131_00_0180_render_rgb_grid_rgba_alpha_bbox_quad_crop_sofa_wall.png
 ```
 
 Backup assets:
@@ -102,9 +97,13 @@ python figures_src/render_camera_aligned_grid_views.py \
   --scene 3dfront_0131_00 \
   --frame 0180 \
   --samples 256 \
-  --opacity-scale 1.15 \
+  --opacity-scale 0.75 \
   --alpha-threshold 0.0 \
-  --crop 370,25,640,385
+  --connect-voxels \
+  --connect-kernel 5 \
+  --connect-iterations 2 \
+  --screen-connect-kernel 41 \
+  --screen-connect-iterations 2
 ```
 
 ## Notes
@@ -120,11 +119,12 @@ python figures_src/render_camera_aligned_grid_views.py \
   strongly structure appears, while expected ray depth changes the blue tone.
   This avoids reading voxel/grid texture as the main signal and makes the
   structure-first concept clearer.
-- The paper-facing Fig. 1 asset should use the `crop_sofa_wall` outputs. The
-  full camera view is kept for auditability, but the extracted grid contains
-  low-density artifacts on the left wall of this frame. Cropping to the sofa and
-  back-wall region follows the NeRF-MAE teaser/Fig. 5 style: show a clean
-  interpretable part of the actual scene rather than the whole room.
+- The grid panels use voxel-connection before and after ray marching: small
+  gaps in the sparse extracted alpha grid are closed with local 3D max-pooling,
+  RGB for newly connected voxels is filled by nearby alpha-weighted colors, and
+  remaining screen-space voxel footprint gaps are connected before saving the
+  figure. This keeps the full render-view panel instead of hiding sparse-grid
+  artifacts with a crop.
 - For predicted proposal visualization exactly like NeRF-RPN, use `nerf_rpn/scripts/proposals2ngp.py` to inject proposal boxes into `transforms.json`, then render through the instant-ngp fork referenced in the NeRF-MAE README. That is heavier and not needed for the Fig. 1 conceptual render.
 - Candidate sheets are under `candidates/`; raw grid render assets remain under
   `debug/grid_volume_views/` for debugging and structure/alpha illustrations

@@ -10,6 +10,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageOps
 
 from render_camera_aligned_grid_views import (
+    connect_screen_gaps,
     load_rgba_volume,
     render_camera_aligned,
     save_alpha,
@@ -61,8 +62,11 @@ def main() -> None:
     parser.add_argument("--height", type=int, default=480)
     parser.add_argument("--samples", type=int, default=160)
     parser.add_argument("--tile-rows", type=int, default=24)
-    parser.add_argument("--opacity-scale", type=float, default=0.18)
-    parser.add_argument("--alpha-threshold", type=float, default=0.012)
+    parser.add_argument("--opacity-scale", type=float, default=0.75)
+    parser.add_argument("--alpha-threshold", type=float, default=0.0)
+    parser.add_argument("--screen-connect-kernel", type=int, default=41)
+    parser.add_argument("--screen-connect-iterations", type=int, default=2)
+    parser.add_argument("--screen-connect-opacity-gain", type=float, default=1.0)
     args = parser.parse_args()
 
     frames = args.frame or DEFAULT_FRAMES
@@ -95,6 +99,14 @@ def main() -> None:
             tile_rows=args.tile_rows,
             opacity_scale=args.opacity_scale,
             alpha_threshold=args.alpha_threshold,
+        )
+        grid_rgb, opacity, depth = connect_screen_gaps(
+            grid_rgb,
+            opacity,
+            depth,
+            kernel_size=args.screen_connect_kernel,
+            iterations=args.screen_connect_iterations,
+            opacity_gain=args.screen_connect_opacity_gain,
         )
         save_rgb(rgba_out, grid_rgb)
         save_alpha(alpha_out, opacity, depth)
