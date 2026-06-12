@@ -10,6 +10,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageOps
 
 from render_camera_aligned_grid_views import (
+    composite_grid_over_render_background,
     connect_screen_gaps,
     load_rgba_volume,
     render_camera_aligned,
@@ -64,9 +65,14 @@ def main() -> None:
     parser.add_argument("--tile-rows", type=int, default=24)
     parser.add_argument("--opacity-scale", type=float, default=0.75)
     parser.add_argument("--alpha-threshold", type=float, default=0.0)
-    parser.add_argument("--screen-connect-kernel", type=int, default=41)
-    parser.add_argument("--screen-connect-iterations", type=int, default=2)
-    parser.add_argument("--screen-connect-opacity-gain", type=float, default=1.0)
+    parser.add_argument("--screen-connect-kernel", type=int, default=31)
+    parser.add_argument("--screen-connect-iterations", type=int, default=1)
+    parser.add_argument("--screen-connect-opacity-gain", type=float, default=0.9)
+    parser.add_argument("--screen-fill-opacity-threshold", type=float, default=0.18)
+    parser.add_argument("--alpha-screen-connect-kernel", type=int, default=71)
+    parser.add_argument("--alpha-screen-connect-iterations", type=int, default=2)
+    parser.add_argument("--alpha-screen-connect-opacity-gain", type=float, default=0.85)
+    parser.add_argument("--alpha-screen-fill-opacity-threshold", type=float, default=0.35)
     args = parser.parse_args()
 
     frames = args.frame or DEFAULT_FRAMES
@@ -88,7 +94,7 @@ def main() -> None:
         rgba_out = out / f"{args.scene}_{frame}_grid_rgba_same_camera.png"
         alpha_out = out / f"{args.scene}_{frame}_grid_alpha_blue_depth_same_camera.png"
         Image.open(render_path).convert("RGB").save(rgb_out)
-        grid_rgb, opacity, depth = render_camera_aligned(
+        grid_rgb_raw, opacity_raw, depth_raw = render_camera_aligned(
             volume=volume,
             meta=meta,
             transforms=transforms,
@@ -101,15 +107,26 @@ def main() -> None:
             alpha_threshold=args.alpha_threshold,
         )
         grid_rgb, opacity, depth = connect_screen_gaps(
-            grid_rgb,
-            opacity,
-            depth,
+            grid_rgb_raw,
+            opacity_raw,
+            depth_raw,
             kernel_size=args.screen_connect_kernel,
             iterations=args.screen_connect_iterations,
             opacity_gain=args.screen_connect_opacity_gain,
+            fill_opacity_threshold=args.screen_fill_opacity_threshold,
         )
+        _, opacity_alpha, depth_alpha = connect_screen_gaps(
+            grid_rgb_raw,
+            opacity_raw,
+            depth_raw,
+            kernel_size=args.alpha_screen_connect_kernel,
+            iterations=args.alpha_screen_connect_iterations,
+            opacity_gain=args.alpha_screen_connect_opacity_gain,
+            fill_opacity_threshold=args.alpha_screen_fill_opacity_threshold,
+        )
+        grid_rgb = composite_grid_over_render_background(grid_rgb, opacity, rgb_out)
         save_rgb(rgba_out, grid_rgb)
-        save_alpha(alpha_out, opacity, depth)
+        save_alpha(alpha_out, opacity_alpha, depth_alpha)
         rows.append((frame, rgb_out, rgba_out, alpha_out))
     make_sheet(rows, out / f"{args.scene}_camera_aligned_view_candidates.png")
 

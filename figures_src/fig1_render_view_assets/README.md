@@ -99,11 +99,13 @@ python figures_src/render_camera_aligned_grid_views.py \
   --samples 256 \
   --opacity-scale 0.75 \
   --alpha-threshold 0.0 \
-  --connect-voxels \
-  --connect-kernel 5 \
-  --connect-iterations 2 \
-  --screen-connect-kernel 41 \
-  --screen-connect-iterations 2
+  --no-connect-voxels \
+  --screen-connect-kernel 31 \
+  --screen-connect-iterations 1 \
+  --screen-fill-opacity-threshold 0.18 \
+  --alpha-screen-connect-kernel 71 \
+  --alpha-screen-connect-iterations 2 \
+  --alpha-screen-fill-opacity-threshold 0.35
 ```
 
 ## Notes
@@ -119,12 +121,15 @@ python figures_src/render_camera_aligned_grid_views.py \
   strongly structure appears, while expected ray depth changes the blue tone.
   This avoids reading voxel/grid texture as the main signal and makes the
   structure-first concept clearer.
-- The grid panels use voxel-connection before and after ray marching: small
-  gaps in the sparse extracted alpha grid are closed with local 3D max-pooling,
-  RGB for newly connected voxels is filled by nearby alpha-weighted colors, and
-  remaining screen-space voxel footprint gaps are connected before saving the
-  figure. This keeps the full render-view panel instead of hiding sparse-grid
-  artifacts with a crop.
+- The grid RGBA panel preserves the camera-aligned grid color where the grid is
+  opaque, but composites transparent/low-opacity regions over the matching
+  rendered RGB view instead of a blank white background. This prevents missing
+  grid opacity from reading as white geometry.
+- We do not dilate all visible voxels by default because that degrades
+  foreground furniture quality.
+- The alpha panel uses a separate, stronger screen-space opacity fill and a
+  lighter blue palette. This is a figure-facing structure visualization, not a
+  separate photorealistic render.
 - For predicted proposal visualization exactly like NeRF-RPN, use `nerf_rpn/scripts/proposals2ngp.py` to inject proposal boxes into `transforms.json`, then render through the instant-ngp fork referenced in the NeRF-MAE README. That is heavier and not needed for the Fig. 1 conceptual render.
 - Candidate sheets are under `candidates/`; raw grid render assets remain under
   `debug/grid_volume_views/` for debugging and structure/alpha illustrations

@@ -65,7 +65,7 @@ def connect_rgba_volume(
 
 def load_rgba_volume(
     feature_path: Path,
-    connect_voxels: bool = True,
+    connect_voxels: bool = False,
     connect_kernel: int = 5,
     connect_iterations: int = 2,
     connect_alpha_gain: float = 0.75,
@@ -240,8 +240,14 @@ def connect_screen_gaps(
     kernel_size: int,
     iterations: int,
     opacity_gain: float,
+    fill_opacity_threshold: float,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Fill screen-space gaps left by sparse voxel footprints."""
+    """Fill only low-opacity screen-space gaps left by sparse voxel footprints.
+
+    This intentionally preserves existing high-opacity pixels. Strong global
+    dilation makes the foreground look worse, so the fill is restricted to
+    white/transparent holes that have nearby occupied evidence.
+    """
     if iterations <= 0:
         return rgb, opacity, depth
     if kernel_size % 2 != 1:
@@ -255,7 +261,6 @@ def connect_screen_gaps(
     connected = op_t
     for _ in range(iterations):
         connected = F.max_pool2d(connected, kernel_size=kernel_size, stride=1, padding=padding)
-    connected = torch.maximum(op_t, (connected * opacity_gain).clamp(0.0, 1.0))
 
     color_num = F.avg_pool2d(rgb_t * op_t, kernel_size=kernel_size, stride=1, padding=padding)
     color_den = F.avg_pool2d(op_t, kernel_size=kernel_size, stride=1, padding=padding)
@@ -263,7 +268,9 @@ def connect_screen_gaps(
     depth_num = F.avg_pool2d(depth_t * op_t, kernel_size=kernel_size, stride=1, padding=padding)
     local_depth = depth_num / color_den.clamp_min(1e-6)
 
-    fill = ((connected > op_t) & (color_den > 1e-4)).expand_as(rgb_t)
+    fill = ((op_t < fill_opacity_threshold) & (connected > fill_opacity_threshold) & (color_den > 1e-4))
+    connected = torch.where(fill, torch.maximum(op_t, (connected * opacity_gain).clamp(0.0, 1.0)), op_t)
+    fill = fill.expand_as(rgb_t)
     rgb_t = torch.where(fill, local_rgb, rgb_t)
     depth_t = torch.where(fill[:, :1], local_depth, depth_t)
     return (
@@ -278,27 +285,48 @@ def save_rgb(path: Path, arr: np.ndarray) -> None:
     Image.fromarray((np.clip(arr, 0.0, 1.0) * 255).astype(np.uint8)).save(path)
 
 
+def composite_grid_over_render_background(grid_rgb: np.ndarray, opacity: np.ndarray, render_rgb_path: Path) -> np.ndarray:
+    """Use the matching real render as the matte background for grid RGBA.
+
+    The extracted radiance-density grid has low-opacity holes that become
+    white if rendered over a blank background. For a figure-facing same-camera
+    view, show grid color where the grid has opacity and let the corresponding
+    released render show through where the grid is transparent.
+    """
+    if not render_rgb_path.exists():
+        return grid_rgb
+    h, w = opacity.shape
+    render_bg = Image.open(render_rgb_path).convert("RGB").resize((w, h), Image.BILINEAR)
+    render_bg = np.asarray(render_bg).astype(np.float32) / 255.0
+
+    internal_bg = np.array([0.93, 0.95, 0.97], dtype=np.float32)
+    matte = np.clip(opacity * 1.75, 0.0, 1.0) ** 0.55
+    matte_3 = matte[..., None]
+    surface_rgb = (grid_rgb - internal_bg[None, None, :] * (1.0 - matte_3)) / np.maximum(matte_3, 1e-4)
+    surface_rgb = np.clip(surface_rgb, 0.0, 1.0)
+    return surface_rgb * matte_3 + render_bg * (1.0 - matte_3)
+
+
 def save_alpha(path: Path, opacity: np.ndarray, depth: np.ndarray) -> None:
-    # Figure-friendly blue structure view with depth shading. Keep far surfaces
-    # blue instead of fading them to white; otherwise the room depth disappears
-    # in the camera-aligned view.
-    alpha_strength = np.clip(1.65 * (np.clip(opacity, 0.0, 1.0) ** 0.46), 0.0, 1.0)
+    # Figure-friendly blue structure view with depth shading. Keep this lighter
+    # than the raw depth map so Fig. 1 reads as structure, not a saturated mask.
+    alpha_strength = np.clip(0.76 * (np.clip(opacity, 0.0, 1.0) ** 0.64), 0.0, 0.84)
     depth = np.clip(depth, 0.0, 1.0)
     valid = opacity > 0.015
     if np.any(valid):
         lo, hi = np.percentile(depth[valid], [2, 98])
         depth = np.clip((depth - lo) / max(hi - lo, 1e-6), 0.0, 1.0)
-    near = np.array([0.03, 0.19, 0.62], dtype=np.float32)
-    far = np.array([0.18, 0.55, 1.00], dtype=np.float32)
+    near = np.array([0.16, 0.43, 0.92], dtype=np.float32)
+    far = np.array([0.58, 0.84, 1.00], dtype=np.float32)
     structure_color = near[None, None, :] * (1.0 - depth[..., None]) + far[None, None, :] * depth[..., None]
-    bg = np.array([0.93, 0.97, 1.00], dtype=np.float32)
+    bg = np.array([0.90, 0.96, 1.00], dtype=np.float32)
     img = bg[None, None, :] * (1.0 - alpha_strength[..., None]) + alpha_strength[..., None] * structure_color
     save_rgb(path, img)
 
 
 def make_quad(render_rgb_path: Path, grid_rgba_path: Path, alpha_path: Path, bbox_path: Path, out_path: Path) -> None:
     paths = [render_rgb_path, grid_rgba_path, alpha_path, bbox_path]
-    labels = ["rendered RGB", "grid RGBA, same camera", "grid alpha / structure", "rendered RGB + boxes"]
+    labels = ["rendered RGB", "grid RGBA over render", "grid alpha / structure", "rendered RGB + boxes"]
     imgs = [Image.open(p).convert("RGB") for p in paths]
     thumb_w, thumb_h = 360, 270
     imgs = [ImageOps.contain(img, (thumb_w, thumb_h), Image.BILINEAR) for img in imgs]
@@ -388,14 +416,19 @@ def main() -> None:
     parser.add_argument("--tile-rows", type=int, default=24)
     parser.add_argument("--opacity-scale", type=float, default=0.75)
     parser.add_argument("--alpha-threshold", type=float, default=0.0)
-    parser.add_argument("--connect-voxels", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--connect-voxels", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--connect-kernel", type=int, default=5)
     parser.add_argument("--connect-iterations", type=int, default=2)
     parser.add_argument("--connect-alpha-gain", type=float, default=0.75)
     parser.add_argument("--rgb-fill-kernel", type=int, default=7)
-    parser.add_argument("--screen-connect-kernel", type=int, default=41)
-    parser.add_argument("--screen-connect-iterations", type=int, default=2)
-    parser.add_argument("--screen-connect-opacity-gain", type=float, default=1.0)
+    parser.add_argument("--screen-connect-kernel", type=int, default=31)
+    parser.add_argument("--screen-connect-iterations", type=int, default=1)
+    parser.add_argument("--screen-connect-opacity-gain", type=float, default=0.9)
+    parser.add_argument("--screen-fill-opacity-threshold", type=float, default=0.18)
+    parser.add_argument("--alpha-screen-connect-kernel", type=int, default=71)
+    parser.add_argument("--alpha-screen-connect-iterations", type=int, default=2)
+    parser.add_argument("--alpha-screen-connect-opacity-gain", type=float, default=0.85)
+    parser.add_argument("--alpha-screen-fill-opacity-threshold", type=float, default=0.35)
     parser.add_argument(
         "--crop",
         default="",
@@ -418,7 +451,7 @@ def main() -> None:
         connect_alpha_gain=args.connect_alpha_gain,
         rgb_fill_kernel=args.rgb_fill_kernel,
     )
-    grid_rgb, opacity, depth = render_camera_aligned(
+    grid_rgb_raw, opacity_raw, depth_raw = render_camera_aligned(
         volume=volume,
         meta=meta,
         transforms=transforms,
@@ -431,22 +464,33 @@ def main() -> None:
         alpha_threshold=args.alpha_threshold,
     )
     grid_rgb, opacity, depth = connect_screen_gaps(
-        grid_rgb,
-        opacity,
-        depth,
+        grid_rgb_raw,
+        opacity_raw,
+        depth_raw,
         kernel_size=args.screen_connect_kernel,
         iterations=args.screen_connect_iterations,
         opacity_gain=args.screen_connect_opacity_gain,
+        fill_opacity_threshold=args.screen_fill_opacity_threshold,
+    )
+    _, opacity_alpha, depth_alpha = connect_screen_gaps(
+        grid_rgb_raw,
+        opacity_raw,
+        depth_raw,
+        kernel_size=args.alpha_screen_connect_kernel,
+        iterations=args.alpha_screen_connect_iterations,
+        opacity_gain=args.alpha_screen_connect_opacity_gain,
+        fill_opacity_threshold=args.alpha_screen_fill_opacity_threshold,
     )
 
     out = Path(args.output_dir)
     rgba_path = out / f"fig1_{args.scene}_{args.frame}_grid_rgba_same_camera.png"
     alpha_path = out / f"fig1_{args.scene}_{args.frame}_grid_alpha_same_camera.png"
-    save_rgb(rgba_path, grid_rgb)
-    save_alpha(alpha_path, opacity, depth)
-
     render_rgb_path = out / f"fig1_{args.scene}_{args.frame}_render_rgb.png"
     bbox_path = out / f"fig1_{args.scene}_{args.frame}_render_rgb_bbox_furniture.png"
+    grid_rgb = composite_grid_over_render_background(grid_rgb, opacity, render_rgb_path)
+    save_rgb(rgba_path, grid_rgb)
+    save_alpha(alpha_path, opacity_alpha, depth_alpha)
+
     if render_rgb_path.exists() and bbox_path.exists():
         make_quad(
             render_rgb_path,
