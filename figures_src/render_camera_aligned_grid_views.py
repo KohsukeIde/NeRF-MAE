@@ -100,7 +100,7 @@ def render_camera_aligned(
     tile_rows: int,
     opacity_scale: float,
     alpha_threshold: float,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     frames = {Path(f["file_path"]).stem: f for f in transforms["frames"]}
     c2w = torch.as_tensor(frames[frame]["transform_matrix"], dtype=torch.float32)
     fx = float(transforms.get("fl_x", transforms["w"] / (2.0 * np.tan(float(transforms["camera_angle_x"]) / 2.0))))
@@ -124,6 +124,7 @@ def render_camera_aligned(
 
     rgb_out = torch.ones((height, width, 3), dtype=torch.float32)
     opacity_out = torch.zeros((height, width), dtype=torch.float32)
+    depth_out = torch.ones((height, width), dtype=torch.float32)
     R = c2w[:3, :3]
     origin = c2w[:3, 3]
     ts_base = torch.linspace(0.0, 1.0, samples, dtype=torch.float32)
@@ -160,10 +161,12 @@ def render_camera_aligned(
         weights = trans * step_alpha
         opacity = weights.sum(dim=1).clamp(0.0, 1.0)
         color = (weights[..., None] * sampled[..., :3].clamp(0.0, 1.0)).sum(dim=1)
+        depth = (weights * ts_base[None, :]).sum(dim=1) / opacity.clamp_min(1e-6)
         rgb = color + (1.0 - opacity[:, None])
         rgb_out[y0:y1] = rgb.reshape(y1 - y0, width, 3)
         opacity_out[y0:y1] = opacity.reshape(y1 - y0, width)
-    return rgb_out.numpy(), opacity_out.numpy()
+        depth_out[y0:y1] = depth.reshape(y1 - y0, width)
+    return rgb_out.numpy(), opacity_out.numpy(), depth_out.numpy()
 
 
 def save_rgb(path: Path, arr: np.ndarray) -> None:
@@ -171,10 +174,15 @@ def save_rgb(path: Path, arr: np.ndarray) -> None:
     Image.fromarray((np.clip(arr, 0.0, 1.0) * 255).astype(np.uint8)).save(path)
 
 
-def save_alpha(path: Path, opacity: np.ndarray) -> None:
-    # Figure-friendly grayscale: dense structure is dark, background is white.
-    v = 1.0 - 0.72 * (np.clip(opacity, 0.0, 1.0) ** 0.7)
-    img = np.stack([v, v, v], axis=-1)
+def save_alpha(path: Path, opacity: np.ndarray, depth: np.ndarray) -> None:
+    # Figure-friendly blue structure view with depth shading. Near opaque
+    # surfaces become saturated blue; farther surfaces fade to pale blue.
+    alpha_strength = 0.92 * (np.clip(opacity, 0.0, 1.0) ** 0.58)
+    depth = np.clip(depth, 0.0, 1.0)
+    near = np.array([0.04, 0.22, 0.68], dtype=np.float32)
+    far = np.array([0.62, 0.82, 1.00], dtype=np.float32)
+    structure_color = near[None, None, :] * (1.0 - depth[..., None]) + far[None, None, :] * depth[..., None]
+    img = (1.0 - alpha_strength[..., None]) + alpha_strength[..., None] * structure_color
     save_rgb(path, img)
 
 
@@ -226,7 +234,7 @@ def main() -> None:
         )
     transforms = json.loads(transforms_path.read_text())
     volume, meta = load_rgba_volume(Path(args.feature_dir) / f"{args.scene}.npz")
-    grid_rgb, opacity = render_camera_aligned(
+    grid_rgb, opacity, depth = render_camera_aligned(
         volume=volume,
         meta=meta,
         transforms=transforms,
@@ -243,7 +251,7 @@ def main() -> None:
     rgba_path = out / f"fig1_{args.scene}_{args.frame}_grid_rgba_same_camera.png"
     alpha_path = out / f"fig1_{args.scene}_{args.frame}_grid_alpha_same_camera.png"
     save_rgb(rgba_path, grid_rgb)
-    save_alpha(alpha_path, opacity)
+    save_alpha(alpha_path, opacity, depth)
 
     render_rgb_path = out / f"fig1_{args.scene}_{args.frame}_render_rgb.png"
     bbox_path = out / f"fig1_{args.scene}_{args.frame}_render_rgb_bbox_furniture.png"

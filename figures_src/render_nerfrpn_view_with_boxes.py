@@ -190,7 +190,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--scene-root", required=True)
     parser.add_argument("--frame", required=True)
-    parser.add_argument("--output-dir", default="figures_src/fig1_render_view_assets/final_candidates")
+    parser.add_argument("--output-dir", default="figures_src/fig1_render_view_assets/candidates/bbox_overlays")
     parser.add_argument("--convention", choices=["nerf", "ngp", "opencv"], default="nerf")
     parser.add_argument("--crop", help="Optional x0,y0,x1,y1 crop after drawing.")
     parser.add_argument("--max-boxes", type=int)

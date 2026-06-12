@@ -39,7 +39,7 @@ Final assets:
 ```text
 final/fig1_3dfront_0131_00_0180_render_rgb.png
 final/fig1_3dfront_0131_00_0180_grid_rgba_same_camera.png
-final/fig1_3dfront_0131_00_0180_grid_alpha_same_camera.png
+final/fig1_3dfront_0131_00_0180_grid_alpha_same_camera.png  # blue, depth-shaded
 final/fig1_3dfront_0131_00_0180_render_rgb_bbox_furniture.png
 final/fig1_3dfront_0131_00_0180_render_rgb_and_bbox_furniture_pair.png
 final/fig1_3dfront_0131_00_0180_render_rgb_grid_rgba_alpha_bbox_quad.png
@@ -76,6 +76,13 @@ Build rendered-view contact sheets:
 python figures_src/select_fig1_render_views.py
 ```
 
+Build same-camera RGB / RGBA-grid / blue-alpha candidate sheets for several
+views of the selected scene:
+
+```bash
+python figures_src/build_fig1_camera_view_candidates.py
+```
+
 Generate the selected rendered view with projected boxes:
 
 ```bash
@@ -103,5 +110,11 @@ python figures_src/render_camera_aligned_grid_views.py \
   using the same camera frame as the released RGB image. They are useful for
   explaining alpha/structure vs RGBA appearance, while the clean rendered RGB
   image should remain the main visual.
+- The alpha panel is intentionally blue and depth-shaded: opacity controls how
+  strongly structure appears, while expected ray depth changes the blue tone.
+  This avoids reading voxel/grid texture as the main signal and makes the
+  structure-first concept clearer.
 - For predicted proposal visualization exactly like NeRF-RPN, use `nerf_rpn/scripts/proposals2ngp.py` to inject proposal boxes into `transforms.json`, then render through the instant-ngp fork referenced in the NeRF-MAE README. That is heavier and not needed for the Fig. 1 conceptual render.
-- Raw grid render assets remain under `../fig1_front3d_volume_final/` for debugging and structure/alpha illustrations only.
+- Candidate sheets are under `candidates/`; raw grid render assets remain under
+  `debug/grid_volume_views/` for debugging and structure/alpha illustrations
+  only.

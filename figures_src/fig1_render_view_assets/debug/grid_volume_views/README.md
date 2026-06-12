@@ -2,7 +2,7 @@
 
 Status: **superseded for the main Fig. 1 render panel**.
 
-Use `../fig1_render_view_assets/final/` for the NeRF-MAE-style rendered RGB
+Use `../../final/` for the NeRF-MAE-style rendered RGB
 view and bbox overlay. The assets in this directory visualize the extracted
 `rgbsigma` grid and are kept only as auxiliary structure/alpha/debug material.
 
@@ -41,7 +41,7 @@ View policy:
   If those artifacts become available, generate that view as a separate asset
   rather than replacing this external view.
 - A real rendered RGB view is now available from the NeRF-RPN `front3d_nerf_data`
-  release, so the main Fig. 1 panel should use `../fig1_render_view_assets/`.
+  release, so the main Fig. 1 panel should use `../../final/`.
   The released-grid visualization is visibly noisier than the NeRF-MAE
   render-style panel and should not be treated as a photorealistic render.
 
@@ -55,7 +55,7 @@ Generation command:
 ```bash
 python figures_src/render_front3d_fig1_volume.py \
   --scene 3dfront_0131_00 \
-  --out-dir figures_src/fig1_front3d_volume_final \
+  --out-dir figures_src/fig1_render_view_assets/debug/grid_volume_views \
   --width 1200 --height 780 --samples 192 --tile-rows 30 \
   --dpi 320 --alpha-threshold 0.07 --opacity-scale 0.17 \
   --azimuth -34 --elevation 60 \

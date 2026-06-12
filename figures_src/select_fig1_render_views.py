@@ -78,7 +78,7 @@ def make_contact_sheet(paths: list[Path], out_path: Path, title: str, thumb_w: i
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", default="figures_src/fig1_render_view_assets/nerf_rpn_front3d_nerf_data/front3d_nerf_data")
-    parser.add_argument("--output-dir", default="figures_src/fig1_render_view_assets/contact_sheets")
+    parser.add_argument("--output-dir", default="figures_src/fig1_render_view_assets/candidates/render_view_contact_sheets")
     parser.add_argument("--top-k", type=int, default=36)
     args = parser.parse_args()
 
