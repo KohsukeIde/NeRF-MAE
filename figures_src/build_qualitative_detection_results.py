@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """Build qualitative predicted-OBB figures for Front3D and ScanNet.
 
-Front3D panels project predicted OBB proposals onto released NeRF-RPN RGB
-renders. ScanNet panels use a reproducible BEV alpha projection because the
-public NeRF-MAE/NeRF-RPN artifacts used here do not include ScanNet RGB render
-views or camera transforms.
+Both Front3D and ScanNet panels project predicted OBB proposals onto released
+NeRF-RPN RGB render views when the corresponding render artifacts are present.
+ScanNet BEV alpha projection remains available as a fallback/debug view.
 """
 
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import sys
 from dataclasses import dataclass
@@ -185,6 +185,147 @@ def select_front3d_frame(
     return best_frame
 
 
+def scannet_feature_dict(feature_path: Path) -> dict:
+    with np.load(feature_path) as z:
+        return {key: z[key] for key in ["resolution", "bbox_min", "bbox_max"]}
+
+
+def scannet_grid_boxes_to_world(boxes: np.ndarray, feature_path: Path) -> np.ndarray:
+    feature = scannet_feature_dict(feature_path)
+    resolution = feature["resolution"].astype(np.float64)
+    bbox_min = feature["bbox_min"].astype(np.float64)
+    bbox_max = feature["bbox_max"].astype(np.float64)
+    scale = (bbox_max - bbox_min) / resolution
+    world = boxes.astype(np.float64).copy()
+    world[:, :3] = world[:, :3] * scale + bbox_min
+    world[:, 3:6] = world[:, 3:6] * scale
+    return world
+
+
+def scannet_obb_corners_world(box: np.ndarray) -> np.ndarray:
+    x, y, z, w, l, h, theta = box.astype(np.float64)
+    half = np.array([w, l, h], dtype=np.float64) / 2.0
+    local = np.array(
+        [
+            [-half[0], -half[1], -half[2]],
+            [half[0], -half[1], -half[2]],
+            [-half[0], half[1], -half[2]],
+            [half[0], half[1], -half[2]],
+            [-half[0], -half[1], half[2]],
+            [half[0], -half[1], half[2]],
+            [-half[0], half[1], half[2]],
+            [half[0], half[1], half[2]],
+        ],
+        dtype=np.float64,
+    )
+    c, s = np.cos(theta), np.sin(theta)
+    rot = np.array([[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]], dtype=np.float64)
+    return local @ rot.T + np.array([x, y, z], dtype=np.float64)
+
+
+def scannet_world_to_proj(frame: dict, width: int, height: int) -> np.ndarray:
+    # Match data/scannet/visualize_bbox.py so qualitative overlays follow the
+    # released NeRF-RPN ScanNet visualization convention.
+    cam2world = np.asarray(frame["transform_matrix"], dtype=np.float64).copy()
+    cam2world[:, [1, 2]] *= -1
+    fy = float(frame["fy"])
+    focal = fy / height
+    zscale = 1.0 / focal
+    xyscale = height
+    cam2proj = np.array(
+        [
+            [xyscale, 0.0, width * 0.5 * zscale, 0.0],
+            [0.0, xyscale, height * 0.5 * zscale, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, zscale, 0.0],
+        ],
+        dtype=np.float64,
+    )
+    return cam2proj @ np.linalg.inv(cam2world)
+
+
+def scannet_project_points(points: np.ndarray, world2proj: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    points_h = np.concatenate([points, np.ones((len(points), 1), dtype=np.float64)], axis=1)
+    projected = (world2proj @ points_h.T).T
+    depth = projected[:, 3]
+    pts2d = projected[:, :2] / np.maximum(depth[:, None], 1e-8)
+    return pts2d, depth
+
+
+def scannet_project_box_edges(
+    box: np.ndarray,
+    frame: dict,
+    image_size: tuple[int, int],
+) -> list[tuple[tuple[float, float], tuple[float, float]]]:
+    width, height = image_size
+    world2proj = scannet_world_to_proj(frame, width, height)
+    pts2d, depth = scannet_project_points(scannet_obb_corners_world(box), world2proj)
+    lines: list[tuple[tuple[float, float], tuple[float, float]]] = []
+    margin = 80
+    for a, b in BOX_EDGES:
+        if depth[a] <= 0 or depth[b] <= 0:
+            continue
+        p0, p1 = pts2d[a], pts2d[b]
+        if (
+            max(p0[0], p1[0]) < -margin
+            or min(p0[0], p1[0]) > width + margin
+            or max(p0[1], p1[1]) < -margin
+            or min(p0[1], p1[1]) > height + margin
+        ):
+            continue
+        lines.append((tuple(p0), tuple(p1)))
+    return lines
+
+
+def scannet_frame_image_path(scene_root: Path, frame: dict) -> Path:
+    return scene_root / frame["file_path"]
+
+
+def load_scannet_transforms(scene_root: Path, split: str) -> dict:
+    transforms_path = scene_root / f"transforms_{split}.json"
+    if not transforms_path.exists():
+        raise FileNotFoundError(transforms_path)
+    return json.loads(transforms_path.read_text())
+
+
+def select_scannet_frame(
+    scene_root: Path,
+    transforms: dict,
+    boxes_world: np.ndarray,
+    preferred_frame: str | None,
+) -> tuple[str, dict]:
+    frames_by_stem = {Path(item["file_path"]).stem: item for item in transforms["frames"]}
+    if preferred_frame:
+        if preferred_frame not in frames_by_stem:
+            raise KeyError(f"{preferred_frame} not found in ScanNet transforms")
+        return preferred_frame, frames_by_stem[preferred_frame]
+
+    best_score = -1.0
+    best_stem = Path(transforms["frames"][0]["file_path"]).stem
+    best_frame = transforms["frames"][0]
+    for frame in transforms["frames"]:
+        image_path = scannet_frame_image_path(scene_root, frame)
+        if not image_path.exists():
+            continue
+        with Image.open(image_path) as image:
+            image_size = image.size
+        visible_edges = 0
+        in_canvas_points = 0
+        for box in boxes_world[:8]:
+            lines = scannet_project_box_edges(box, frame, image_size)
+            visible_edges += len(lines)
+            for p0, p1 in lines:
+                for p in [p0, p1]:
+                    if 0 <= p[0] < image_size[0] and 0 <= p[1] < image_size[1]:
+                        in_canvas_points += 1
+        score = visible_edges * 10 + in_canvas_points
+        if score > best_score:
+            best_score = score
+            best_stem = Path(frame["file_path"]).stem
+            best_frame = frame
+    return best_stem, best_frame
+
+
 def add_title(image: Image.Image, title: str) -> Image.Image:
     title_h = 34
     out = Image.new("RGB", (image.width, image.height + title_h), "white")
@@ -294,6 +435,65 @@ def draw_bev_panel(
 
 
 def make_scannet_panel(args: argparse.Namespace, out_dir: Path) -> Path:
+    scene_root = Path(args.scannet_render_root) / args.scannet_scene
+    if not args.scannet_bev and scene_root.exists():
+        return make_scannet_rgb_panel(args, out_dir)
+    if not args.scannet_bev:
+        print(f"ScanNet render scene missing at {scene_root}; falling back to BEV alpha projection.")
+    return make_scannet_bev_panel(args, out_dir)
+
+
+def draw_scannet_rgb_boxes(
+    image_path: Path,
+    frame: dict,
+    boxes_world: np.ndarray,
+    color: tuple[int, int, int],
+    title: str,
+) -> Image.Image:
+    image = Image.open(image_path).convert("RGB")
+    canvas = image.copy()
+    draw = ImageDraw.Draw(canvas)
+    for box in boxes_world:
+        for p0, p1 in scannet_project_box_edges(box, frame, canvas.size):
+            draw.line([p0, p1], fill=(255, 255, 255), width=5)
+            draw.line([p0, p1], fill=color, width=3)
+    return add_title(canvas, title)
+
+
+def make_scannet_rgb_panel(args: argparse.Namespace, out_dir: Path) -> Path:
+    scene_root = Path(args.scannet_render_root) / args.scannet_scene
+    transforms = load_scannet_transforms(scene_root, args.scannet_split)
+    feature_path = Path(args.scannet_feature_dir) / f"{args.scannet_scene}.npz"
+
+    boxes_by_method: dict[str, np.ndarray] = {}
+    for method in SCANNET_METHODS:
+        boxes, _scores = load_top_proposals(method.proposal_dir, args.scannet_scene, args.top_k, args.score_threshold)
+        boxes_by_method[method.key] = scannet_grid_boxes_to_world(boxes, feature_path)
+
+    frame_stem, frame = select_scannet_frame(
+        scene_root,
+        transforms,
+        boxes_by_method[SCANNET_METHODS[-1].key],
+        args.scannet_frame,
+    )
+    image_path = scannet_frame_image_path(scene_root, frame)
+    panels = []
+    for method in SCANNET_METHODS:
+        panels.append(
+            draw_scannet_rgb_boxes(
+                image_path=image_path,
+                frame=frame,
+                boxes_world=boxes_by_method[method.key],
+                color=method.color,
+                title=f"ScanNet {args.scannet_scene} / {method.label}",
+            )
+        )
+    out = out_dir / f"scannet_{args.scannet_scene}_{frame_stem}_pred_obb_rgb.png"
+    make_row(panels, out)
+    return out
+
+
+def make_scannet_bev_panel(args: argparse.Namespace, out_dir: Path) -> Path:
     panels = []
     for method in SCANNET_METHODS:
         proposal_path = method.proposal_dir / f"{args.scannet_scene}.npz"
@@ -330,22 +530,30 @@ def make_row(images: list[Image.Image], out_path: Path) -> None:
     sheet.save(out_path)
 
 
-def make_combined(front_path: Path, scan_path: Path, out_path: Path) -> None:
-    front = Image.open(front_path).convert("RGB")
+def make_combined(front_paths: list[Path], scan_path: Path, out_path: Path) -> None:
+    fronts = [Image.open(path).convert("RGB") for path in front_paths]
     scan = Image.open(scan_path).convert("RGB")
-    target_w = max(front.width, scan.width)
-    front = ImageOps.contain(front, (target_w, 420), Image.BILINEAR)
+    target_w = max([scan.width] + [front.width for front in fronts])
+    fronts = [ImageOps.contain(front, (target_w, 390), Image.BILINEAR) for front in fronts]
     scan = ImageOps.contain(scan, (target_w, 420), Image.BILINEAR)
     margin = 18
     title_h = 34
-    out = Image.new("RGB", (target_w + margin * 2, front.height + scan.height + title_h * 2 + margin * 3), "white")
+    height = sum(front.height for front in fronts) + scan.height + title_h * (len(fronts) + 1) + margin * (len(fronts) + 2)
+    out = Image.new("RGB", (target_w + margin * 2, height), "white")
     draw = ImageDraw.Draw(out)
     y = margin
-    draw.text((margin, y + 8), "Front3D qualitative predicted OBBs", fill=(20, 20, 20))
-    y += title_h
-    out.paste(front, (margin, y))
-    y += front.height + margin
-    draw.text((margin, y + 8), "ScanNet qualitative predicted OBBs (BEV alpha projection; public RGB renders unavailable)", fill=(20, 20, 20))
+    for index, front in enumerate(fronts):
+        title = "Front3D qualitative predicted OBBs" if index == 0 else "Front3D qualitative predicted OBBs (top-view candidate)"
+        draw.text((margin, y + 8), title, fill=(20, 20, 20))
+        y += title_h
+        out.paste(front, (margin, y))
+        y += front.height + margin
+    scan_title = "ScanNet qualitative predicted OBBs"
+    if "bev" in scan_path.name:
+        scan_title += " (BEV alpha projection fallback)"
+    else:
+        scan_title += " (released RGB render view)"
+    draw.text((margin, y + 8), scan_title, fill=(20, 20, 20))
     y += title_h
     out.paste(scan, (margin, y))
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -357,24 +565,40 @@ def main() -> None:
     parser.add_argument("--output-dir", default="figures_src/qualitative_detection_assets/final")
     parser.add_argument("--front3d-scene", default="3dfront_0143_00")
     parser.add_argument("--front3d-frame", default="", help="Empty string auto-selects a frame.")
+    parser.add_argument("--front3d-extra-frame", default="0015", help="Optional second Front3D frame; empty disables it.")
     parser.add_argument("--front3d-render-root", default="figures_src/qualitative_detection_assets/front3d_render_data/front3d_nerf_data")
     parser.add_argument("--front3d-feature-dir", default="dataset/finetune/front3d_rpn_data/features")
     parser.add_argument("--front3d-convention", choices=["nerf", "ngp", "opencv"], default="nerf")
     parser.add_argument("--scannet-scene", default="scene0151_00")
     parser.add_argument("--scannet-feature-dir", default="dataset/finetune/scannet_rpn_data/features")
     parser.add_argument("--scannet-obb-dir", default="dataset/finetune/scannet_rpn_data/obb")
+    parser.add_argument("--scannet-render-root", default="figures_src/qualitative_detection_assets/scannet_render_data/scannet_nerf_data")
+    parser.add_argument("--scannet-split", choices=["train", "test"], default="train")
+    parser.add_argument("--scannet-frame", default="", help="Empty string auto-selects a frame.")
+    parser.add_argument("--scannet-bev", action="store_true", help="Force ScanNet BEV alpha projection instead of RGB overlay.")
     parser.add_argument("--top-k", type=int, default=8)
     parser.add_argument("--score-threshold", type=float, default=0.35)
     args = parser.parse_args()
     if args.front3d_frame == "":
         args.front3d_frame = None
+    if args.front3d_extra_frame == "":
+        args.front3d_extra_frame = None
+    if args.scannet_frame == "":
+        args.scannet_frame = None
 
     out_dir = Path(args.output_dir)
-    front_path = make_front3d_panel(args, out_dir)
+    front_paths = [make_front3d_panel(args, out_dir)]
+    if args.front3d_extra_frame:
+        extra_args = copy.copy(args)
+        extra_args.front3d_frame = args.front3d_extra_frame
+        extra_path = make_front3d_panel(extra_args, out_dir)
+        if extra_path not in front_paths:
+            front_paths.append(extra_path)
     scan_path = make_scannet_panel(args, out_dir)
     combined = out_dir / "fig5_qualitative_detection_draft.png"
-    make_combined(front_path, scan_path, combined)
-    print(f"wrote {front_path}")
+    make_combined(front_paths, scan_path, combined)
+    for front_path in front_paths:
+        print(f"wrote {front_path}")
     print(f"wrote {scan_path}")
     print(f"wrote {combined}")
 
