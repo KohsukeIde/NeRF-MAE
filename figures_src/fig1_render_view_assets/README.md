@@ -38,8 +38,11 @@ Final assets:
 
 ```text
 final/fig1_3dfront_0131_00_0180_render_rgb.png
+final/fig1_3dfront_0131_00_0180_grid_rgba_same_camera.png
+final/fig1_3dfront_0131_00_0180_grid_alpha_same_camera.png
 final/fig1_3dfront_0131_00_0180_render_rgb_bbox_furniture.png
 final/fig1_3dfront_0131_00_0180_render_rgb_and_bbox_furniture_pair.png
+final/fig1_3dfront_0131_00_0180_render_rgb_grid_rgba_alpha_bbox_quad.png
 ```
 
 Backup assets:
@@ -79,8 +82,26 @@ Generate the selected rendered view with projected boxes:
 python figures_src/build_fig1_render_assets.py
 ```
 
+Generate alpha/RGBA views from the extracted `rgbsigma` grid using the same
+camera as the selected rendered RGB view:
+
+```bash
+python figures_src/render_camera_aligned_grid_views.py \
+  --scene 3dfront_0131_00 \
+  --frame 0180 \
+  --samples 192 \
+  --opacity-scale 0.18 \
+  --alpha-threshold 0.012
+```
+
 ## Notes
 
 - The bbox overlay here uses the ground-truth `bounding_boxes` already stored in `transforms.json`, projected onto the released RGB render view.
+- `grid_alpha_same_camera` and `grid_rgba_same_camera` are not separate
+  photorealistic NeRF renders. They are camera-aligned ray-marched views of the
+  extracted radiance-density grid (`dataset/finetune/front3d_rpn_data/features`),
+  using the same camera frame as the released RGB image. They are useful for
+  explaining alpha/structure vs RGBA appearance, while the clean rendered RGB
+  image should remain the main visual.
 - For predicted proposal visualization exactly like NeRF-RPN, use `nerf_rpn/scripts/proposals2ngp.py` to inject proposal boxes into `transforms.json`, then render through the instant-ngp fork referenced in the NeRF-MAE README. That is heavier and not needed for the Fig. 1 conceptual render.
 - Raw grid render assets remain under `../fig1_front3d_volume_final/` for debugging and structure/alpha illustrations only.
