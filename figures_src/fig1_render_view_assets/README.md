@@ -25,6 +25,18 @@ The local detection data under `dataset/finetune/front3d_rpn_data` only contains
 
 ## Selected Fig. 1 Scene
 
+Inspect these first:
+
+```text
+paper_candidates/
+final/
+```
+
+`paper_candidates/` contains the smaller set intended for human selection. The
+larger `final/` directory keeps the current exported components. Intermediate
+contact sheets and debug renders are under `work_archive/`; downloaded render
+data is under `render_cache/`.
+
 Current selected scene/view:
 
 ```text
@@ -37,12 +49,10 @@ drawn box indices: 1,2,3,4,5,6
 Final assets:
 
 ```text
-final/fig1_3dfront_0131_00_0180_render_rgb.png
-final/fig1_3dfront_0131_00_0180_grid_rgba_same_camera.png
-final/fig1_3dfront_0131_00_0180_grid_alpha_same_camera.png  # blue, depth-shaded
-final/fig1_3dfront_0131_00_0180_render_rgb_bbox_furniture.png
-final/fig1_3dfront_0131_00_0180_render_rgb_and_bbox_furniture_pair.png
-final/fig1_3dfront_0131_00_0180_render_rgb_grid_rgba_alpha_bbox_quad.png
+paper_candidates/fig1_recommended_render_grid_alpha_bbox_quad.png
+paper_candidates/fig1_alpha_structure_candidate.png
+paper_candidates/fig1_grid_rgba_candidate.png
+paper_candidates/fig1_render_rgb_bbox_candidate.png
 ```
 
 Backup assets:
@@ -131,6 +141,5 @@ python figures_src/render_camera_aligned_grid_views.py \
   lighter blue palette. This is a figure-facing structure visualization, not a
   separate photorealistic render.
 - For predicted proposal visualization exactly like NeRF-RPN, use `nerf_rpn/scripts/proposals2ngp.py` to inject proposal boxes into `transforms.json`, then render through the instant-ngp fork referenced in the NeRF-MAE README. That is heavier and not needed for the Fig. 1 conceptual render.
-- Candidate sheets are under `candidates/`; raw grid render assets remain under
-  `debug/grid_volume_views/` for debugging and structure/alpha illustrations
-  only.
+- Candidate sheets and raw grid render debug assets are under
+  `work_archive/`. They are kept for auditability, not for direct paper use.

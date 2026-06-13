@@ -407,7 +407,7 @@ def main() -> None:
     parser.add_argument("--feature-dir", default="dataset/finetune/front3d_rpn_data/features")
     parser.add_argument(
         "--render-root",
-        default="figures_src/fig1_render_view_assets/nerf_rpn_front3d_nerf_data/front3d_nerf_data",
+        default="figures_src/fig1_render_view_assets/render_cache/nerf_rpn_front3d_nerf_data/front3d_nerf_data",
     )
     parser.add_argument("--output-dir", default="figures_src/fig1_render_view_assets/final")
     parser.add_argument("--width", type=int, default=640)

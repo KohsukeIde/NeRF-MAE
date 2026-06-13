@@ -13,7 +13,7 @@ from render_nerfrpn_view_with_boxes import overlay_boxes
 SCENE = "3dfront_0131_00"
 FRAME = "0180"
 BOX_INDICES = [1, 2, 3, 4, 5, 6]
-ROOT = Path("figures_src/fig1_render_view_assets/nerf_rpn_front3d_nerf_data/front3d_nerf_data")
+ROOT = Path("figures_src/fig1_render_view_assets/render_cache/nerf_rpn_front3d_nerf_data/front3d_nerf_data")
 OUT = Path("figures_src/fig1_render_view_assets/final")
 
 

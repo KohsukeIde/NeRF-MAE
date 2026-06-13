@@ -1,30 +1,60 @@
 # Qualitative Detection Assets
 
-These assets fill the paper placeholder:
+This directory stores paper-facing qualitative OBB overlays and the intermediate
+images used to select them.
+
+## What To Inspect First
+
+Use these for figure selection:
 
 ```text
-Figure 5: Qualitative detection results.
-Predicted oriented boxes on Front3D and ScanNet scenes:
-scratch vs. NeRF-MAE† vs. structure-first, same scenes.
+final/
+paper_shortlists/gt_10/
 ```
 
-## Current Draft
+`final/` contains the current recommended subset copied from the GT shortlist.
+`paper_shortlists/gt_10/` contains 10 readable candidates with panels ordered as:
 
 ```text
-final/fig5_qualitative_detection_draft.png
-final/front3d_3dfront_0143_00_0015_pred_obb_threeway.png
-final/front3d_3dfront_0143_00_0172_pred_obb_threeway.png
-final/scannet_scene0151_00_2634_pred_obb_rgb.png
+Front3D: GT / scratch / NeRF-MAE† / structure-first
+ScanNet: GT / NeRF-MAE† / structure-first
 ```
+
+The contact sheet is:
+
+```text
+paper_shortlists/gt_10/contact_sheet_gt_10.png
+```
+
+The older no-GT shortlist is kept only for reference:
+
+```text
+paper_shortlists/no_gt_10/
+```
+
+## Directory Roles
+
+```text
+final/             selected paper-facing exports only
+paper_shortlists/  candidate sets for human selection
+rankings/          approximate-IoU scene ranking CSVs used for candidate search
+render_cache/      downloaded NeRF-RPN RGB render data and camera transforms
+work_archive/      old drafts, rejected candidates, contact sheets, debug views
+```
+
+`work_archive/` is not paper-facing. It is kept so previous visual decisions can
+be audited without cluttering the selection directories.
 
 ## Inputs
 
 Front3D uses released NeRF-RPN RGB renders and camera transforms:
 
 ```text
-front3d_render_data/front3d_nerf_data/3dfront_0143_00/train/images/0172.jpg
-front3d_render_data/front3d_nerf_data/3dfront_0143_00/train/transforms.json
+render_cache/front3d_render_data/front3d_nerf_data/<scene>/train/images/*.jpg
+render_cache/front3d_render_data/front3d_nerf_data/<scene>/train/transforms.json
 ```
+
+Front3D GT boxes come from `transforms.json` `bounding_boxes`.
 
 Predicted proposal dumps:
 
@@ -34,50 +64,62 @@ NeRF-MAE†: output/nerf_rpn/results/budgetcurve_baseline_e1200_seed1_fcos1000_e
 ours:      output/nerf_rpn/results/budgetcurve_cosine_ramp_e600_seed1_fcos1000_eval/proposals
 ```
 
-ScanNet uses public `scannet_rpn_data` features/proposals and released
-`scannet_nerf_data` RGB views/camera transforms. Proposals are converted from
-RPN grid coordinates back to ScanNet world coordinates with each scene's
-`bbox_min`, `bbox_max`, and `resolution`, then projected with the same
-convention as `data/scannet/visualize_bbox.py`.
+ScanNet uses public `scannet_rpn_data` GT/features/proposals plus released
+`scannet_nerf_data` RGB views/camera transforms. Proposals and GT are converted
+from RPN grid coordinates back to ScanNet world coordinates with each scene's
+`bbox_min`, `bbox_max`, and `resolution`, then projected with the same convention
+as `data/scannet/visualize_bbox.py`.
 
 ```text
+GT:        dataset/finetune/scannet_rpn_data/obb
 NeRF-MAE†: output/nerf_rpn/results/baseline_e300_scannet_fcos1000_seed1_eval/proposals
 ours:      output/nerf_rpn/results/cosine_ramp_e300_scannet_fcos1000_seed1_eval/proposals
 ```
 
-No local ScanNet scratch proposal dump was found at the time this draft was
-created; add it to `SCANNET_METHODS` in the script when available. The current
-ScanNet RGB panel compares NeRF-MAE† and structure-first on the same view.
+No local ScanNet scratch proposal dump was found when these figures were built.
+If a ScanNet scratch dump is generated, add it to `SCANNET_METHODS` in
+`figures_src/build_qualitative_detection_results.py`.
 
 ## Reproduction
 
-Download the selected Front3D render scene:
+Download selected render scenes:
 
 ```bash
 python figures_src/download_front3d_render_scene.py \
   --scene 3dfront_0143_00 \
-  --output-dir figures_src/qualitative_detection_assets/front3d_render_data
-```
+  --output-dir figures_src/qualitative_detection_assets/render_cache/front3d_render_data
 
-Download the selected ScanNet render scene:
-
-```bash
 python figures_src/download_scannet_render_scene.py \
   --scene scene0151_00 \
-  --output-dir figures_src/qualitative_detection_assets/scannet_render_data
+  --output-dir figures_src/qualitative_detection_assets/render_cache/scannet_render_data
 ```
 
-Build the current draft:
+Build one qualitative panel:
 
 ```bash
 python figures_src/build_qualitative_detection_results.py \
   --front3d-scene 3dfront_0143_00 \
-  --front3d-frame 0172 \
-  --front3d-extra-frame 0015 \
+  --front3d-frame 0015 \
+  --front3d-extra-frame "" \
   --scannet-scene scene0151_00 \
+  --scannet-frame 2634 \
   --top-k 3 \
-  --score-threshold 0.55
+  --score-threshold 0.35
 ```
 
-Use a lower threshold or larger `--top-k` only for debugging. For paper figures,
-the current setting is intentionally sparse so predicted boxes remain readable.
+Regenerate a ranked/readable candidate pool:
+
+```bash
+python figures_src/select_qualitative_detection_wins.py \
+  --dataset front3d \
+  --gt-dir dataset/finetune/front3d_rpn_data/obb \
+  --baseline-dir output/nerf_rpn/results/budgetcurve_baseline_e1200_seed1_fcos1000_eval/proposals \
+  --ours-dir output/nerf_rpn/results/budgetcurve_cosine_ramp_e600_seed1_fcos1000_eval/proposals \
+  --output figures_src/qualitative_detection_assets/rankings/front3d_ours_wins_ranked.csv
+
+python figures_src/generate_qualitative_win_candidates.py \
+  --output-dir figures_src/qualitative_detection_assets/readable_win_candidates_gt
+```
+
+The ranking uses approximate CPU 3D OBB IoU only for qualitative candidate
+selection. It is not a replacement for the official detection metrics.

@@ -155,14 +155,14 @@ def main() -> None:
         shutil.rmtree(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    front_render = Path("figures_src/qualitative_detection_assets/front3d_render_data/front3d_nerf_data")
-    scan_render = Path("figures_src/qualitative_detection_assets/scannet_render_data/scannet_nerf_data")
+    front_render = Path("figures_src/qualitative_detection_assets/render_cache/front3d_render_data/front3d_nerf_data")
+    scan_render = Path("figures_src/qualitative_detection_assets/render_cache/scannet_render_data/scannet_nerf_data")
     front_feature = Path("dataset/finetune/front3d_rpn_data/features")
     scan_feature = Path("dataset/finetune/scannet_rpn_data/features")
 
     made: list[Path] = []
     index = 1
-    for scene in ranked_scenes(Path("figures_src/qualitative_detection_assets/front3d_ours_wins_ranked.csv"), args.front3d_count):
+    for scene in ranked_scenes(Path("figures_src/qualitative_detection_assets/rankings/front3d_ours_wins_ranked.csv"), args.front3d_count):
         if not (front_render / scene).exists():
             continue
         for frame in best_front3d_frames(scene, front_render, front_feature, args.frames_per_scene, args.top_k):
@@ -174,6 +174,7 @@ def main() -> None:
                 front3d_convention="nerf",
                 top_k=args.top_k,
                 score_threshold=0.35,
+                include_gt=True,
             )
             path = q.make_front3d_panel(ns, out_dir)
             final = out_dir / f"candidate_{index:02d}_front3d_{scene}_{frame}.png"
@@ -181,7 +182,7 @@ def main() -> None:
             made.append(final)
             index += 1
 
-    for scene in ranked_scenes(Path("figures_src/qualitative_detection_assets/scannet_ours_wins_ranked.csv"), args.scannet_count):
+    for scene in ranked_scenes(Path("figures_src/qualitative_detection_assets/rankings/scannet_ours_wins_ranked.csv"), args.scannet_count):
         if not (scan_render / scene).exists():
             continue
         for frame in best_scannet_frames(scene, scan_render, scan_feature, args.frames_per_scene, args.top_k):
@@ -191,8 +192,10 @@ def main() -> None:
                 scannet_split="train",
                 scannet_frame=frame,
                 scannet_feature_dir=str(scan_feature),
+                scannet_obb_dir="dataset/finetune/scannet_rpn_data/obb",
                 top_k=args.top_k,
                 score_threshold=0.35,
+                include_gt=True,
             )
             path = q.make_scannet_rgb_panel(ns, out_dir)
             final = out_dir / f"candidate_{index:02d}_scannet_{scene}_{frame}.png"

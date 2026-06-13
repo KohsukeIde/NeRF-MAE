@@ -23,7 +23,7 @@ def main() -> None:
     parser.add_argument("--scene", action="append", required=True, help="Scene name, e.g. 3dfront_0131_00")
     parser.add_argument(
         "--output-dir",
-        default="figures_src/fig1_render_view_assets/nerf_rpn_front3d_nerf_data",
+        default="figures_src/fig1_render_view_assets/render_cache/nerf_rpn_front3d_nerf_data",
         help="Directory where front3d_nerf_data/<scene>/... will be extracted.",
     )
     parser.add_argument("--include-model", action="store_true", help="Also extract train/model.msgpack.")

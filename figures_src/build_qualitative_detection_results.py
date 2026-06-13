@@ -55,6 +55,13 @@ FRONT3D_METHODS = [
     ),
 ]
 
+GT_SPEC = MethodSpec(
+    "gt",
+    "GT",
+    Path("__ground_truth__"),
+    (62, 101, 214),
+)
+
 SCANNET_METHODS = [
     MethodSpec(
         "nerfmae",
@@ -360,6 +367,18 @@ def make_front3d_panel(args: argparse.Namespace, out_dir: Path) -> Path:
     )
     image_path = scene_root / "train" / "images" / f"{frame}.jpg"
     panels = []
+    if getattr(args, "include_gt", True):
+        panels.append(
+            draw_projected_boxes(
+                image_path,
+                transforms,
+                frame,
+                transforms.get("bounding_boxes", []),
+                GT_SPEC.color,
+                f"Front3D {args.front3d_scene} / {GT_SPEC.label}",
+                convention=args.front3d_convention,
+            )
+        )
     for method in FRONT3D_METHODS:
         panels.append(
             draw_projected_boxes(
@@ -478,6 +497,18 @@ def make_scannet_rgb_panel(args: argparse.Namespace, out_dir: Path) -> Path:
     )
     image_path = scannet_frame_image_path(scene_root, frame)
     panels = []
+    if getattr(args, "include_gt", True):
+        gt_grid = np.load(Path(args.scannet_obb_dir) / f"{args.scannet_scene}.npy").astype(np.float64)
+        gt_world = scannet_grid_boxes_to_world(gt_grid, feature_path)
+        panels.append(
+            draw_scannet_rgb_boxes(
+                image_path=image_path,
+                frame=frame,
+                boxes_world=gt_world,
+                color=GT_SPEC.color,
+                title=f"ScanNet {args.scannet_scene} / {GT_SPEC.label}",
+            )
+        )
     for method in SCANNET_METHODS:
         panels.append(
             draw_scannet_rgb_boxes(
@@ -566,16 +597,17 @@ def main() -> None:
     parser.add_argument("--front3d-scene", default="3dfront_0143_00")
     parser.add_argument("--front3d-frame", default="", help="Empty string auto-selects a frame.")
     parser.add_argument("--front3d-extra-frame", default="0015", help="Optional second Front3D frame; empty disables it.")
-    parser.add_argument("--front3d-render-root", default="figures_src/qualitative_detection_assets/front3d_render_data/front3d_nerf_data")
+    parser.add_argument("--front3d-render-root", default="figures_src/qualitative_detection_assets/render_cache/front3d_render_data/front3d_nerf_data")
     parser.add_argument("--front3d-feature-dir", default="dataset/finetune/front3d_rpn_data/features")
     parser.add_argument("--front3d-convention", choices=["nerf", "ngp", "opencv"], default="nerf")
     parser.add_argument("--scannet-scene", default="scene0151_00")
     parser.add_argument("--scannet-feature-dir", default="dataset/finetune/scannet_rpn_data/features")
     parser.add_argument("--scannet-obb-dir", default="dataset/finetune/scannet_rpn_data/obb")
-    parser.add_argument("--scannet-render-root", default="figures_src/qualitative_detection_assets/scannet_render_data/scannet_nerf_data")
+    parser.add_argument("--scannet-render-root", default="figures_src/qualitative_detection_assets/render_cache/scannet_render_data/scannet_nerf_data")
     parser.add_argument("--scannet-split", choices=["train", "test"], default="train")
     parser.add_argument("--scannet-frame", default="", help="Empty string auto-selects a frame.")
     parser.add_argument("--scannet-bev", action="store_true", help="Force ScanNet BEV alpha projection instead of RGB overlay.")
+    parser.add_argument("--no-gt", dest="include_gt", action="store_false", help="Do not include the GT panel.")
     parser.add_argument("--top-k", type=int, default=8)
     parser.add_argument("--score-threshold", type=float, default=0.35)
     args = parser.parse_args()

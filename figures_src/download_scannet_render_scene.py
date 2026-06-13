@@ -17,7 +17,7 @@ def main() -> None:
     parser.add_argument("--scene", action="append", required=True, help="Scene name, e.g. scene0151_00")
     parser.add_argument(
         "--output-dir",
-        default="figures_src/qualitative_detection_assets/scannet_render_data",
+        default="figures_src/qualitative_detection_assets/render_cache/scannet_render_data",
         help="Directory where scannet_nerf_data/<scene>/... will be extracted.",
     )
     parser.add_argument("--include-test", action="store_true", help="Also extract test/rgb/*.jpg.")
