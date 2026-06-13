@@ -26,24 +26,17 @@ The contact sheet is:
 paper_shortlists/gt_10/contact_sheet_gt_10.png
 ```
 
-The older no-GT shortlist is kept only for reference:
-
-```text
-paper_shortlists/no_gt_10/
-```
-
 ## Directory Roles
 
 ```text
 final/             selected paper-facing exports only
-paper_shortlists/  candidate sets for human selection
+paper_shortlists/  GT-included candidate set for human selection
 rankings/          approximate-IoU scene ranking CSVs used for candidate search
 render_cache/      downloaded NeRF-RPN RGB render data and camera transforms
-work_archive/      old drafts, rejected candidates, contact sheets, debug views
 ```
 
-`work_archive/` is not paper-facing. It is kept so previous visual decisions can
-be audited without cluttering the selection directories.
+Old drafts, rejected candidates, no-GT panels, and debug views have been removed
+from this directory. Regenerate them from the scripts if needed.
 
 ## Inputs
 
@@ -118,7 +111,7 @@ python figures_src/select_qualitative_detection_wins.py \
   --output figures_src/qualitative_detection_assets/rankings/front3d_ours_wins_ranked.csv
 
 python figures_src/generate_qualitative_win_candidates.py \
-  --output-dir figures_src/qualitative_detection_assets/readable_win_candidates_gt
+  --output-dir figures_src/qualitative_detection_assets/paper_shortlists/gt_10
 ```
 
 The ranking uses approximate CPU 3D OBB IoU only for qualitative candidate
