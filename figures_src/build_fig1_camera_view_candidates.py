@@ -15,6 +15,7 @@ from render_camera_aligned_grid_views import (
     load_rgba_volume,
     render_camera_aligned,
     save_alpha,
+    save_alpha_depth_normal,
     save_rgb,
 )
 
@@ -73,6 +74,8 @@ def main() -> None:
     parser.add_argument("--alpha-screen-connect-iterations", type=int, default=2)
     parser.add_argument("--alpha-screen-connect-opacity-gain", type=float, default=0.85)
     parser.add_argument("--alpha-screen-fill-opacity-threshold", type=float, default=0.35)
+    parser.add_argument("--grid-background", choices=["render", "flat"], default="render")
+    parser.add_argument("--alpha-style", choices=["depth", "depth-normal"], default="depth")
     args = parser.parse_args()
 
     frames = args.frame or DEFAULT_FRAMES
@@ -124,9 +127,13 @@ def main() -> None:
             opacity_gain=args.alpha_screen_connect_opacity_gain,
             fill_opacity_threshold=args.alpha_screen_fill_opacity_threshold,
         )
-        grid_rgb = composite_grid_over_render_background(grid_rgb, opacity, rgb_out)
+        if args.grid_background == "render":
+            grid_rgb = composite_grid_over_render_background(grid_rgb, opacity, rgb_out)
         save_rgb(rgba_out, grid_rgb)
-        save_alpha(alpha_out, opacity_alpha, depth_alpha)
+        if args.alpha_style == "depth-normal":
+            save_alpha_depth_normal(alpha_out, opacity_alpha, depth_alpha)
+        else:
+            save_alpha(alpha_out, opacity_alpha, depth_alpha)
         rows.append((frame, rgb_out, rgba_out, alpha_out))
     make_sheet(rows, out / f"{args.scene}_camera_aligned_view_candidates.png")
 

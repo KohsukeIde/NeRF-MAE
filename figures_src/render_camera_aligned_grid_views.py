@@ -324,9 +324,92 @@ def save_alpha(path: Path, opacity: np.ndarray, depth: np.ndarray) -> None:
     save_rgb(path, img)
 
 
+def save_alpha_depth_normal(
+    path: Path,
+    opacity: np.ndarray,
+    depth: np.ndarray,
+    hole_fill_kernel: int = 63,
+    hole_fill_near_threshold: float = 0.20,
+    hole_fill_opacity_threshold: float = 0.045,
+    palette: str = "blue",
+) -> None:
+    """Save a connected structure panel from ray-marched alpha/depth.
+
+    Marching-cubes surfaces look clean where the alpha field is strong, but
+    they can drop low-alpha side walls that are still visible in the actual
+    ray-marched grid. This view uses the same camera rays as the RGB panel and
+    shades the accumulated alpha depth as a surface, so side/back structures
+    remain connected instead of falling back to a white background.
+    """
+    opacity = np.clip(opacity, 0.0, 1.0)
+    depth = np.clip(depth, 0.0, 1.0)
+    valid = opacity > 0.012
+
+    depth_norm = depth.copy()
+    if np.any(valid):
+        lo, hi = np.percentile(depth_norm[valid], [2, 98])
+        depth_norm = np.clip((depth_norm - lo) / max(hi - lo, 1e-6), 0.0, 1.0)
+
+    # Build a screen-space normal from expected alpha depth. The scale is
+    # intentionally modest: enough to read as a continuous surface, not a noisy
+    # reconstruction result.
+    dy, dx = np.gradient(depth_norm)
+    nx = -dx * 7.5
+    ny = -dy * 7.5
+    nz = np.ones_like(depth_norm)
+    denom = np.sqrt(nx * nx + ny * ny + nz * nz)
+    nx, ny, nz = nx / np.maximum(denom, 1e-6), ny / np.maximum(denom, 1e-6), nz / np.maximum(denom, 1e-6)
+
+    light = np.array([-0.35, -0.45, 0.82], dtype=np.float32)
+    light = light / np.linalg.norm(light)
+    lambert = np.clip(nx * light[0] + ny * light[1] + nz * light[2], 0.0, 1.0)
+    shade = 0.58 + 0.42 * lambert
+
+    # Depth keeps the far wall visible while opacity controls confidence. The
+    # gray palette reads more like geometry/mesh; blue is kept for structure
+    # signal illustrations.
+    if palette == "gray":
+        near = np.array([0.32, 0.37, 0.42], dtype=np.float32)
+        far = np.array([0.82, 0.86, 0.89], dtype=np.float32)
+        bg = np.array([0.94, 0.95, 0.96], dtype=np.float32)
+    elif palette == "blue":
+        near = np.array([0.24, 0.52, 0.96], dtype=np.float32)
+        far = np.array([0.72, 0.90, 1.00], dtype=np.float32)
+        bg = np.array([0.88, 0.96, 1.00], dtype=np.float32)
+    else:
+        raise ValueError(f"Unknown alpha palette: {palette}")
+    base = near[None, None, :] * (1.0 - depth_norm[..., None]) + far[None, None, :] * depth_norm[..., None]
+    color = np.clip(base * shade[..., None] + 0.035, 0.0, 1.0)
+
+    alpha_strength = np.clip(0.88 * (opacity ** 0.52), 0.0, 0.90)
+    img = bg[None, None, :] * (1.0 - alpha_strength[..., None]) + color * alpha_strength[..., None]
+
+    # Figure-facing cleanup: the extracted grid can have pinholes where a ray
+    # misses a sparse voxel footprint even though neighboring rays clearly hit
+    # the same wall/furniture surface. Fill only those low-opacity pinholes from
+    # nearby alpha-weighted structure colors. This keeps the side wall connected
+    # to the back wall without inventing a new RGB render.
+    img_t = torch.from_numpy(img).permute(2, 0, 1).unsqueeze(0).float()
+    op_t = torch.from_numpy(opacity).unsqueeze(0).unsqueeze(0).float()
+    kernel = hole_fill_kernel
+    if kernel % 2 != 1:
+        raise ValueError("--alpha-hole-fill-kernel must be odd")
+    padding = kernel // 2
+    near_op = F.max_pool2d(op_t, kernel_size=kernel, stride=1, padding=padding)
+    color_num = F.avg_pool2d(img_t * op_t, kernel_size=kernel, stride=1, padding=padding)
+    color_den = F.avg_pool2d(op_t, kernel_size=kernel, stride=1, padding=padding)
+    local_color = color_num / color_den.clamp_min(1e-6)
+    fill = (op_t < hole_fill_opacity_threshold) & (near_op > hole_fill_near_threshold) & (color_den > 1e-4)
+    # Feather the fill so true empty background still reads as low confidence.
+    fill_strength = ((near_op - hole_fill_near_threshold) / 0.35).clamp(0.0, 0.75)
+    img_t = torch.where(fill.expand_as(img_t), img_t * (1.0 - fill_strength) + local_color * fill_strength, img_t)
+    img = img_t.squeeze(0).permute(1, 2, 0).numpy().clip(0.0, 1.0)
+    save_rgb(path, img)
+
+
 def make_quad(render_rgb_path: Path, grid_rgba_path: Path, alpha_path: Path, bbox_path: Path, out_path: Path) -> None:
     paths = [render_rgb_path, grid_rgba_path, alpha_path, bbox_path]
-    labels = ["rendered RGB", "grid RGBA over render", "grid alpha / structure", "rendered RGB + boxes"]
+    labels = ["rendered RGB", "render-completed grid RGBA", "grid alpha / structure", "rendered RGB + boxes"]
     imgs = [Image.open(p).convert("RGB") for p in paths]
     thumb_w, thumb_h = 360, 270
     imgs = [ImageOps.contain(img, (thumb_w, thumb_h), Image.BILINEAR) for img in imgs]
@@ -430,6 +513,22 @@ def main() -> None:
     parser.add_argument("--alpha-screen-connect-opacity-gain", type=float, default=0.85)
     parser.add_argument("--alpha-screen-fill-opacity-threshold", type=float, default=0.35)
     parser.add_argument(
+        "--alpha-style",
+        choices=["depth", "depth-normal"],
+        default="depth",
+        help="Style for the alpha/structure panel. depth-normal keeps side/back surfaces connected.",
+    )
+    parser.add_argument("--alpha-hole-fill-kernel", type=int, default=63)
+    parser.add_argument("--alpha-hole-fill-near-threshold", type=float, default=0.20)
+    parser.add_argument("--alpha-hole-fill-opacity-threshold", type=float, default=0.045)
+    parser.add_argument("--alpha-palette", choices=["blue", "gray"], default="blue")
+    parser.add_argument(
+        "--grid-background",
+        choices=["render", "flat"],
+        default="render",
+        help="Background for the grid RGBA panel. 'render' composites low-opacity grid over the RGB render; 'flat' shows the grid alone.",
+    )
+    parser.add_argument(
         "--crop",
         default="",
         help="Aligned crop for paper-facing panels, formatted left,top,right,bottom. Empty string disables crops.",
@@ -487,9 +586,21 @@ def main() -> None:
     alpha_path = out / f"fig1_{args.scene}_{args.frame}_grid_alpha_same_camera.png"
     render_rgb_path = out / f"fig1_{args.scene}_{args.frame}_render_rgb.png"
     bbox_path = out / f"fig1_{args.scene}_{args.frame}_render_rgb_bbox_furniture.png"
-    grid_rgb = composite_grid_over_render_background(grid_rgb, opacity, render_rgb_path)
+    if args.grid_background == "render":
+        grid_rgb = composite_grid_over_render_background(grid_rgb, opacity, render_rgb_path)
     save_rgb(rgba_path, grid_rgb)
-    save_alpha(alpha_path, opacity_alpha, depth_alpha)
+    if args.alpha_style == "depth-normal":
+        save_alpha_depth_normal(
+            alpha_path,
+            opacity_alpha,
+            depth_alpha,
+            hole_fill_kernel=args.alpha_hole_fill_kernel,
+            hole_fill_near_threshold=args.alpha_hole_fill_near_threshold,
+            hole_fill_opacity_threshold=args.alpha_hole_fill_opacity_threshold,
+            palette=args.alpha_palette,
+        )
+    else:
+        save_alpha(alpha_path, opacity_alpha, depth_alpha)
 
     if render_rgb_path.exists() and bbox_path.exists():
         make_quad(

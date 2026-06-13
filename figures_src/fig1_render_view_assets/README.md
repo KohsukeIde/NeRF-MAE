@@ -33,9 +33,8 @@ final/
 ```
 
 `paper_candidates/` contains the smaller set intended for human selection. The
-larger `final/` directory keeps the current exported components. Intermediate
-contact sheets and debug renders are under `work_archive/`; downloaded render
-data is under `render_cache/`.
+`final/` directory keeps only the current exported components needed to rebuild
+the candidate sheet. Downloaded render data is under `render_cache/`.
 
 Current selected scene/view:
 
@@ -49,17 +48,12 @@ drawn box indices: 1,2,3,4,5,6
 Final assets:
 
 ```text
-paper_candidates/fig1_recommended_render_grid_alpha_bbox_quad.png
-paper_candidates/fig1_alpha_structure_candidate.png
-paper_candidates/fig1_grid_rgba_candidate.png
+paper_candidates/fig1_recommended_render_completed_alpha_bbox_quad.png
+paper_candidates/fig1_render_completed_grid_rgba_candidate.png
+paper_candidates/fig1_alpha_structure_gray_candidate.png
+paper_candidates/fig1_alpha_palette_comparison.png
+paper_candidates/fig1_render_rgb_candidate.png
 paper_candidates/fig1_render_rgb_bbox_candidate.png
-```
-
-Backup assets:
-
-```text
-final/fig1_3dfront_0045_00_0252_render_rgb.png
-final/fig1_3dfront_0045_00_0252_render_rgb_bbox.png
 ```
 
 ## Reproduction
@@ -74,10 +68,7 @@ Download rendered RGB views and camera transforms for candidate scenes:
 
 ```bash
 python figures_src/download_front3d_render_scene.py \
-  --scene 3dfront_0131_00 \
-  --scene 3dfront_0045_00 \
-  --scene 3dfront_0033_01 \
-  --scene 3dfront_0135_00
+  --scene 3dfront_0131_00
 ```
 
 Build rendered-view contact sheets:
@@ -115,7 +106,13 @@ python figures_src/render_camera_aligned_grid_views.py \
   --screen-fill-opacity-threshold 0.18 \
   --alpha-screen-connect-kernel 71 \
   --alpha-screen-connect-iterations 2 \
-  --alpha-screen-fill-opacity-threshold 0.35
+  --alpha-screen-fill-opacity-threshold 0.35 \
+  --alpha-style depth-normal \
+  --alpha-palette gray \
+  --alpha-hole-fill-kernel 63 \
+  --alpha-hole-fill-near-threshold 0.20 \
+  --alpha-hole-fill-opacity-threshold 0.045 \
+  --grid-background render
 ```
 
 ## Notes
@@ -127,19 +124,32 @@ python figures_src/render_camera_aligned_grid_views.py \
   using the same camera frame as the released RGB image. They are useful for
   explaining alpha/structure vs RGBA appearance, while the clean rendered RGB
   image should remain the main visual.
-- The alpha panel is intentionally blue and depth-shaded: opacity controls how
-  strongly structure appears, while expected ray depth changes the blue tone.
-  This avoids reading voxel/grid texture as the main signal and makes the
-  structure-first concept clearer.
+- The alpha panel is intentionally gray and depth/normal-shaded in the current
+  paper candidate. This reads more like geometry/mesh than the earlier blue
+  signal-map style. Use `--alpha-palette blue` only for diagnostic figures that
+  need to emphasize alpha as a structure signal.
+- The current paper-facing alpha panel uses `--alpha-style depth-normal`,
+  which shades the same-camera ray-marched alpha/depth as a connected surface.
+  This replaced the marching-cubes-only mesh candidate because the latter
+  dropped low-alpha side/back walls and made them look like white missing
+  geometry.
 - The grid RGBA panel preserves the camera-aligned grid color where the grid is
   opaque, but composites transparent/low-opacity regions over the matching
   rendered RGB view instead of a blank white background. This prevents missing
   grid opacity from reading as white geometry.
+- For diagnostics, use `--grid-background flat`. That shows the extracted grid
+  alone. In the selected 0180 view, the far-left table/door region is mostly
+  low-opacity in the extracted grid; if `--grid-background render` is used, that
+  region is primarily the released RGB render showing through rather than
+  recovered grid geometry.
+- The paper-facing `fig1_render_completed_grid_rgba_candidate.png` therefore
+  should be described as render-completed/image-composited grid visualization,
+  not as a pure mesh or pure grid render.
 - We do not dilate all visible voxels by default because that degrades
   foreground furniture quality.
-- The alpha panel uses a separate, stronger screen-space opacity fill and a
-  lighter blue palette. This is a figure-facing structure visualization, not a
-  separate photorealistic render.
+- The alpha panel uses a separate, stronger screen-space opacity fill and the
+  gray palette. This is a figure-facing structure visualization, not a separate
+  photorealistic render.
 - For predicted proposal visualization exactly like NeRF-RPN, use `nerf_rpn/scripts/proposals2ngp.py` to inject proposal boxes into `transforms.json`, then render through the instant-ngp fork referenced in the NeRF-MAE README. That is heavier and not needed for the Fig. 1 conceptual render.
-- Candidate sheets and raw grid render debug assets are under
-  `work_archive/`. They are kept for auditability, not for direct paper use.
+- Intermediate contact sheets and rejected debug renders were removed from this
+  directory. Regenerate them with the commands above if needed.
