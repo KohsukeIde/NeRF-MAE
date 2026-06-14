@@ -1,3 +1,5 @@
 job,stage,condition,epochs,seed,run_suffix,dependency
-1909302.pbs1,pretrain,reverse_ramp,300,1,abci3reverse,
-1909303.pbs1,fcos,reverse_ramp,300,1,abci3reverse,afterok:1909302.pbs1
+1909302.pbs1,pretrain,reverse_ramp,300,1,abci3reverse,canceled_slow_deterministic
+1909303.pbs1,fcos,reverse_ramp,300,1,abci3reverse,canceled_depended_on_1909302
+1912406.pbs1,pretrain,reverse_ramp,300,1,abci3reverse_det0,
+1912407.pbs1,fcos,reverse_ramp,300,1,abci3reverse_det0,afterok:1912406.pbs1

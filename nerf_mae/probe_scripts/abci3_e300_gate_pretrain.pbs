@@ -95,8 +95,15 @@ RESUME_ALLOW_PARTIAL="${RESUME_ALLOW_PARTIAL:-1}"
 SKIP_EXISTING="${SKIP_EXISTING:-1}"
 USE_WANDB="${USE_WANDB:-0}"
 WANDB_MODE="${WANDB_MODE:-offline}"
-DETERMINISTIC="${DETERMINISTIC:-1}"
+DETERMINISTIC="${DETERMINISTIC:-0}"
+ALLOW_SLOW_DETERMINISTIC_PRETRAIN="${ALLOW_SLOW_DETERMINISTIC_PRETRAIN:-0}"
 PRETRAIN_MASTER_PORT="${PRETRAIN_MASTER_PORT:-29500}"
+
+if [[ "${DETERMINISTIC}" == "1" && "${ALLOW_SLOW_DETERMINISTIC_PRETRAIN}" != "1" ]]; then
+  echo "[error] DETERMINISTIC=1 makes ABCI3 pretraining ~5-6x slower and is disabled for normal experiments." >&2
+  echo "[error] Use DETERMINISTIC=0, or set ALLOW_SLOW_DETERMINISTIC_PRETRAIN=1 only for an explicit speed/debug audit." >&2
+  exit 1
+fi
 
 normalize_empty_literal() {
   local name="$1"
@@ -322,6 +329,7 @@ export SKIP_EXISTING="$(printf '%q' "${SKIP_EXISTING}")"
 export USE_WANDB="$(printf '%q' "${USE_WANDB}")"
 export WANDB_MODE="$(printf '%q' "${WANDB_MODE}")"
 export DETERMINISTIC="$(printf '%q' "${DETERMINISTIC}")"
+export ALLOW_SLOW_DETERMINISTIC_PRETRAIN="$(printf '%q' "${ALLOW_SLOW_DETERMINISTIC_PRETRAIN}")"
 export DISABLE_ABS_POS_EMBED="$(printf '%q' "${DISABLE_ABS_POS_EMBED}")"
 export DISABLE_RELATIVE_POSITION_BIAS="$(printf '%q' "${DISABLE_RELATIVE_POSITION_BIAS}")"
 export ROTATE_PROB="$(printf '%q' "${ROTATE_PROB}")"

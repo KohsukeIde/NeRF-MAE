@@ -23,12 +23,15 @@ Submitted a clean e300 reverse ramp control without coord-jitter:
 
 | job | stage | condition | notes |
 |---|---|---|---|
-| `1909302.pbs1` | pretrain | `reverse_ramp` | `RUN_SUFFIX=abci3reverse`, e300, seed1 |
-| `1909303.pbs1` | FCOS | `reverse_ramp` | depends on `afterok:1909302.pbs1` |
+| `1909302.pbs1` | pretrain | `reverse_ramp` | canceled; accidentally used PBS default `DETERMINISTIC=1` and was running at ~65h/e300 pace |
+| `1909303.pbs1` | FCOS | `reverse_ramp` | canceled with `1909302.pbs1` |
+| `1912406.pbs1` | pretrain | `reverse_ramp` | `RUN_SUFFIX=abci3reverse_det0`, e300, seed1, `DETERMINISTIC=0` |
+| `1912407.pbs1` | FCOS | `reverse_ramp` | depends on `afterok:1912406.pbs1` |
 
 Implementation note:
 - `reverse_ramp` was added to the ABCI3 e300 gate PBS wrappers as a clean, no coord-jitter counterpart to the existing `reverse_ramp_coord_jitter`.
 - It uses the same probe objective as `cosine_ramp`, but with `PROBE_CURRICULUM_RGB_START_WEIGHT=1.0` and `PROBE_CURRICULUM_RGB_END_WEIGHT=0.0`.
+- The active run uses `DETERMINISTIC=0`, matching the fast budget/probe pretraining protocol used by the main det0 rows.
 
 Decision rule:
 - If `reverse_ramp_e300` is clearly below `cosine_ramp_e300`, the paper can state that structure-to-appearance order matters.
