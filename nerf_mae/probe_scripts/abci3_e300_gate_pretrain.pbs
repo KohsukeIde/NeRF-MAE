@@ -200,7 +200,7 @@ case "${KIND}:${CONDITION}" in
   baseline:baseline)
     SAVE_NAME="nerfmae_all_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
-  curriculum:cosine_ramp|curriculum:cosine_ramp_alpha_shuffle|curriculum:cosine_ramp_coord_jitter|curriculum:linear_ramp_coord_jitter|curriculum:step_ramp_coord_jitter|curriculum:reverse_ramp_coord_jitter|curriculum:constant_mixed_coord_jitter)
+  curriculum:cosine_ramp|curriculum:reverse_ramp|curriculum:cosine_ramp_alpha_shuffle|curriculum:cosine_ramp_coord_jitter|curriculum:linear_ramp_coord_jitter|curriculum:step_ramp_coord_jitter|curriculum:reverse_ramp_coord_jitter|curriculum:constant_mixed_coord_jitter)
     SAVE_NAME="nerfmae_alpha_rgba_curr_${CONDITION}_p1.0_e${EPOCHS}_seed${SEED}${suffix_part}"
     ;;
   diagnostic:paper_loss|diagnostic:alpha_target_only|diagnostic:alpha_target_only_no_pos|diagnostic:alpha_target_only_coord_jitter|diagnostic:baseline_no_pos|diagnostic:baseline_coord_jitter|diagnostic:cosine_no_pos|diagnostic:cosine_coord_jitter|diagnostic:shuffle_coord_jitter|diagnostic:dmae_target_alpha_gated_rgb|diagnostic:dmae_hier_concat|diagnostic:dmae_hier_concat_coord_jitter|diagnostic:dmae_hier_film)
@@ -586,7 +586,7 @@ case "${KIND}:${CONDITION}" in
   baseline:baseline)
     env "${common_env[@]}" "${resume_env[@]}" PROBE_MODE=baseline bash train_mae3d.sh
     ;;
-  curriculum:cosine_ramp|curriculum:cosine_ramp_coord_jitter|curriculum:linear_ramp_coord_jitter|curriculum:step_ramp_coord_jitter|curriculum:reverse_ramp_coord_jitter|curriculum:constant_mixed_coord_jitter)
+  curriculum:cosine_ramp|curriculum:reverse_ramp|curriculum:cosine_ramp_coord_jitter|curriculum:linear_ramp_coord_jitter|curriculum:step_ramp_coord_jitter|curriculum:reverse_ramp_coord_jitter|curriculum:constant_mixed_coord_jitter)
     curriculum_mode="cosine_rgb_ramp"
     curriculum_epochs="${EPOCHS}"
     rgb_start="0.0"
@@ -610,7 +610,7 @@ case "${KIND}:${CONDITION}" in
         curriculum_mode="alpha_warmup"
         curriculum_epochs="${PROBE_CURRICULUM_EPOCHS:-$(((EPOCHS + 1) / 2))}"
         ;;
-      reverse_ramp_coord_jitter)
+      reverse_ramp|reverse_ramp_coord_jitter)
         curriculum_mode="cosine_rgb_ramp"
         rgb_start="1.0"
         rgb_end="0.0"
