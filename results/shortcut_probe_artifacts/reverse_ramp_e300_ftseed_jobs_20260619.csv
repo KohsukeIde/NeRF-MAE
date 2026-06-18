@@ -1,0 +1,3 @@
+job,stage,condition,epochs,pretrain_seed,finetune_seed,run_suffix,log
+1921617.pbs1,fcos,reverse_ramp,300,1,2,abci3reverse_det0,/groups/gag51404/ide/vgi/NeRF-MAE/output/launcher/reverse_ramp_e300_ftseeds_20260619_011515/reverse_e300_ftseed2.pbs.log
+1921618.pbs1,fcos,reverse_ramp,300,1,3,abci3reverse_det0,/groups/gag51404/ide/vgi/NeRF-MAE/output/launcher/reverse_ramp_e300_ftseeds_20260619_011515/reverse_e300_ftseed3.pbs.log
