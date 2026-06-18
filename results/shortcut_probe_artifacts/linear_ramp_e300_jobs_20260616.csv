@@ -1,0 +1,5 @@
+job,stage,condition,epochs,pretrain_seed,finetune_seed,run_suffix,deterministic,dependency,log
+1916248.pbs1,pretrain,linear_ramp,300,1,,abci3linear_det0,0,,output/launcher/linear_ramp_e300_det0_20260616_180439/e300_lin_s1_pre.pbs.log
+1916249.pbs1,fcos,linear_ramp,300,1,1,abci3linear_det0,0,afterok:1916248.pbs1,output/launcher/linear_ramp_e300_det0_20260616_180439/e300_lin_s1_fcos.pbs.log
+1916251.pbs1,fcos,linear_ramp,300,1,2,abci3linear_det0,0,afterok:1916248.pbs1,output/launcher/linear_ramp_e300_det0_20260616_180439/e300_lin_s1_ft2_fcos.pbs.log
+1916252.pbs1,fcos,linear_ramp,300,1,3,abci3linear_det0,0,afterok:1916248.pbs1,output/launcher/linear_ramp_e300_det0_20260616_180439/e300_lin_s1_ft3_fcos.pbs.log

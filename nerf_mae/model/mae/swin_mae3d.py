@@ -455,7 +455,7 @@ class SwinTransformer_MAE3D(nn.Module):  # TODO: change to 3D
         out_channels: int = 256,
         input_dim: int = 4,
         decoder_embed_dim: int = 768,
-        masking_prob=0.50,
+        masking_prob=0.75,
         resolution=160,
         masking_strategy=None,
     ):
@@ -1106,7 +1106,7 @@ class SwinTransformer_MAE3D_New(nn.Module):  # TODO: change to 3D
         out_channels: int = 4,
         input_ch_dim: int = 4,
         decoder_embed_dim: int = 768,
-        masking_prob=0.50,
+        masking_prob=0.75,
         resolution=160,
         drop_rate=0.10,
         masking_strategy="random",

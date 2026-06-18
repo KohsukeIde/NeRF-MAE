@@ -120,7 +120,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--masking_prob", type=float, default=0.5, help="Input dimension for backbone."
+        "--masking_prob",
+        type=float,
+        default=0.75,
+        help="MAE patch masking probability.",
     )
 
     parser.add_argument(

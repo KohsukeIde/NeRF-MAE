@@ -72,6 +72,7 @@ short_condition() {
   case "$1" in
     baseline) printf "base" ;;
     cosine_ramp) printf "cos" ;;
+    linear_ramp) printf "lin" ;;
     cosine_ramp_alpha_shuffle) printf "shuf" ;;
     *) printf "%s" "$1" | tr -cd '[:alnum:]_' | cut -c1-8 ;;
   esac

@@ -11,3 +11,7 @@ job,labels,condition,finetune_seed,save_name,checkpoint
 1909299.pbs1,0.25,scratch,3,front3d_scratch_lowlabel_pt25_seed3_fcos1000,scratch
 1909300.pbs1,0.25,baseline_e300,3,baseline_e300_lowlabel_pt25_seed3_fcos1000,output/nerf_mae/results/nerfmae_all_p1.0_e300_seed1/epoch_300.pt
 1909301.pbs1,0.25,cosine_ramp_e300,3,cosine_ramp_e300_lowlabel_pt25_seed3_fcos1000,output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1/epoch_300.pt
+1916159.pbs1,0.50,scratch,2,front3d_scratch_lowlabel_pt05_seed2_fcos1000,scratch
+1916160.pbs1,0.50,scratch,3,front3d_scratch_lowlabel_pt05_seed3_fcos1000,scratch
+1916161.pbs1,0.50,baseline_e300,2,baseline_e300_lowlabel_pt05_seed2_fcos1000,output/nerf_mae/results/nerfmae_all_p1.0_e300_seed1/epoch_300.pt
+1916162.pbs1,0.50,baseline_e300,3,baseline_e300_lowlabel_pt05_seed3_fcos1000,output/nerf_mae/results/nerfmae_all_p1.0_e300_seed1/epoch_300.pt
