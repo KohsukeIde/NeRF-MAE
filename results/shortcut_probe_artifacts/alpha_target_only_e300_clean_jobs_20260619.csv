@@ -1,0 +1,5 @@
+job,stage,condition,epochs,pretrain_seed,finetune_seed,run_suffix,dependency,log
+1923106.pbs1,pretrain,alpha_target_only,300,1,,abci3ato_det0,,/groups/gag51404/ide/vgi/NeRF-MAE/output/launcher/alpha_target_only_e300_clean_20260619_141545/alpha_target_only_e300_pre.pbs.log
+1923108.pbs1,fcos,alpha_target_only,300,1,1,abci3ato_det0,afterok:1923106.pbs1,/groups/gag51404/ide/vgi/NeRF-MAE/output/launcher/alpha_target_only_e300_clean_20260619_141545/alpha_target_only_e300_ftseed1.pbs.log
+1923109.pbs1,fcos,alpha_target_only,300,1,2,abci3ato_det0,afterok:1923106.pbs1,/groups/gag51404/ide/vgi/NeRF-MAE/output/launcher/alpha_target_only_e300_clean_20260619_141545/alpha_target_only_e300_ftseed2.pbs.log
+1923110.pbs1,fcos,alpha_target_only,300,1,3,abci3ato_det0,afterok:1923106.pbs1,/groups/gag51404/ide/vgi/NeRF-MAE/output/launcher/alpha_target_only_e300_clean_20260619_141545/alpha_target_only_e300_ftseed3.pbs.log
