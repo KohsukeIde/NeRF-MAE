@@ -1,0 +1,5 @@
+condition,pretrain_seed,finetune_seed,AP25,AP50,AP75,eval_path
+alpha_target_only_e300_clean,1,1,0.755970,0.436988,0.037280,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_only_p1.0_e300_seed1_abci3ato_det0_epoch300_sched_epoch_seed1_fcos1000_eval/eval.json
+alpha_target_only_e300_clean,1,2,0.773944,0.470598,0.022013,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_only_p1.0_e300_seed1_abci3ato_det0_epoch300_sched_epoch_preseed1_ftseed2_fcos1000_eval/eval.json
+alpha_target_only_e300_clean,1,3,0.774663,0.440159,0.073388,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_target_only_p1.0_e300_seed1_abci3ato_det0_epoch300_sched_epoch_preseed1_ftseed3_fcos1000_eval/eval.json
+alpha_target_only_e300_clean_mean_std,1,"1,2,3",0.768192 ± 0.010591,0.449248 ± 0.018557,0.044227 ± 0.026383,
