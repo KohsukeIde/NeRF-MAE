@@ -8,6 +8,7 @@ ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 GPU_IDS="${GPU_IDS:-0}"
 DATASET_NAME="${DATASET_NAME:-front3d}"
 SPLIT_NAME="${SPLIT_NAME:-3dfront}"
+DATA_ROOT="${DATA_ROOT:-../dataset/finetune/${DATASET_NAME}_rpn_data}"
 PERCENT_TRAIN="${PERCENT_TRAIN:-1.0}"
 FCOS_NUM_EPOCHS="${FCOS_NUM_EPOCHS:-100}"
 FCOS_LR="${FCOS_LR:-1e-4}"
@@ -32,6 +33,7 @@ export WANDB_MODE="${WANDB_MODE:-offline}"
 
 export DATASET_NAME
 export SPLIT_NAME
+export DATA_ROOT
 export GPU_IDS
 export PERCENT_TRAIN
 export NUM_EPOCHS="${FCOS_NUM_EPOCHS}"
