@@ -1,0 +1,27 @@
+regime,arm,seed,AP25,AP50,AP75,R25,R50,eval_path
+10%,scratch,1,0.487715,0.147404,0.001787,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/scannet_scratch_lowlabel_pt10_seed1_fcos1000_eval/eval.json
+10%,scratch,2,0.537952,0.141585,0.001253,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/scannet_scratch_lowlabel_pt10_seed2_fcos1000_eval/eval.json
+10%,scratch,3,0.445890,0.065455,0.000000,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/scannet_scratch_lowlabel_pt10_seed3_fcos1000_eval/eval.json
+10%,joint_e300,1,0.506772,0.191530,0.000000,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/baseline_e300_scannet_lowlabel_pt10_seed1_fcos1000_eval/eval.json
+10%,joint_e300,2,0.518558,0.177527,0.000521,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/baseline_e300_scannet_lowlabel_pt10_seed2_fcos1000_eval/eval.json
+10%,joint_e300,3,0.553527,0.193214,0.000911,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/baseline_e300_scannet_lowlabel_pt10_seed3_fcos1000_eval/eval.json
+10%,cosine_e300,1,0.539926,0.158176,0.000819,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/cosine_ramp_e300_scannet_lowlabel_pt10_seed1_fcos1000_eval/eval.json
+10%,cosine_e300,2,0.564496,0.157415,0.000215,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/cosine_ramp_e300_scannet_lowlabel_pt10_seed2_fcos1000_eval/eval.json
+10%,cosine_e300,3,0.546006,0.171174,0.000081,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/cosine_ramp_e300_scannet_lowlabel_pt10_seed3_fcos1000_eval/eval.json
+100%,scratch,1,0.471034,0.116256,0.001642,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/scannet_scratch_lowlabel_pt100_seed1_fcos1000_eval/eval.json
+100%,scratch,2,0.461141,0.111705,0.000334,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/scannet_scratch_lowlabel_pt100_seed2_fcos1000_eval/eval.json
+100%,scratch,3,0.432078,0.053967,0.000000,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/scannet_scratch_lowlabel_pt100_seed3_fcos1000_eval/eval.json
+100%,joint_e300,1,0.501348,0.189824,0.002415,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/baseline_e300_scannet_fcos1000_seed1_eval/eval.json
+100%,joint_e300,2,0.528296,0.183838,0.000062,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/baseline_e300_scannet_fcos1000_seed2_eval/eval.json
+100%,joint_e300,3,0.511515,0.153470,0.000170,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/baseline_e300_scannet_fcos1000_seed3_eval/eval.json
+100%,cosine_e300,1,0.588334,0.191231,0.000614,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/cosine_ramp_e300_scannet_fcos1000_seed1_eval/eval.json
+100%,cosine_e300,2,0.570487,0.191103,0.000643,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/cosine_ramp_e300_scannet_fcos1000_seed2_eval/eval.json
+100%,cosine_e300,3,0.537795,0.114683,0.000000,,,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/cosine_ramp_e300_scannet_fcos1000_seed3_eval/eval.json
+
+regime,arm,n,AP25_mean_std,AP50_mean_std,AP75_mean_std,R25_mean_std,R50_mean_std
+10%,scratch,3,0.490519 ± 0.046095,0.118148 ± 0.045727,0.001013 ± 0.000917,,
+10%,joint_e300,3,0.526286 ± 0.024316,0.187423 ± 0.008612,0.000477 ± 0.000457,,
+10%,cosine_e300,3,0.550143 ± 0.012797,0.162255 ± 0.007733,0.000372 ± 0.000393,,
+100%,scratch,3,0.454751 ± 0.020249,0.093976 ± 0.034724,0.000659 ± 0.000868,,
+100%,joint_e300,3,0.513720 ± 0.013609,0.175711 ± 0.019492,0.000882 ± 0.001328,,
+100%,cosine_e300,3,0.565539 ± 0.025630,0.165672 ± 0.044158,0.000419 ± 0.000363,,
