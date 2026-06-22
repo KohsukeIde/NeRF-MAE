@@ -4,7 +4,9 @@ import importlib.util
 import json
 import logging
 import os
+import random
 from copy import deepcopy
+from functools import partial
 
 import numpy as np
 import torch
@@ -17,7 +19,9 @@ from eval import evaluate_box_proposals_ap, evaluate_box_proposals_recall
 from model.anchor import AnchorGenerator3D, RPNHead
 from model.feature_extractor import (VGG_FPN, Bottleneck, ResNet_FPN_64,
                                      ResNet_FPN_256, ResNetSimplified_64,
-                                     ResNetSimplified_256, SwinTransformer_FPN)
+                                     ResNetSimplified_256, SwinTransformer_FPN,
+                                     SwinTransformer_FPN_Pretrained_Skip as
+                                     SwinTransformer_FPN_Pretrained)
 from model.nerf_rpn import NeRFRegionProposalNetwork
 from model.utils import box_iou_3d
 from torch.nn.parallel import DistributedDataParallel as DDP
@@ -49,6 +53,9 @@ def parse_args():
     parser.add_argument('--preload', action='store_true', help='Preload the features and boxes.')
 
     parser.add_argument('--checkpoint', default='', help='Path to the checkpoint to load.')
+    parser.add_argument('--mae_checkpoint', default='', help='Path to an MAE checkpoint used to initialize Swin backbone.')
+    parser.add_argument('--scratch_backbone', action='store_true',
+                        help='Use randomly initialized Swin backbone even if --mae_checkpoint is provided.')
     parser.add_argument('--load_backbone_only', action='store_true', help='Only load the backbone.')
     parser.add_argument('--backbone_type', type=str, default='resnet', 
                         choices=['resnet', 'vgg_AF', 'vgg_EF',  'swin_t', 'swin_s', 'swin_b', 'swin_l'],)
@@ -81,6 +88,11 @@ def parse_args():
     parser.add_argument('--rotate_prob', default=0.5, type=float, help='The probability of rotating the scene.')
     parser.add_argument('--flip_prob', default=0.5, type=float, help='The probability of flipping the scene.')
     parser.add_argument('--rot_scale_prob', default=0.5, type=float, help='The probability of extra rotation and scaling.')
+    parser.add_argument('--percent_train', type=float, default=1.0,
+                        help='Fraction of training scenes to use for low-label Front3D/Hypersim runs.')
+    parser.add_argument('--seed', type=int, default=None, help='Random seed for training and data loading.')
+    parser.add_argument('--deterministic', action='store_true',
+                        help='Enable deterministic torch algorithms where available.')
 
     # Training parameters
     parser.add_argument('--batch_size', default=1, type=int, help='The batch size.')
@@ -143,6 +155,46 @@ def parse_args():
     return args
 
 
+def set_random_seed(seed, deterministic=False):
+    if deterministic and "CUBLAS_WORKSPACE_CONFIG" not in os.environ:
+        os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
+
+    torch.backends.cudnn.deterministic = deterministic
+    torch.backends.cudnn.benchmark = not deterministic
+
+    if deterministic and hasattr(torch, "use_deterministic_algorithms"):
+        try:
+            torch.use_deterministic_algorithms(True, warn_only=True)
+        except TypeError:
+            torch.use_deterministic_algorithms(True)
+
+    if seed is None:
+        return
+
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    random.seed(seed)
+    np.random.seed(seed % (2**32))
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+
+
+def seed_dataloader_worker(worker_id, base_seed):
+    worker_seed = (base_seed + worker_id) % (2**32)
+    random.seed(worker_seed)
+    np.random.seed(worker_seed)
+    torch.manual_seed(worker_seed)
+
+
+def build_generator(seed):
+    if seed is None:
+        return None
+    generator = torch.Generator()
+    generator.manual_seed(seed)
+    return generator
+
+
 class Trainer:
     def __init__(self, args, rank=0, world_size=1, device_id=None, logger=None):
         self.args = args
@@ -150,6 +202,20 @@ class Trainer:
         self.world_size = world_size
         self.device_id = device_id
         self.logger = logger if logger is not None else logging.getLogger()
+        torch.multiprocessing.set_sharing_strategy("file_system")
+        self.data_seed = None if args.seed is None else int(args.seed) + rank * 1000
+        self.worker_init_fn = None
+        self.eval_worker_init_fn = None
+        self.train_generator = None
+        self.eval_generator = None
+
+        if self.data_seed is not None:
+            self.worker_init_fn = partial(seed_dataloader_worker, base_seed=self.data_seed)
+            self.eval_worker_init_fn = partial(
+                seed_dataloader_worker, base_seed=self.data_seed + 100000
+            )
+            self.train_generator = build_generator(self.data_seed)
+            self.eval_generator = build_generator(self.data_seed + 100000)
 
         
         if args.dataset_name == 'hypersim':
@@ -283,13 +349,26 @@ class Trainer:
                     'swin_s': {'embed_dim':96, 'depths':[2, 2, 18, 2], 'num_heads':[3, 6, 12, 24]},
                     'swin_b': {'embed_dim':128, 'depths':[2, 2, 18, 2], 'num_heads':[3, 6, 12, 24]},
                     'swin_l': {'embed_dim':192, 'depths':[2, 2, 18, 2], 'num_heads':[6, 12, 24, 48]}}
-            self.backbone = SwinTransformer_FPN(patch_size=[4, 4, 4], 
-                                                embed_dim=swin[self.args.backbone_type]['embed_dim'], 
-                                                depths=swin[self.args.backbone_type]['depths'],
-                                                num_heads=swin[self.args.backbone_type]['num_heads'], 
-                                                window_size=[4, 4, 4],
-                                                stochastic_depth_prob=0.1,
-                                                expand_dim=True,)
+            use_mae_backbone = bool(self.args.mae_checkpoint) and not self.args.scratch_backbone
+            load_mae_checkpoint = use_mae_backbone and not self.args.checkpoint
+            if use_mae_backbone:
+                self.logger.info(
+                    "Using MAE-compatible Swin FPN backbone architecture "
+                    f"(load_mae_checkpoint={load_mae_checkpoint})."
+                )
+                self.backbone = SwinTransformer_FPN_Pretrained(
+                    resolution=self.args.resolution,
+                    checkpoint_path=self.args.mae_checkpoint if load_mae_checkpoint else None,
+                    is_eval=not load_mae_checkpoint,
+                )
+            else:
+                self.backbone = SwinTransformer_FPN(patch_size=[4, 4, 4],
+                                                    embed_dim=swin[self.args.backbone_type]['embed_dim'],
+                                                    depths=swin[self.args.backbone_type]['depths'],
+                                                    num_heads=swin[self.args.backbone_type]['num_heads'],
+                                                    window_size=[4, 4, 4],
+                                                    stochastic_depth_prob=0.1,
+                                                    expand_dim=True,)
 
     def save_checkpoint(self, epoch, path):
         torch.save({
@@ -312,7 +391,8 @@ class Trainer:
             self.train_set = self.dataset(scene_list=self.train_scenes, features_path=self.args.features_path, 
                                           boxes_path=self.args.boxes_path, normalize_density=self.args.normalize_density,
                                           flip_prob=self.args.flip_prob, rotate_prob=self.args.rotate_prob, 
-                                          rot_scale_prob=self.args.rot_scale_prob, preload=self.args.preload)
+                                          rot_scale_prob=self.args.rot_scale_prob, preload=self.args.preload,
+                                          percent_train=self.args.percent_train)
             self.val_set = self.dataset(scene_list=self.val_scenes, features_path=self.args.features_path, 
                                         boxes_path=self.args.boxes_path, normalize_density=self.args.normalize_density,
                                         preload=self.args.preload)
@@ -331,12 +411,19 @@ class Trainer:
         if self.world_size == 1:
             self.train_loader = DataLoader(self.train_set, batch_size=self.args.batch_size, 
                                            collate_fn=BaseDataset.collate_fn,
-                                           shuffle=True, num_workers=4, pin_memory=True)
+                                           shuffle=True, num_workers=4, pin_memory=True,
+                                           worker_init_fn=self.worker_init_fn,
+                                           generator=self.train_generator)
         else:
-            self.train_sampler = DistributedSampler(self.train_set)
+            self.train_sampler = DistributedSampler(
+                self.train_set,
+                seed=0 if self.data_seed is None else self.data_seed,
+            )
             self.train_loader = DataLoader(self.train_set, batch_size=self.args.batch_size // self.world_size,
                                            collate_fn=BaseDataset.collate_fn,
-                                           sampler=self.train_sampler, num_workers=2, pin_memory=True)
+                                           sampler=self.train_sampler, num_workers=2, pin_memory=True,
+                                           worker_init_fn=self.worker_init_fn,
+                                           generator=self.train_generator)
 
         if self.rank == 0:
             self.logger.info(f'Loaded {len(self.train_set)} training scenes, '
@@ -457,7 +544,9 @@ class Trainer:
         self.model.eval()
         dataloader = DataLoader(dataset, batch_size=self.args.batch_size // self.world_size, 
                                 shuffle=False, num_workers=4,
-                                collate_fn=dataset.collate_fn)
+                                collate_fn=dataset.collate_fn,
+                                worker_init_fn=self.eval_worker_init_fn,
+                                generator=self.eval_generator)
 
         self.logger.info(f'Evaluating...')
 
@@ -562,14 +651,17 @@ class Trainer:
 
         # Average precisions
         ap50 = evaluate_box_proposals_ap(proposals_list, scores_list, gt_boxes_list, iou_thresh=0.5, top_k=self.args.top_k)
+        ap75 = evaluate_box_proposals_ap(proposals_list, scores_list, gt_boxes_list, iou_thresh=0.75, top_k=self.args.top_k)
         ap25 = evaluate_box_proposals_ap(proposals_list, scores_list, gt_boxes_list, iou_thresh=0.25, top_k=self.args.top_k)
 
         APs.append(ap50['ap'].item())
 
         print(f'AP@50: AP: {ap50["ap"].item():.4f}')
+        print(f'AP@75: AP: {ap75["ap"].item():.4f}')
         print(f'AP@25: AP: {ap25["ap"].item():.4f}')
 
         json_dict['ap_50'] = ap50
+        json_dict['ap_75'] = ap75
         json_dict['ap_25'] = ap25
 
         if self.args.mode == 'eval':
@@ -623,6 +715,8 @@ def main_worker(proc, nprocs, args, gpu_ids, init_method):
     '''
     dist.init_process_group(backend='nccl', init_method=init_method, world_size=nprocs, rank=proc)
     torch.cuda.set_device(gpu_ids[proc])
+    worker_seed = None if args.seed is None else int(args.seed) + proc * 1000
+    set_random_seed(worker_seed, deterministic=args.deterministic)
 
     logger = logging.getLogger(f'worker_{proc}')
     logger.setLevel(logging.DEBUG)
@@ -649,6 +743,7 @@ def main_worker(proc, nprocs, args, gpu_ids, init_method):
 
 def main():
     args = parse_args()
+    set_random_seed(args.seed, deterministic=args.deterministic)
 
     logging.basicConfig(level=logging.INFO, format='[%(asctime)s %(levelname)s] %(message)s')
 
