@@ -36,6 +36,7 @@ AUTO_RESUME_PRETRAIN="${AUTO_RESUME_PRETRAIN:-1}"
 RESUME_ALLOW_PARTIAL="${RESUME_ALLOW_PARTIAL:-1}"
 FCOS_NUM_EPOCHS="${FCOS_NUM_EPOCHS:-1000}"
 FCOS_GPU_IDS="${FCOS_GPU_IDS:-0}"
+FCOS_PERCENT_TRAIN="${FCOS_PERCENT_TRAIN:-1.0}"
 FCOS_BATCH_SIZE_PER_GPU="${FCOS_BATCH_SIZE_PER_GPU:-2}"
 FCOS_LR="${FCOS_LR:-1e-4}"
 FCOS_WEIGHT_DECAY="${FCOS_WEIGHT_DECAY:-1e-3}"
@@ -96,6 +97,7 @@ short_condition() {
   case "$1" in
     baseline) printf "base" ;;
     cosine_ramp) printf "cos" ;;
+    constant_rgb_half) printf "w05" ;;
     cosine_ramp_alpha_shuffle) printf "shuf" ;;
     alpha_target_only) printf "ato" ;;
     alpha_target_only_no_pos) printf "atnopos" ;;
@@ -127,7 +129,7 @@ pretrain_save_name() {
     baseline:baseline)
       printf "nerfmae_all_p1.0_e%s_seed%s%s\n" "${epochs}" "${seed}" "${suffix_part}"
       ;;
-    curriculum:cosine_ramp|curriculum:cosine_ramp_alpha_shuffle)
+    curriculum:cosine_ramp|curriculum:linear_ramp|curriculum:reverse_ramp|curriculum:constant_rgb_half|curriculum:cosine_ramp_alpha_shuffle)
       printf "nerfmae_alpha_rgba_curr_%s_p1.0_e%s_seed%s%s\n" "${condition}" "${epochs}" "${seed}" "${suffix_part}"
       ;;
     diagnostic:alpha_target_only|diagnostic:alpha_target_only_no_pos|diagnostic:alpha_target_only_coord_jitter|diagnostic:baseline_no_pos|diagnostic:baseline_coord_jitter|diagnostic:cosine_no_pos|diagnostic:cosine_coord_jitter|diagnostic:shuffle_coord_jitter|diagnostic:dmae_target_alpha_gated_rgb|diagnostic:dmae_hier_concat|diagnostic:dmae_hier_concat_coord_jitter|diagnostic:dmae_hier_film)
@@ -164,6 +166,21 @@ combine_dependency() {
   else
     printf "%s\n" "${b}"
   fi
+}
+
+percent_tag() {
+  case "$1" in
+    1|1.0|1.00)
+      printf "" ;;
+    0.1|0.10|.1)
+      printf "_pt10" ;;
+    0.25|0.250|.25)
+      printf "_pt25" ;;
+    0.5|0.50|.5)
+      printf "_pt50" ;;
+    *)
+      printf "_pt%s" "$(printf "%s" "$1" | tr -cd '[:alnum:]')" ;;
+  esac
 }
 
 submit_pretrain() {
@@ -220,13 +237,13 @@ submit_fcos() {
 
   short="$(short_condition "${condition}")"
   if [[ "${finetune_seed}" == "${seed}" ]]; then
-    fcos_name="e${epochs}_${short}_s${seed}_fcos"
+    fcos_name="e${epochs}_${short}_s${seed}$(percent_tag "${FCOS_PERCENT_TRAIN}")_fcos"
   else
-    fcos_name="e${epochs}_${short}_pre${seed}_ft${finetune_seed}_fcos"
+    fcos_name="e${epochs}_${short}_pre${seed}_ft${finetune_seed}$(percent_tag "${FCOS_PERCENT_TRAIN}")_fcos"
   fi
   qsub_gpu_ids="${PRETRAIN_GPU_IDS//,/:}"
   fcos_gpu_ids="${FCOS_GPU_IDS:-0}"
-  varlist="KIND=${kind},CONDITION=${condition},EPOCHS=${epochs},SEED=${seed},FINETUNE_SEED=${finetune_seed},RUN_SUFFIX=${RUN_SUFFIX},PROBE_ENV_PREFIX=${PROBE_ENV_PREFIX},PRETRAIN_DATA_ROOT=${PRETRAIN_DATA_ROOT},FCOS_DATA_ROOT=${FCOS_DATA_ROOT},ABCI3_CUDA_MODULE=${ABCI3_CUDA_MODULE},PRETRAIN_NODES=${PRETRAIN_NODES},PRETRAIN_GPU_IDS=${qsub_gpu_ids},PRETRAIN_BATCH_SIZE_PER_GPU=${PRETRAIN_BATCH_SIZE_PER_GPU},PRETRAIN_EVAL_INTERVAL=${PRETRAIN_EVAL_INTERVAL},PRETRAIN_CHECKPOINT_INTERVAL=${PRETRAIN_CHECKPOINT_INTERVAL},PRETRAIN_KEEP_CHECKPOINTS=${PRETRAIN_KEEP_CHECKPOINTS},PRETRAIN_LOG_INTERVAL=${PRETRAIN_LOG_INTERVAL},PRETRAIN_PROFILE_STEP_TIME=${PRETRAIN_PROFILE_STEP_TIME},FCOS_GPU_IDS=${fcos_gpu_ids},FCOS_NUM_EPOCHS=${FCOS_NUM_EPOCHS},FCOS_BATCH_SIZE_PER_GPU=${FCOS_BATCH_SIZE_PER_GPU},FCOS_LR=${FCOS_LR},FCOS_WEIGHT_DECAY=${FCOS_WEIGHT_DECAY},FCOS_LR_SCHEDULER=${FCOS_LR_SCHEDULER},USE_WANDB=${USE_WANDB},WANDB_MODE=${WANDB_MODE},DETERMINISTIC=${DETERMINISTIC},SKIP_EXISTING=1"
+  varlist="KIND=${kind},CONDITION=${condition},EPOCHS=${epochs},SEED=${seed},FINETUNE_SEED=${finetune_seed},RUN_SUFFIX=${RUN_SUFFIX},PROBE_ENV_PREFIX=${PROBE_ENV_PREFIX},PRETRAIN_DATA_ROOT=${PRETRAIN_DATA_ROOT},FCOS_DATA_ROOT=${FCOS_DATA_ROOT},ABCI3_CUDA_MODULE=${ABCI3_CUDA_MODULE},PRETRAIN_NODES=${PRETRAIN_NODES},PRETRAIN_GPU_IDS=${qsub_gpu_ids},PRETRAIN_BATCH_SIZE_PER_GPU=${PRETRAIN_BATCH_SIZE_PER_GPU},PRETRAIN_EVAL_INTERVAL=${PRETRAIN_EVAL_INTERVAL},PRETRAIN_CHECKPOINT_INTERVAL=${PRETRAIN_CHECKPOINT_INTERVAL},PRETRAIN_KEEP_CHECKPOINTS=${PRETRAIN_KEEP_CHECKPOINTS},PRETRAIN_LOG_INTERVAL=${PRETRAIN_LOG_INTERVAL},PRETRAIN_PROFILE_STEP_TIME=${PRETRAIN_PROFILE_STEP_TIME},FCOS_GPU_IDS=${fcos_gpu_ids},FCOS_NUM_EPOCHS=${FCOS_NUM_EPOCHS},FCOS_PERCENT_TRAIN=${FCOS_PERCENT_TRAIN},FCOS_BATCH_SIZE_PER_GPU=${FCOS_BATCH_SIZE_PER_GPU},FCOS_LR=${FCOS_LR},FCOS_WEIGHT_DECAY=${FCOS_WEIGHT_DECAY},FCOS_LR_SCHEDULER=${FCOS_LR_SCHEDULER},USE_WANDB=${USE_WANDB},WANDB_MODE=${WANDB_MODE},DETERMINISTIC=${DETERMINISTIC},SKIP_EXISTING=1"
 
   local fcos_cmd=(
     qsub
