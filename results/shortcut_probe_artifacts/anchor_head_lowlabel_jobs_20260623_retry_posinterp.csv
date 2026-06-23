@@ -1,0 +1,7 @@
+job_id,job_name,arm,seed,percent_train,save_name,checkpoint,note
+1938340.pbs1,anc_j_p10r_s1,joint_e300,1,0.1,front3d_anchor_joint_e300_p10_seed1_rpn200,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_all_p1.0_e300_seed1_abci3clean/epoch_300.pt,pos_embed_interpolation_retry
+1938341.pbs1,anc_c_p10r_s1,cosine_e300,1,0.1,front3d_anchor_cosine_e300_p10_seed1_rpn200,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1_abci3clean/epoch_300.pt,pos_embed_interpolation_retry
+1938342.pbs1,anc_j_p10r_s2,joint_e300,2,0.1,front3d_anchor_joint_e300_p10_seed2_rpn200,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_all_p1.0_e300_seed1_abci3clean/epoch_300.pt,pos_embed_interpolation_retry
+1938343.pbs1,anc_c_p10r_s2,cosine_e300,2,0.1,front3d_anchor_cosine_e300_p10_seed2_rpn200,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1_abci3clean/epoch_300.pt,pos_embed_interpolation_retry
+1938344.pbs1,anc_j_p10r_s3,joint_e300,3,0.1,front3d_anchor_joint_e300_p10_seed3_rpn200,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_all_p1.0_e300_seed1_abci3clean/epoch_300.pt,pos_embed_interpolation_retry
+1938345.pbs1,anc_c_p10r_s3,cosine_e300,3,0.1,front3d_anchor_cosine_e300_p10_seed3_rpn200,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1_abci3clean/epoch_300.pt,pos_embed_interpolation_retry

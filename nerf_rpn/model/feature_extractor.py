@@ -43,6 +43,19 @@ def _torch_load_trusted_checkpoint(path, map_location="cpu"):
         return torch.load(path, map_location=map_location)
 
 
+def _pos_embed_like(pos_embed, x):
+    if tuple(pos_embed.shape[1:4]) == tuple(x.shape[1:4]):
+        return pos_embed.type_as(x).to(x.device).clone().detach()
+    pos = pos_embed.permute(0, 4, 1, 2, 3).contiguous()
+    pos = F.interpolate(
+        pos.type_as(x).to(x.device),
+        size=tuple(x.shape[1:4]),
+        mode="trilinear",
+        align_corners=False,
+    )
+    return pos.permute(0, 2, 3, 4, 1).contiguous().clone().detach()
+
+
 # Simplified 3D Residual Block
 class ResidualBlockSimplified(nn.Module):
     """The simplified Basic Residual block of ResNet."""
@@ -1189,7 +1202,7 @@ class SwinTransformer_FPN_Pretrained_Skip(nn.Module):  # TODO: change to 3D
         # Forward pass through the SwinTransformer base
         features: List[torch.Tensor] = []
         x = self.base.patch_partition(x)
-        x = x + self.base.pos_embed.type_as(x).to(x.device).clone().detach()
+        x = x + _pos_embed_like(self.base.pos_embed, x)
         for i in range(len(self.base.stages)):
             x = self.base.stages[i](x)
             features.append(
@@ -1309,7 +1322,7 @@ class SwinTransformer_FPN_Pretrained(nn.Module):  # TODO: change to 3D
         # Forward pass through the SwinTransformer base
         features: List[torch.Tensor] = []
         x = self.base.patch_partition(x)
-        x = x + self.base.pos_embed.type_as(x).to(x.device).clone().detach()
+        x = x + _pos_embed_like(self.base.pos_embed, x)
         for i in range(len(self.base.stages)):
             x = self.base.stages[i](x)
             features.append(

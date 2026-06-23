@@ -24,6 +24,7 @@ USE_WANDB="${USE_WANDB:-0}"
 SEED="${SEED:-}"
 DETERMINISTIC="${DETERMINISTIC:-0}"
 NORMALIZE_DENSITY="${NORMALIZE_DENSITY:-1}"
+ANCHOR_MAE_BACKBONE_ARCH="${ANCHOR_MAE_BACKBONE_ARCH:-0}"
 
 PRETRAIN_SAVE_NAME="${PRETRAIN_SAVE_NAME:-}"
 VARIANT_NAME="${VARIANT_NAME:-${MODE}}"
@@ -105,6 +106,9 @@ if [[ "${MODE}" == "probe" ]]; then
 else
   train_cmd+=(--scratch_backbone)
 fi
+if [[ "${ANCHOR_MAE_BACKBONE_ARCH}" == "1" ]]; then
+  train_cmd+=(--mae_backbone_arch)
+fi
 
 "${train_cmd[@]}"
 
@@ -144,6 +148,9 @@ if [[ "${MODE}" == "probe" ]]; then
   eval_cmd+=(--mae_checkpoint "${PRETRAIN_CHECKPOINT}")
 else
   eval_cmd+=(--scratch_backbone)
+fi
+if [[ "${ANCHOR_MAE_BACKBONE_ARCH}" == "1" ]]; then
+  eval_cmd+=(--mae_backbone_arch)
 fi
 
 "${eval_cmd[@]}"

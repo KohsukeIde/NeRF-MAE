@@ -1,0 +1,4 @@
+job_id,job_name,arm,seed,percent_train,save_name,note
+1938476.pbs1,anc_sm_p10_s1,scratch_maearch,1,0.1,front3d_anchor_scratch_maearch_p10_seed1_rpn200,architecture_matched_random_init
+1938477.pbs1,anc_sm_p10_s2,scratch_maearch,2,0.1,front3d_anchor_scratch_maearch_p10_seed2_rpn200,architecture_matched_random_init
+1938478.pbs1,anc_sm_p10_s3,scratch_maearch,3,0.1,front3d_anchor_scratch_maearch_p10_seed3_rpn200,architecture_matched_random_init

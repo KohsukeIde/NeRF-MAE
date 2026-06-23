@@ -56,6 +56,8 @@ def parse_args():
     parser.add_argument('--mae_checkpoint', default='', help='Path to an MAE checkpoint used to initialize Swin backbone.')
     parser.add_argument('--scratch_backbone', action='store_true',
                         help='Use randomly initialized Swin backbone even if --mae_checkpoint is provided.')
+    parser.add_argument('--mae_backbone_arch', action='store_true',
+                        help='Use the MAE-compatible Swin backbone architecture without loading MAE weights.')
     parser.add_argument('--load_backbone_only', action='store_true', help='Only load the backbone.')
     parser.add_argument('--backbone_type', type=str, default='resnet', 
                         choices=['resnet', 'vgg_AF', 'vgg_EF',  'swin_t', 'swin_s', 'swin_b', 'swin_l'],)
@@ -349,8 +351,8 @@ class Trainer:
                     'swin_s': {'embed_dim':96, 'depths':[2, 2, 18, 2], 'num_heads':[3, 6, 12, 24]},
                     'swin_b': {'embed_dim':128, 'depths':[2, 2, 18, 2], 'num_heads':[3, 6, 12, 24]},
                     'swin_l': {'embed_dim':192, 'depths':[2, 2, 18, 2], 'num_heads':[6, 12, 24, 48]}}
-            use_mae_backbone = bool(self.args.mae_checkpoint) and not self.args.scratch_backbone
-            load_mae_checkpoint = use_mae_backbone and not self.args.checkpoint
+            load_mae_checkpoint = bool(self.args.mae_checkpoint) and not self.args.scratch_backbone and not self.args.checkpoint
+            use_mae_backbone = load_mae_checkpoint or self.args.mae_backbone_arch
             if use_mae_backbone:
                 self.logger.info(
                     "Using MAE-compatible Swin FPN backbone architecture "

@@ -1,0 +1,10 @@
+arm,seed,status,ap25,ap50,ap75,recall25_top2500,recall50_top2500,path
+scratch_maearch,1,ok,0.06475839763879776,0.002048582537099719,6.319131102827669e-07,0.9117646813392639,0.23529411852359772,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/front3d_anchor_scratch_maearch_p10_seed1_rpn200_eval/eval.json
+scratch_maearch,2,ok,0.08697307854890823,0.002956768497824669,0.0,0.9117646813392639,0.22794117033481598,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/front3d_anchor_scratch_maearch_p10_seed2_rpn200_eval/eval.json
+scratch_maearch,3,ok,0.06035884842276573,0.0022493719588965178,0.0,0.904411792755127,0.18382352590560913,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/front3d_anchor_scratch_maearch_p10_seed3_rpn200_eval/eval.json
+joint_e300,1,ok,0.0008785809623077512,2.0179445527901407e-06,0.0,0.47058823704719543,0.022058824077248573,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/front3d_anchor_joint_e300_p10_seed1_rpn200_eval/eval.json
+joint_e300,2,ok,0.0036676775198429823,9.858998964773491e-05,0.0,0.6617646813392639,0.07352941483259201,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/front3d_anchor_joint_e300_p10_seed2_rpn200_eval/eval.json
+joint_e300,3,ok,0.055690646171569824,0.00045591933303512633,0.0,0.9117646813392639,0.14705882966518402,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/front3d_anchor_joint_e300_p10_seed3_rpn200_eval/eval.json
+structure_first_cosine_e300,1,ok,0.05573907122015953,0.0005155486287549138,0.0,0.8823529481887817,0.125,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/front3d_anchor_cosine_e300_p10_seed1_rpn200_eval/eval.json
+structure_first_cosine_e300,2,ok,0.0019468714017421007,1.534869079478085e-05,0.0,0.6691176295280457,0.05147058889269829,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/front3d_anchor_cosine_e300_p10_seed2_rpn200_eval/eval.json
+structure_first_cosine_e300,3,ok,0.10385268926620483,0.002395699732005596,0.0,0.9117646813392639,0.1985294073820114,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/front3d_anchor_cosine_e300_p10_seed3_rpn200_eval/eval.json
