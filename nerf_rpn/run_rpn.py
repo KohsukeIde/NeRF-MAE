@@ -32,6 +32,13 @@ from torch.utils.data.distributed import DistributedSampler
 from tqdm import tqdm
 
 
+def _torch_load_trusted_checkpoint(path, map_location="cpu"):
+    try:
+        return torch.load(path, map_location=map_location, weights_only=False)
+    except TypeError:
+        return torch.load(path, map_location=map_location)
+
+
 # Anchor parameters
 anchor_sizes = ((8,), (16,), (32,), (64,),)
 aspect_ratios = (((1., 1., 1.), (1., 1., 2.), (1., 2., 2.), (1., 1., 3.), 
@@ -58,6 +65,13 @@ def parse_args():
                         help='Use randomly initialized Swin backbone even if --mae_checkpoint is provided.')
     parser.add_argument('--mae_backbone_arch', action='store_true',
                         help='Use the MAE-compatible Swin backbone architecture without loading MAE weights.')
+    parser.add_argument('--mae_init_mode', default='constructor', choices=['constructor', 'direct'],
+                        help=(
+                            'How to initialize an MAE-compatible Swin backbone from --mae_checkpoint. '
+                            'constructor preserves the shared FCOS/Anchor wrapper loader; direct first '
+                            'builds the downstream backbone and then loads the MAE state_dict into '
+                            'backbone.base for loader-audit experiments.'
+                        ))
     parser.add_argument('--load_backbone_only', action='store_true', help='Only load the backbone.')
     parser.add_argument('--backbone_type', type=str, default='resnet', 
                         choices=['resnet', 'vgg_AF', 'vgg_EF',  'swin_t', 'swin_s', 'swin_b', 'swin_l'],)
@@ -102,6 +116,15 @@ def parse_args():
     parser.add_argument('--batch_size', default=1, type=int, help='The batch size.')
     parser.add_argument('--num_epochs', default=100, type=int, help='The number of epochs to train.')
     parser.add_argument('--lr', default=1e-4, type=float, help='The learning rate.')
+    parser.add_argument('--backbone_lr_scale', default=1.0, type=float,
+                        help='Multiplier applied to the backbone LR relative to the RPN head LR.')
+    parser.add_argument('--lr_scheduler', default='onecycle_epoch',
+                        choices=['onecycle_epoch', 'onecycle_legacy', 'constant'],
+                        help='Learning-rate scheduler for Anchor-RPN.')
+    parser.add_argument('--scheduler_total_steps', default=0, type=int,
+                        help='Optional explicit scheduler total_steps. If 0, infer from --lr_scheduler.')
+    parser.add_argument('--freeze_backbone_epochs', default=0, type=int,
+                        help='Freeze the backbone for the first N training epochs.')
     parser.add_argument('--reg_loss_weight', default=5.0, type=float, 
                         help='The weight for balancing the regression loss.')
     parser.add_argument('--reg_loss_weight_2d', default=0.0, type=float, 
@@ -310,6 +333,9 @@ class Trainer:
 
         self.init_datasets()
 
+    def unwrap_model(self):
+        return self.model.module if isinstance(self.model, DDP) else self.model
+
     def init_datasets(self):
         if not self.args.dataset_split and not self.args.dataset_name=='general':
             raise ValueError('The dataset split must be specified if not using general dataset.')
@@ -358,13 +384,23 @@ class Trainer:
             if use_mae_backbone:
                 self.logger.info(
                     "Using MAE-compatible Swin FPN backbone architecture "
-                    f"(load_mae_checkpoint={load_mae_checkpoint})."
+                    f"(load_mae_checkpoint={load_mae_checkpoint}, "
+                    f"mae_init_mode={self.args.mae_init_mode})."
                 )
                 self.backbone = SwinTransformer_FPN_Pretrained(
                     resolution=self.args.resolution,
-                    checkpoint_path=self.args.mae_checkpoint if load_mae_checkpoint else None,
-                    is_eval=not load_mae_checkpoint,
+                    checkpoint_path=(
+                        self.args.mae_checkpoint
+                        if load_mae_checkpoint and self.args.mae_init_mode == 'constructor'
+                        else None
+                    ),
+                    is_eval=(
+                        not load_mae_checkpoint
+                        or self.args.mae_init_mode == 'direct'
+                    ),
                 )
+                if load_mae_checkpoint and self.args.mae_init_mode == 'direct':
+                    self.load_mae_checkpoint_direct(self.args.mae_checkpoint)
             else:
                 self.backbone = SwinTransformer_FPN(patch_size=[4, 4, 4],
                                                     embed_dim=swin[self.args.backbone_type]['embed_dim'],
@@ -373,6 +409,36 @@ class Trainer:
                                                     window_size=[4, 4, 4],
                                                     stochastic_depth_prob=0.1,
                                                     expand_dim=True,)
+
+    def load_mae_checkpoint_direct(self, checkpoint_path):
+        if not hasattr(self.backbone, 'base'):
+            raise RuntimeError('direct MAE init requires a backbone with a .base module')
+        assert os.path.exists(checkpoint_path), "The checkpoint does not exist."
+        self.logger.info(
+            'Directly loading MAE state_dict into Anchor-RPN backbone.base from %s',
+            checkpoint_path,
+        )
+        checkpoint = _torch_load_trusted_checkpoint(checkpoint_path, map_location='cpu')
+        missing, unexpected = self.backbone.base.load_state_dict(
+            checkpoint['state_dict'], strict=False
+        )
+        encoder_unexpected = [
+            key for key in unexpected
+            if not key.startswith(('decoder', 'out', 'mask_token'))
+        ]
+        self.logger.info(
+            'Direct MAE init complete: missing=%d unexpected=%d encoder_unexpected=%d',
+            len(missing),
+            len(unexpected),
+            len(encoder_unexpected),
+        )
+        if missing or encoder_unexpected:
+            self.logger.warning(
+                'Direct MAE init non-empty encoder mismatch: '
+                'missing_sample=%s encoder_unexpected_sample=%s',
+                missing[:10],
+                encoder_unexpected[:10],
+            )
 
     def save_checkpoint(self, epoch, path):
         torch.save({
@@ -456,11 +522,9 @@ class Trainer:
             self.logger.info(f'Loaded {len(self.train_set)} training scenes, '
                              f'{len(self.val_set)} validation scenes')
 
-        self.optimizer = AdamW(self.model.parameters(), lr=self.args.lr, 
-                               weight_decay=self.args.weight_decay)
+        self.optimizer = self.build_optimizer()
 
-        self.scheduler = OneCycleLR(self.optimizer, max_lr=self.args.lr,
-                                    total_steps=self.args.num_epochs * len(self.train_loader))
+        self.scheduler = self.build_scheduler()
 
         self.best_metric = None
         self.best_metric_ap50 = None
@@ -471,6 +535,7 @@ class Trainer:
             if self.world_size > 1:
                 self.train_sampler.set_epoch(epoch)
 
+            self.set_backbone_trainable(epoch > self.args.freeze_backbone_epochs)
             self.train_epoch(epoch)
             if self.rank != 0:
                 continue
@@ -495,6 +560,58 @@ class Trainer:
                 self.save_checkpoint(epoch, os.path.join(self.args.save_path, f'epoch_{epoch}.pt'))
                 self.delete_old_checkpoints(self.args.save_path, keep_latest=self.args.keep_checkpoints)
 
+    def build_optimizer(self):
+        model_ref = self.unwrap_model()
+        backbone_params = list(model_ref.backbone.parameters())
+        head_params = list(model_ref.rpn.head.parameters())
+        tracked_ids = {id(param) for param in backbone_params + head_params}
+        extra_params = [
+            param for param in model_ref.parameters() if id(param) not in tracked_ids
+        ]
+        if extra_params:
+            head_params.extend(extra_params)
+
+        param_groups = []
+        max_lrs = []
+        if head_params:
+            param_groups.append({'params': head_params, 'lr': self.args.lr})
+            max_lrs.append(self.args.lr)
+        if backbone_params:
+            backbone_lr = self.args.lr * self.args.backbone_lr_scale
+            param_groups.append({'params': backbone_params, 'lr': backbone_lr})
+            max_lrs.append(backbone_lr)
+        self.max_lrs = max_lrs
+        self.logger.info(
+            'Anchor optimizer param groups: head_lr=%s backbone_lr_scale=%s max_lrs=%s',
+            self.args.lr,
+            self.args.backbone_lr_scale,
+            max_lrs,
+        )
+        return AdamW(param_groups, lr=self.args.lr, weight_decay=self.args.weight_decay)
+
+    def build_scheduler(self):
+        if self.args.lr_scheduler == 'constant':
+            self.logger.info('Using constant LR (no scheduler stepping).')
+            return None
+        total_steps = self.args.scheduler_total_steps
+        if total_steps <= 0:
+            if self.args.lr_scheduler == 'onecycle_legacy':
+                total_steps = 1000 * len(self.train_loader)
+            else:
+                total_steps = self.args.num_epochs * len(self.train_loader)
+        self.logger.info(
+            'Using Anchor %s scheduler with total_steps=%s max_lrs=%s',
+            self.args.lr_scheduler,
+            total_steps,
+            self.max_lrs,
+        )
+        return OneCycleLR(self.optimizer, max_lr=self.max_lrs, total_steps=total_steps)
+
+    def set_backbone_trainable(self, trainable):
+        model_ref = self.unwrap_model()
+        for param in model_ref.backbone.parameters():
+            param.requires_grad = trainable
+
     def train_epoch(self, epoch):
         torch.autograd.set_detect_anomaly(True)
         for i, batch in enumerate(self.train_loader):
@@ -516,7 +633,8 @@ class Trainer:
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.args.clip_grad_norm)
 
             self.optimizer.step()
-            self.scheduler.step()
+            if self.scheduler is not None:
+                self.scheduler.step()
             
             self.optimizer.zero_grad()
 
@@ -546,7 +664,11 @@ class Trainer:
 
             if self.args.wandb and self.rank == 0:
                 wandb.log({
-                    'lr': self.scheduler.get_last_lr()[0],
+                    'lr': (
+                        self.scheduler.get_last_lr()[0]
+                        if self.scheduler is not None
+                        else self.optimizer.param_groups[0]['lr']
+                    ),
                     'loss': loss.item(),
                     'objectness_loss': losses['loss_objectness'].item(),
                     'regression_loss': losses['loss_rpn_box_reg'].item(),

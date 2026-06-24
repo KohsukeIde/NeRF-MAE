@@ -15,6 +15,10 @@ PERCENT_TRAIN="${PERCENT_TRAIN:-1.0}"
 ANCHOR_NUM_EPOCHS="${ANCHOR_NUM_EPOCHS:-200}"
 ANCHOR_LR="${ANCHOR_LR:-3e-4}"
 ANCHOR_WEIGHT_DECAY="${ANCHOR_WEIGHT_DECAY:-1e-3}"
+ANCHOR_BACKBONE_LR_SCALE="${ANCHOR_BACKBONE_LR_SCALE:-1.0}"
+ANCHOR_LR_SCHEDULER="${ANCHOR_LR_SCHEDULER:-onecycle_epoch}"
+ANCHOR_SCHEDULER_TOTAL_STEPS="${ANCHOR_SCHEDULER_TOTAL_STEPS:-}"
+ANCHOR_FREEZE_BACKBONE_EPOCHS="${ANCHOR_FREEZE_BACKBONE_EPOCHS:-0}"
 ANCHOR_BATCH_SIZE="${ANCHOR_BATCH_SIZE:-2}"
 ANCHOR_LOG_INTERVAL="${ANCHOR_LOG_INTERVAL:-10}"
 ANCHOR_EVAL_INTERVAL="${ANCHOR_EVAL_INTERVAL:-10}"
@@ -28,6 +32,7 @@ SEED="${SEED:-}"
 DETERMINISTIC="${DETERMINISTIC:-0}"
 NORMALIZE_DENSITY="${NORMALIZE_DENSITY:-1}"
 ANCHOR_MAE_BACKBONE_ARCH="${ANCHOR_MAE_BACKBONE_ARCH:-0}"
+ANCHOR_MAE_INIT_MODE="${ANCHOR_MAE_INIT_MODE:-constructor}"
 ANCHOR_BEST_CHECKPOINT_NAME="${ANCHOR_BEST_CHECKPOINT_NAME:-model_best_ap50.pt}"
 ANCHOR_EVAL_ON_TRAIN="${ANCHOR_EVAL_ON_TRAIN:-0}"
 
@@ -87,6 +92,9 @@ train_cmd=(
   --num_epochs "${ANCHOR_NUM_EPOCHS}"
   --lr "${ANCHOR_LR}"
   --weight_decay "${ANCHOR_WEIGHT_DECAY}"
+  --backbone_lr_scale "${ANCHOR_BACKBONE_LR_SCALE}"
+  --lr_scheduler "${ANCHOR_LR_SCHEDULER}"
+  --freeze_backbone_epochs "${ANCHOR_FREEZE_BACKBONE_EPOCHS}"
   --log_interval "${ANCHOR_LOG_INTERVAL}"
   --eval_interval "${ANCHOR_EVAL_INTERVAL}"
   --keep_checkpoints "${ANCHOR_KEEP_CHECKPOINTS}"
@@ -121,6 +129,10 @@ else
 fi
 if [[ "${ANCHOR_MAE_BACKBONE_ARCH}" == "1" ]]; then
   train_cmd+=(--mae_backbone_arch)
+fi
+train_cmd+=(--mae_init_mode "${ANCHOR_MAE_INIT_MODE}")
+if [[ -n "${ANCHOR_SCHEDULER_TOTAL_STEPS}" ]]; then
+  train_cmd+=(--scheduler_total_steps "${ANCHOR_SCHEDULER_TOTAL_STEPS}")
 fi
 if [[ "${ANCHOR_EVAL_ON_TRAIN}" == "1" ]]; then
   train_cmd+=(--eval_on_train)
@@ -172,6 +184,7 @@ fi
 if [[ "${ANCHOR_MAE_BACKBONE_ARCH}" == "1" ]]; then
   eval_cmd+=(--mae_backbone_arch)
 fi
+eval_cmd+=(--mae_init_mode "${ANCHOR_MAE_INIT_MODE}")
 
 "${eval_cmd[@]}"
 

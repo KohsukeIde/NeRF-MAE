@@ -1,0 +1,13 @@
+{
+  "checkpoint": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1/epoch_300.pt",
+  "common_base_keys": 350,
+  "constructor_only_keys": [],
+  "direct_missing_count": 0,
+  "direct_only_keys": [],
+  "direct_unexpected_count": 33,
+  "direct_unexpected_encoder_count": 0,
+  "max_abs_diff_common": 0.0,
+  "mismatch_count": 0,
+  "mismatch_sample": [],
+  "resolution": 160
+}
