@@ -1,5 +1,12 @@
 # Anchor-head Front3D 10% label results (2026-06-24)
 
+**Validity status: invalid for paper claims.** These results are kept only as a
+failed pipeline diagnostic. The detector operates near the noise floor
+(AP@50 ~ 0 for all arms), and the high-recall/near-zero-AP pattern indicates a
+scoring/ranking failure rather than a meaningful representation comparison.
+Do not use this table as evidence that structure-first transfer fails under an
+anchor head. See `anchor_head_lowlabel_invalid_note_20260624.md`.
+
 - Detector head: anchor-based NeRF-RPN (`run_rpn.py`).
 - Data: Front3D, `PERCENT_TRAIN=0.1`, 3 finetune seeds.
 - Backbone comparison is architecture-matched: scratch uses MAE-compatible Swin-FPN architecture with random initialization.

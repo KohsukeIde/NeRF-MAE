@@ -18,6 +18,7 @@ CHECKPOINT="${CHECKPOINT:?CHECKPOINT is required}"
 MODE="${MODE:-probe}"
 MAE_CHECKPOINT="${MAE_CHECKPOINT:-}"
 FRONT3D_DATA_ROOT="${FRONT3D_DATA_ROOT:-${ROOT_DIR}/dataset/finetune/front3d_rpn_data}"
+FRONT3D_SPLIT_PATH="${FRONT3D_SPLIT_PATH:-${FRONT3D_DATA_ROOT}/3dfront_split.npz}"
 GPU_IDS="${GPU_IDS:-0}"
 ANCHOR_BATCH_SIZE="${ANCHOR_BATCH_SIZE:-2}"
 ANCHOR_NMS_THRESH="${ANCHOR_NMS_THRESH:-0.3}"
@@ -29,7 +30,7 @@ SKIP_EXISTING="${SKIP_EXISTING:-1}"
 [[ -f "${CHECKPOINT}" ]] || { echo "[error] missing checkpoint: ${CHECKPOINT}" >&2; exit 1; }
 [[ -d "${FRONT3D_DATA_ROOT}/features" ]] || { echo "[error] missing Front3D features: ${FRONT3D_DATA_ROOT}/features" >&2; exit 1; }
 [[ -d "${FRONT3D_DATA_ROOT}/obb" ]] || { echo "[error] missing Front3D OBBs: ${FRONT3D_DATA_ROOT}/obb" >&2; exit 1; }
-[[ -f "${FRONT3D_DATA_ROOT}/3dfront_split.npz" ]] || { echo "[error] missing Front3D split: ${FRONT3D_DATA_ROOT}/3dfront_split.npz" >&2; exit 1; }
+[[ -f "${FRONT3D_SPLIT_PATH}" ]] || { echo "[error] missing Front3D split: ${FRONT3D_SPLIT_PATH}" >&2; exit 1; }
 
 EVAL_SAVE_PATH="${ROOT_DIR}/output/nerf_rpn/results/${SAVE_NAME}_eval"
 EVAL_JSON="${EVAL_SAVE_PATH}/eval.json"
@@ -109,7 +110,7 @@ cmd=(
   --backbone_type swin_s
   --features_path "${FRONT3D_DATA_ROOT}/features"
   --boxes_path "${FRONT3D_DATA_ROOT}/obb"
-  --dataset_split "${FRONT3D_DATA_ROOT}/3dfront_split.npz"
+  --dataset_split "${FRONT3D_SPLIT_PATH}"
   --save_path "${EVAL_SAVE_PATH}"
   --checkpoint "${CHECKPOINT}"
   --rpn_nms_thresh "${ANCHOR_NMS_THRESH}"

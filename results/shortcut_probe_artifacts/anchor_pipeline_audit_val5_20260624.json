@@ -1,0 +1,67 @@
+{
+  "checkpoint_audit": {
+    "checkpoint": "output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1_abci3clean/epoch_300.pt",
+    "state_dict_key_count": 383,
+    "pos_embed_shape": [
+      1,
+      40,
+      40,
+      40,
+      96
+    ],
+    "backbone_out_channels": 256
+  },
+  "anchor_coverage": {
+    "split": "val_scenes",
+    "scene_count": 5,
+    "gt_count": 45,
+    "mean_max_iou": 0.4811224341392517,
+    "median_max_iou": 0.4854966104030609,
+    "p10_max_iou": 0.39583808183670044,
+    "p90_max_iou": 0.5705270290374757,
+    "oracle_recall25": 0.9777777777777777,
+    "oracle_recall50": 0.4222222222222222,
+    "per_scene": [
+      {
+        "scene": "3dfront_0083_01",
+        "num_gt": 7,
+        "num_anchors": 341380,
+        "mean_max_iou": 0.4654203951358795,
+        "recall25_oracle": 0.8571428571428571,
+        "recall50_oracle": 0.5714285714285714
+      },
+      {
+        "scene": "3dfront_0042_01",
+        "num_gt": 10,
+        "num_anchors": 342940,
+        "mean_max_iou": 0.47957414388656616,
+        "recall25_oracle": 1.0,
+        "recall50_oracle": 0.2
+      },
+      {
+        "scene": "3dfront_0149_00",
+        "num_gt": 12,
+        "num_anchors": 407420,
+        "mean_max_iou": 0.48931458592414856,
+        "recall25_oracle": 1.0,
+        "recall50_oracle": 0.4166666666666667
+      },
+      {
+        "scene": "3dfront_0054_00",
+        "num_gt": 9,
+        "num_anchors": 732225,
+        "mean_max_iou": 0.48297548294067383,
+        "recall25_oracle": 1.0,
+        "recall50_oracle": 0.5555555555555556
+      },
+      {
+        "scene": "3dfront_0110_00",
+        "num_gt": 7,
+        "num_anchors": 340860,
+        "mean_max_iou": 0.48260968923568726,
+        "recall25_oracle": 1.0,
+        "recall50_oracle": 0.42857142857142855
+      }
+    ]
+  }
+}

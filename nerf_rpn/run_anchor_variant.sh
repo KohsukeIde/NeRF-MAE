@@ -20,11 +20,16 @@ ANCHOR_LOG_INTERVAL="${ANCHOR_LOG_INTERVAL:-10}"
 ANCHOR_EVAL_INTERVAL="${ANCHOR_EVAL_INTERVAL:-10}"
 ANCHOR_KEEP_CHECKPOINTS="${ANCHOR_KEEP_CHECKPOINTS:-1}"
 ANCHOR_NMS_THRESH="${ANCHOR_NMS_THRESH:-0.3}"
+ANCHOR_ROTATE_PROB="${ANCHOR_ROTATE_PROB:-0.5}"
+ANCHOR_FLIP_PROB="${ANCHOR_FLIP_PROB:-0.5}"
+ANCHOR_ROT_SCALE_PROB="${ANCHOR_ROT_SCALE_PROB:-0.5}"
 USE_WANDB="${USE_WANDB:-0}"
 SEED="${SEED:-}"
 DETERMINISTIC="${DETERMINISTIC:-0}"
 NORMALIZE_DENSITY="${NORMALIZE_DENSITY:-1}"
 ANCHOR_MAE_BACKBONE_ARCH="${ANCHOR_MAE_BACKBONE_ARCH:-0}"
+ANCHOR_BEST_CHECKPOINT_NAME="${ANCHOR_BEST_CHECKPOINT_NAME:-model_best_ap50.pt}"
+ANCHOR_EVAL_ON_TRAIN="${ANCHOR_EVAL_ON_TRAIN:-0}"
 
 PRETRAIN_SAVE_NAME="${PRETRAIN_SAVE_NAME:-}"
 VARIANT_NAME="${VARIANT_NAME:-${MODE}}"
@@ -58,6 +63,11 @@ elif [[ "${MODE}" != "scratch" ]]; then
   exit 1
 fi
 
+if [[ "${MODE}" == "probe" && "${ANCHOR_MAE_BACKBONE_ARCH}" != "1" ]]; then
+  echo "[warn] MODE=probe requires the MAE-compatible backbone for train/eval; forcing ANCHOR_MAE_BACKBONE_ARCH=1" >&2
+  ANCHOR_MAE_BACKBONE_ARCH=1
+fi
+
 cd "${SCRIPT_DIR}"
 
 export PATH="${PROBE_ENV_PREFIX}/bin:${PATH}"
@@ -81,6 +91,9 @@ train_cmd=(
   --eval_interval "${ANCHOR_EVAL_INTERVAL}"
   --keep_checkpoints "${ANCHOR_KEEP_CHECKPOINTS}"
   --rpn_nms_thresh "${ANCHOR_NMS_THRESH}"
+  --rotate_prob "${ANCHOR_ROTATE_PROB}"
+  --flip_prob "${ANCHOR_FLIP_PROB}"
+  --rot_scale_prob "${ANCHOR_ROT_SCALE_PROB}"
   --log_to_file
   --rotated_bbox
   --batch_size "${ANCHOR_BATCH_SIZE}"
@@ -109,10 +122,17 @@ fi
 if [[ "${ANCHOR_MAE_BACKBONE_ARCH}" == "1" ]]; then
   train_cmd+=(--mae_backbone_arch)
 fi
+if [[ "${ANCHOR_EVAL_ON_TRAIN}" == "1" ]]; then
+  train_cmd+=(--eval_on_train)
+fi
 
 "${train_cmd[@]}"
 
-BEST_CHECKPOINT="${SAVE_PATH}/model_best.pt"
+BEST_CHECKPOINT="${SAVE_PATH}/${ANCHOR_BEST_CHECKPOINT_NAME}"
+if [[ ! -f "${BEST_CHECKPOINT}" && "${ANCHOR_BEST_CHECKPOINT_NAME}" != "model_best.pt" ]]; then
+  echo "[warn] no ${ANCHOR_BEST_CHECKPOINT_NAME}; falling back to model_best.pt" >&2
+  BEST_CHECKPOINT="${SAVE_PATH}/model_best.pt"
+fi
 [[ -f "${BEST_CHECKPOINT}" ]] || {
   echo "[error] no anchor checkpoint found: ${BEST_CHECKPOINT}" >&2
   exit 1

@@ -1,0 +1,3 @@
+job_id,job_name,arm,seed,percent_train,save_name,mae_backbone_arch,note
+1939517.pbs1,anc_sanity_official_s1,official_scratch,1,1.0,front3d_anchor_scratch_full_seed1_rpn200_sanity,0,official Swin-FPN scratch sanity gate
+1939518.pbs1,anc_sanity_maearch_s1,maearch_scratch,1,1.0,front3d_anchor_scratch_maearch_full_seed1_rpn200_sanity,1,MAE-compatible random-init scratch sanity gate

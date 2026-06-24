@@ -1,0 +1,5 @@
+job_id,job_name,arm,seed,percent_train,save_name,mae_backbone_arch,eval_on_train,note
+1939519.pbs1,anc_overfit2_official_s1,official_scratch,1,0.02,front3d_anchor_scratch_overfit2_seed1_rpn80_apbest,0,1,official Swin-FPN 2-scene train-split overfit gate
+1939520.pbs1,anc_overfit2_maearch_s1,maearch_scratch,1,0.02,front3d_anchor_scratch_maearch_overfit2_seed1_rpn80_apbest,1,1,MAE-compatible 2-scene train-split overfit gate
+1939521.pbs1,anc_sanity_official_s1b,official_scratch,1,1.0,front3d_anchor_scratch_full_seed1_rpn200_sanity_apbest,0,0,official Swin-FPN full-label sanity gate
+1939522.pbs1,anc_sanity_maearch_s1b,maearch_scratch,1,1.0,front3d_anchor_scratch_maearch_full_seed1_rpn200_sanity_apbest,1,0,MAE-compatible random-init full-label sanity gate

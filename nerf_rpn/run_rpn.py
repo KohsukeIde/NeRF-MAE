@@ -95,6 +95,8 @@ def parse_args():
     parser.add_argument('--seed', type=int, default=None, help='Random seed for training and data loading.')
     parser.add_argument('--deterministic', action='store_true',
                         help='Enable deterministic torch algorithms where available.')
+    parser.add_argument('--eval_on_train', action='store_true',
+                        help='Diagnostic only: evaluate training progress on the training split.')
 
     # Training parameters
     parser.add_argument('--batch_size', default=1, type=int, help='The batch size.')
@@ -410,6 +412,29 @@ class Trainer:
             self.train_set = GeneralRPNDataset(csv_path=self.args.train_csv, normalize_density=self.args.normalize_density)
             self.val_set = GeneralRPNDataset(csv_path=self.args.val_csv, normalize_density=self.args.normalize_density)
 
+        if self.args.eval_on_train:
+            self.logger.warning(
+                'Diagnostic mode enabled: evaluating on the training split without augmentation.'
+            )
+            train_eval_scenes = getattr(self.train_set, 'scene_list', self.train_scenes)
+            if self.args.dataset_name in ['hypersim', 'front3d']:
+                self.val_set = self.dataset(
+                    scene_list=train_eval_scenes,
+                    features_path=self.args.features_path,
+                    boxes_path=self.args.boxes_path,
+                    normalize_density=self.args.normalize_density,
+                    preload=self.args.preload,
+                    percent_train=1.0,
+                )
+            elif self.args.dataset_name == 'scannet':
+                self.val_set = ScanNetRPNDataset(
+                    scene_list=train_eval_scenes,
+                    features_path=self.args.features_path,
+                    boxes_path=self.args.boxes_path,
+                )
+            elif self.args.dataset_name == 'general':
+                self.val_set = self.train_set
+
         if self.world_size == 1:
             self.train_loader = DataLoader(self.train_set, batch_size=self.args.batch_size, 
                                            collate_fn=BaseDataset.collate_fn,
@@ -438,6 +463,8 @@ class Trainer:
                                     total_steps=self.args.num_epochs * len(self.train_loader))
 
         self.best_metric = None
+        self.best_metric_ap50 = None
+        self.best_metric_ap25 = None
         os.makedirs(self.args.save_path, exist_ok=True)
 
         for epoch in range(1, self.args.num_epochs + 1):
@@ -451,9 +478,19 @@ class Trainer:
             if epoch % self.args.eval_interval == 0 or epoch == self.args.num_epochs:
                 recalls, APs = self.eval(self.val_set)
                 metric = recalls[-1]
+                metric_ap50 = APs["ap50"] if isinstance(APs, dict) else APs[0]
+                metric_ap25 = APs["ap25"] if isinstance(APs, dict) and "ap25" in APs else None
                 if self.best_metric is None or metric > self.best_metric:
                     self.best_metric = metric
                     self.save_checkpoint(epoch, os.path.join(self.args.save_path, 'model_best.pt'))
+                if self.best_metric_ap50 is None or metric_ap50 > self.best_metric_ap50:
+                    self.best_metric_ap50 = metric_ap50
+                    self.save_checkpoint(epoch, os.path.join(self.args.save_path, 'model_best_ap50.pt'))
+                if metric_ap25 is not None and (
+                    self.best_metric_ap25 is None or metric_ap25 > self.best_metric_ap25
+                ):
+                    self.best_metric_ap25 = metric_ap25
+                    self.save_checkpoint(epoch, os.path.join(self.args.save_path, 'model_best_ap25.pt'))
 
                 self.save_checkpoint(epoch, os.path.join(self.args.save_path, f'epoch_{epoch}.pt'))
                 self.delete_old_checkpoints(self.args.save_path, keep_latest=self.args.keep_checkpoints)
@@ -656,7 +693,11 @@ class Trainer:
         ap75 = evaluate_box_proposals_ap(proposals_list, scores_list, gt_boxes_list, iou_thresh=0.75, top_k=self.args.top_k)
         ap25 = evaluate_box_proposals_ap(proposals_list, scores_list, gt_boxes_list, iou_thresh=0.25, top_k=self.args.top_k)
 
-        APs.append(ap50['ap'].item())
+        APs = {
+            "ap50": ap50['ap'].item(),
+            "ap75": ap75['ap'].item(),
+            "ap25": ap25['ap'].item(),
+        }
 
         print(f'AP@50: AP: {ap50["ap"].item():.4f}')
         print(f'AP@75: AP: {ap75["ap"].item():.4f}')

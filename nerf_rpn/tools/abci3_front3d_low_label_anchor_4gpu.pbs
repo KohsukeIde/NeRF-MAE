@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #PBS -q rt_HG
-#PBS -l select=1
+#PBS -l select=1:ncpus=64:ngpus=4:mem=320gb
 #PBS -l walltime=72:00:00
 #PBS -P gag51404
 #PBS -j oe
@@ -20,11 +20,11 @@ MAE_CHECKPOINT="${MAE_CHECKPOINT:-}"
 PRETRAIN_SAVE_NAME="${PRETRAIN_SAVE_NAME:-${VARIANT_NAME}}"
 
 FRONT3D_DATA_ROOT="${FRONT3D_DATA_ROOT:-${ROOT_DIR}/dataset/finetune/front3d_rpn_data}"
-PERCENT_TRAIN="${PERCENT_TRAIN:-0.1}"
-GPU_IDS="${GPU_IDS:-0}"
+PERCENT_TRAIN="${PERCENT_TRAIN:-1.0}"
+GPU_IDS="${GPU_IDS:-0-3}"
 FINETUNE_SEED="${FINETUNE_SEED:-1}"
 ANCHOR_NUM_EPOCHS="${ANCHOR_NUM_EPOCHS:-200}"
-ANCHOR_BATCH_SIZE="${ANCHOR_BATCH_SIZE:-2}"
+ANCHOR_BATCH_SIZE="${ANCHOR_BATCH_SIZE:-8}"
 ANCHOR_LR="${ANCHOR_LR:-3e-4}"
 ANCHOR_WEIGHT_DECAY="${ANCHOR_WEIGHT_DECAY:-1e-3}"
 ANCHOR_EVAL_INTERVAL="${ANCHOR_EVAL_INTERVAL:-10}"
@@ -78,44 +78,6 @@ export LD_LIBRARY_PATH="${PROBE_ENV_PREFIX}/lib:${PROBE_ENV_PREFIX}/lib/python3.
 
 mkdir -p "${ROOT_DIR}/output/launcher" "${ROOT_DIR}/runtime"
 
-check_sort_vertices() {
-  (
-    cd "${ROOT_DIR}/nerf_rpn"
-    "${PROBE_PYTHON_BIN}" - <<'PY'
-import torch
-import sort_vertices
-print("sort_vertices import ok")
-PY
-  )
-}
-
-if ! check_sort_vertices; then
-  echo "[info] sort_vertices import missing; building rotated_iou"
-  build_lock="${ROOT_DIR}/runtime/rotated_iou_build.lock"
-  acquired_lock=0
-  while true; do
-    if mkdir "${build_lock}" 2>/dev/null; then
-      acquired_lock=1
-      break
-    fi
-    echo "[info] waiting for rotated_iou build lock: ${build_lock}"
-    sleep 20
-    if check_sort_vertices; then
-      break
-    fi
-  done
-  if [[ "${acquired_lock}" == "1" ]]; then
-    if ! check_sort_vertices; then
-      (
-        cd "${ROOT_DIR}/nerf_rpn"
-        bash "${ROOT_DIR}/nerf_rpn/build_rotated_iou.sh"
-      )
-    fi
-    rmdir "${build_lock}"
-  fi
-  check_sort_vertices
-fi
-
 common_env=(
   MODE="${MODE}"
   VARIANT_NAME="${VARIANT_NAME}"
@@ -160,4 +122,4 @@ else
 fi
 
 test -f "${EVAL_JSON}"
-echo "[info] Front3D low-label Anchor-RPN complete eval=${EVAL_JSON}"
+echo "[info] Front3D 4GPU Anchor-RPN complete eval=${EVAL_JSON}"

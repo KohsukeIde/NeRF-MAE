@@ -1,0 +1,3 @@
+job_id,description,save_name,batch,gpus,submitted_at
+1939549.pbs1,official_swin_full_sanity_b8,front3d_anchor_scratch_full_seed1_rpn200_sanity_b8,8,0-3,2026-06-24T03:45:07+09:00
+1939550.pbs1,mae_arch_full_sanity_b8,front3d_anchor_scratch_maearch_full_seed1_rpn200_sanity_b8,8,0-3,2026-06-24T03:45:07+09:00
