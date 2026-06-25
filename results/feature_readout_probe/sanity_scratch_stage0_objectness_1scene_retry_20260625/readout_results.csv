@@ -1,0 +1,2 @@
+arm,stage,target,balanced_ap,auroc,acc_at_logit0,n,pos_frac,train_n,train_pos_frac,val_n,val_pos_frac
+scratch,0,objectness,0.4763068971838465,0.484375,0.46875,64,0.5,32,0.5,64,0.5

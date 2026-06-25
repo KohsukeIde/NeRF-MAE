@@ -1,0 +1,2 @@
+job_id,job_name,run_name,percent_train,arms,stages,targets,expected_results
+1944599.pbs1,frp_sanity,sanity_scratch_stage0_objectness_1scene_20260625,0.10,scratch,0,objectness,/groups/gag51404/ide/vgi/NeRF-MAE/results/feature_readout_probe/sanity_scratch_stage0_objectness_1scene_20260625/readout_results.csv

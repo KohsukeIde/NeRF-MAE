@@ -1,0 +1,50 @@
+{
+  "percent_train": 0.1,
+  "resolution": 160,
+  "alpha_threshold": 0.01,
+  "shell_alpha_threshold": 0.02,
+  "shell_smooth_kernel": 3,
+  "stages": [
+    0,
+    1,
+    2
+  ],
+  "targets": [
+    "objectness",
+    "occupancy",
+    "shell"
+  ],
+  "samples_per_class": 512,
+  "eval_samples_per_class": 2048,
+  "readout_epochs": 40,
+  "arms": [
+    {
+      "name": "scratch",
+      "checkpoint": null
+    },
+    {
+      "name": "joint_e300",
+      "checkpoint": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_all_p1.0_e300_seed1/epoch_300.pt"
+    },
+    {
+      "name": "cosine_e300",
+      "checkpoint": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1/epoch_300.pt"
+    },
+    {
+      "name": "linear_e300",
+      "checkpoint": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_alpha_rgba_curr_linear_ramp_p1.0_e300_seed1_abci3linear_det0/epoch_300.pt"
+    },
+    {
+      "name": "w05_e300",
+      "checkpoint": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_alpha_rgba_curr_constant_rgb_half_p1.0_e300_seed1_abci3w05/epoch_300.pt"
+    },
+    {
+      "name": "occupancy_only_e300",
+      "checkpoint": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_alpha_target_only_p1.0_e300_seed1_abci3ato_det0/epoch_300.pt"
+    },
+    {
+      "name": "shuffle_e300",
+      "checkpoint": "/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/nerfmae_alpha_rgba_curr_cosine_ramp_alpha_shuffle_p1.0_e300_seed1/epoch_300.pt"
+    }
+  ]
+}

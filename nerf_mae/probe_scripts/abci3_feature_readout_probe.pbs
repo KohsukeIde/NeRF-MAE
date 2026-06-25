@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+#PBS -q rt_HG
+#PBS -l select=1
+#PBS -l walltime=24:00:00
+#PBS -P gag51404
+#PBS -j oe
+
+set -euo pipefail
+
+cd "${PBS_O_WORKDIR:?PBS_O_WORKDIR is not set}"
+
+ROOT_DIR="${ROOT_DIR:-${PBS_O_WORKDIR}}"
+PROBE_ENV_PREFIX="${PROBE_ENV_PREFIX:-${ROOT_DIR}/.venv-abci3}"
+ABCI3_CUDA_MODULE="${ABCI3_CUDA_MODULE:-cuda/11.8/11.8.0}"
+
+RUN_NAME="${RUN_NAME:?RUN_NAME is required}"
+PERCENT_TRAIN="${PERCENT_TRAIN:-0.10}"
+READOUT_SEED="${READOUT_SEED:-1}"
+STAGES="${STAGES:-0 1 2}"
+TARGETS="${TARGETS:-objectness occupancy shell}"
+ARMS="${ARMS:-preset_main}"
+SAMPLES_PER_CLASS="${SAMPLES_PER_CLASS:-512}"
+EVAL_SAMPLES_PER_CLASS="${EVAL_SAMPLES_PER_CLASS:-2048}"
+READOUT_EPOCHS="${READOUT_EPOCHS:-40}"
+READOUT_BATCH_SIZE="${READOUT_BATCH_SIZE:-8192}"
+MAX_TRAIN_SCENES="${MAX_TRAIN_SCENES:-0}"
+MAX_VAL_SCENES="${MAX_VAL_SCENES:-0}"
+
+source /etc/profile.d/modules.sh
+module load "${ABCI3_CUDA_MODULE}"
+
+export PYTHONPATH="${ROOT_DIR}:${PYTHONPATH:-}"
+export PATH="${PROBE_ENV_PREFIX}/bin:${PATH}"
+export LD_LIBRARY_PATH="${PROBE_ENV_PREFIX}/lib:${PROBE_ENV_PREFIX}/lib/python3.11/site-packages/torch/lib:${CUDA_HOME:-/apps/cuda/11.8.0}/lib64:${LD_LIBRARY_PATH:-}"
+export TMPDIR="${TMPDIR:-${ROOT_DIR}/runtime/tmp}"
+export TORCH_EXTENSIONS_DIR="${TORCH_EXTENSIONS_DIR:-${ROOT_DIR}/runtime/torch_extensions}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-${ROOT_DIR}/runtime/cache}"
+export TORCH_HOME="${TORCH_HOME:-${ROOT_DIR}/runtime/torch_home}"
+
+mkdir -p "${ROOT_DIR}/runtime" "${ROOT_DIR}/results/feature_readout_probe"
+
+"${PROBE_ENV_PREFIX}/bin/python" "${ROOT_DIR}/nerf_mae/probe_scripts/feature_readout_probe.py" \
+  --data_root "${ROOT_DIR}/dataset/finetune/front3d_rpn_data" \
+  --split "${ROOT_DIR}/dataset/finetune/front3d_rpn_data/3dfront_split.npz" \
+  --output_dir "${ROOT_DIR}/results/feature_readout_probe/${RUN_NAME}" \
+  --percent_train "${PERCENT_TRAIN}" \
+  --seed "${READOUT_SEED}" \
+  --stages ${STAGES} \
+  --targets ${TARGETS} \
+  --arms ${ARMS} \
+  --samples_per_class "${SAMPLES_PER_CLASS}" \
+  --eval_samples_per_class "${EVAL_SAMPLES_PER_CLASS}" \
+  --readout_epochs "${READOUT_EPOCHS}" \
+  --readout_batch_size "${READOUT_BATCH_SIZE}" \
+  --max_train_scenes "${MAX_TRAIN_SCENES}" \
+  --max_val_scenes "${MAX_VAL_SCENES}" \
+  --device cuda
+
+test -f "${ROOT_DIR}/results/feature_readout_probe/${RUN_NAME}/readout_results.csv"
+echo "[info] feature readout complete: ${ROOT_DIR}/results/feature_readout_probe/${RUN_NAME}/readout_results.csv"

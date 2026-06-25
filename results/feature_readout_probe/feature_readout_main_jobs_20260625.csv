@@ -1,0 +1,3 @@
+job_id,job_name,run_name,percent_train,arms,stages,targets,expected_results
+1944616.pbs1,frp_p10,readout_p10_main_20260625,0.10,preset_main,0 1 2,objectness occupancy shell,/groups/gag51404/ide/vgi/NeRF-MAE/results/feature_readout_probe/readout_p10_main_20260625/readout_results.csv
+1944617.pbs1,frp_p100,readout_p100_main_20260625,1.0,preset_main,0 1 2,objectness occupancy shell,/groups/gag51404/ide/vgi/NeRF-MAE/results/feature_readout_probe/readout_p100_main_20260625/readout_results.csv

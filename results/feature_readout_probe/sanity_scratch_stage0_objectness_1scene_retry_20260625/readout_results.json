@@ -1,0 +1,16 @@
+[
+  {
+    "arm": "scratch",
+    "stage": 0,
+    "target": "objectness",
+    "train_n": 32,
+    "train_pos_frac": 0.5,
+    "val_n": 64,
+    "val_pos_frac": 0.5,
+    "balanced_ap": 0.4763068971838465,
+    "auroc": 0.484375,
+    "acc_at_logit0": 0.46875,
+    "n": 64,
+    "pos_frac": 0.5
+  }
+]
