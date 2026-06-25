@@ -1,0 +1,4 @@
+condition,job_id,run_name,expected_log
+baseline,1944756.pbs1,grad_quick_baseline_p10_e2_seed1_20260625,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/grad_quick_baseline_p10_e2_seed1_20260625/log/worker_0.log
+cosine_ramp,1944757.pbs1,grad_quick_cosine_ramp_p10_e2_seed1_20260625,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/grad_quick_cosine_ramp_p10_e2_seed1_20260625/log/worker_0.log
+constant_rgb_half,1944758.pbs1,grad_quick_constant_rgb_half_p10_e2_seed1_20260625,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/grad_quick_constant_rgb_half_p10_e2_seed1_20260625/log/worker_0.log

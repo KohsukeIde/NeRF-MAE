@@ -79,6 +79,7 @@ def preset_arms(root: Path) -> Dict[str, Arm]:
     base = root / "output/nerf_mae/results"
     specs = {
         "scratch": None,
+        "coord_only": None,
         "joint_e300": base / "nerfmae_all_p1.0_e300_seed1" / "epoch_300.pt",
         "cosine_e300": base / "nerfmae_alpha_rgba_curr_cosine_ramp_p1.0_e300_seed1" / "epoch_300.pt",
         "linear_e300": base / "nerfmae_alpha_rgba_curr_linear_ramp_p1.0_e300_seed1_abci3linear_det0" / "epoch_300.pt",
@@ -95,6 +96,8 @@ def resolve_arms(tokens: Sequence[str], root: Path) -> List[Arm]:
     for token in tokens:
         if token == "preset_main":
             names.extend(["scratch", "joint_e300", "cosine_e300", "linear_e300", "w05_e300", "occupancy_only_e300", "shuffle_e300"])
+        elif token == "preset_with_coord":
+            names.extend(["coord_only", "scratch", "joint_e300", "cosine_e300", "linear_e300", "w05_e300", "occupancy_only_e300", "shuffle_e300"])
         elif "=" in token:
             name, value = token.split("=", 1)
             ckpt = Path(value)
@@ -184,6 +187,17 @@ def valid_mask_for_feature(feature_shape: Tuple[int, int, int], original_shape: 
     zs = (torch.arange(fh, dtype=torch.float32) + 0.5) * sz
     gx, gy, gz = torch.meshgrid(xs, ys, zs, indexing="ij")
     return (gx < ow) & (gy < ol) & (gz < oh)
+
+
+def coordinate_features(feature_shape: Tuple[int, int, int], resolution: int) -> torch.Tensor:
+    """Normalized [x,y,z] coordinate features for a feature-grid arm."""
+    fw, fl, fh = feature_shape
+    sx, sy, sz = resolution / fw, resolution / fl, resolution / fh
+    xs = ((torch.arange(fw, dtype=torch.float32) + 0.5) * sx) / float(resolution)
+    ys = ((torch.arange(fl, dtype=torch.float32) + 0.5) * sy) / float(resolution)
+    zs = ((torch.arange(fh, dtype=torch.float32) + 0.5) * sz) / float(resolution)
+    gx, gy, gz = torch.meshgrid(xs, ys, zs, indexing="ij")
+    return torch.stack([gx, gy, gz], dim=0)
 
 
 def downsample_occupancy(alpha: torch.Tensor, feature_shape: Tuple[int, int, int], threshold: float) -> torch.Tensor:
@@ -332,7 +346,7 @@ def eval_linear_readout(head: nn.Linear, x: torch.Tensor, y: torch.Tensor) -> Di
 
 
 def collect_samples(
-    model: SwinTransformer_FPN_Pretrained_Skip,
+    model: Optional[SwinTransformer_FPN_Pretrained_Skip],
     dataset: Front3DRPNDataset,
     args: argparse.Namespace,
     device: torch.device,
@@ -348,8 +362,21 @@ def collect_samples(
     for idx in range(limit):
         rgbsigma, boxes, scene = dataset[idx]
         original_shape = tuple(int(v) for v in rgbsigma.shape[-3:])
-        padded = pad_to_resolution(rgbsigma, args.resolution).unsqueeze(0).to(device)
-        feats = extract_stage_features(model, padded, args.stages)
+        if model is None:
+            feats = {
+                stage: coordinate_features(
+                    (
+                        args.resolution // (4 * (2 ** stage)),
+                        args.resolution // (4 * (2 ** stage)),
+                        args.resolution // (4 * (2 ** stage)),
+                    ),
+                    args.resolution,
+                )
+                for stage in args.stages
+            }
+        else:
+            padded = pad_to_resolution(rgbsigma, args.resolution).unsqueeze(0).to(device)
+            feats = extract_stage_features(model, padded, args.stages)
         alpha = pad_to_resolution(rgbsigma[-1], args.resolution).cpu()
         for stage, feat in feats.items():
             fshape = tuple(int(v) for v in feat.shape[-3:])
@@ -416,15 +443,20 @@ def main() -> None:
         "eval_samples_per_class": args.eval_samples_per_class,
         "readout_epochs": args.readout_epochs,
         "arms": [{"name": a.name, "checkpoint": str(a.checkpoint) if a.checkpoint else None} for a in arms],
+        "notes": [
+            "coord_only uses normalized x/y/z coordinates at each feature-grid cell.",
+            "balanced_ap is measured under class-balanced sampling; it is not detector AP.",
+        ],
     }
     (args.output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2))
 
     for arm in arms:
         print(f"[arm] {arm.name} checkpoint={arm.checkpoint}")
-        model = build_backbone(arm, args.resolution, device)
+        model = None if arm.name == "coord_only" else build_backbone(arm, args.resolution, device)
         train_samples = collect_samples(model, train_set, args, device, eval_mode=False)
         val_samples = collect_samples(model, val_set, args, device, eval_mode=True)
-        del model
+        if model is not None:
+            del model
         if device.type == "cuda":
             torch.cuda.empty_cache()
         for stage in args.stages:

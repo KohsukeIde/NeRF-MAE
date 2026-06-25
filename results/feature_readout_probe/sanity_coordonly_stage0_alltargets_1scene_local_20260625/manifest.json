@@ -1,0 +1,28 @@
+{
+  "percent_train": 0.1,
+  "resolution": 160,
+  "alpha_threshold": 0.01,
+  "shell_alpha_threshold": 0.02,
+  "shell_smooth_kernel": 3,
+  "stages": [
+    0
+  ],
+  "targets": [
+    "objectness",
+    "occupancy",
+    "shell"
+  ],
+  "samples_per_class": 16,
+  "eval_samples_per_class": 32,
+  "readout_epochs": 1,
+  "arms": [
+    {
+      "name": "coord_only",
+      "checkpoint": null
+    }
+  ],
+  "notes": [
+    "coord_only uses normalized x/y/z coordinates at each feature-grid cell.",
+    "balanced_ap is measured under class-balanced sampling; it is not detector AP."
+  ]
+}

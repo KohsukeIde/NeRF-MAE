@@ -1,0 +1,4 @@
+arm,stage,target,balanced_ap,auroc,acc_at_logit0,n,pos_frac,train_n,train_pos_frac,val_n,val_pos_frac
+coord_only,0,objectness,0.4475482844436794,0.4521484375,0.5,64,0.5,32,0.5,64,0.5
+coord_only,0,occupancy,0.6902848234436477,0.671875,0.578125,64,0.5,32,0.5,64,0.5
+coord_only,0,shell,0.5754719576802594,0.494140625,0.5,64,0.5,32,0.5,64,0.5

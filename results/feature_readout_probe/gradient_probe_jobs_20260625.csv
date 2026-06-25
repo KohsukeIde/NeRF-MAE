@@ -1,0 +1,4 @@
+job_id,condition,run_name,expected_log
+1944750.pbs1,baseline,grad_conflict_baseline_e5_seed1_20260625,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/grad_conflict_baseline_e5_seed1_20260625/log/worker_0.log
+1944751.pbs1,cosine_ramp,grad_conflict_cosine_ramp_e5_seed1_20260625,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/grad_conflict_cosine_ramp_e5_seed1_20260625/log/worker_0.log
+1944752.pbs1,constant_rgb_half,grad_conflict_constant_rgb_half_e5_seed1_20260625,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_mae/results/grad_conflict_constant_rgb_half_e5_seed1_20260625/log/worker_0.log
