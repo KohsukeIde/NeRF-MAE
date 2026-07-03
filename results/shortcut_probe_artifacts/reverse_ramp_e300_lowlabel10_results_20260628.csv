@@ -1,0 +1,4 @@
+condition,pretrain_seed,finetune_seed,percent_train,AP25,AP50,AP75,eval_path,R25,R50,R75
+reverse_ramp_e300_pt10,1,1,0.10,0.5383458137512207,0.14752641320228577,0.0005297771422192454,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_rgba_curr_reverse_ramp_p1.0_e300_seed1_abci3reverse_det0_epoch300_sched_epoch_seed1_pt10_fcos1000_eval/eval.json,,,
+reverse_ramp_e300_pt10,1,2,0.10,0.5525245666503906,0.1753886193037033,0.00022281640849541873,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_rgba_curr_reverse_ramp_p1.0_e300_seed1_abci3reverse_det0_epoch300_sched_epoch_preseed1_ftseed2_pt10_fcos1000_eval/eval.json,,,
+reverse_ramp_e300_pt10,1,3,0.10,0.4337828755378723,0.10054010897874832,0.0,/groups/gag51404/ide/vgi/NeRF-MAE/output/nerf_rpn/results/nerfmae_alpha_rgba_curr_reverse_ramp_p1.0_e300_seed1_abci3reverse_det0_epoch300_sched_epoch_preseed1_ftseed3_pt10_fcos1000_eval/eval.json,,,
